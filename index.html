@@ -2677,20 +2677,20 @@
       let wave = 0, waveRemaining = 0, spawnTimer = 0, score = 0, coins = 0, combo = 0, comboTimer = 0;
       const mobileOpeningScale = () => {
         if (!compactDevice) return 1;
-        if (wave <= 1) return .76;
-        if (wave <= 2) return .86;
-        return .94;
+        if (wave <= 1) return .86;
+        if (wave <= 2) return .94;
+        return 1;
       };
       const mobileProjectileScale = () => {
         if (!compactDevice) return 1;
-        if (wave <= 1) return .8;
-        if (wave <= 2) return .9;
-        return .97;
+        if (wave <= 1) return .86;
+        if (wave <= 2) return .94;
+        return 1;
       };
-      const mobileBaseSpawnCap = () => compactDevice ? Math.min(11 + wave, 24) : Math.min(15 + wave, 36);
-      const mobileBurstSpawnCap = () => compactDevice ? Math.min(17 + wave, 36) : Math.min(24 + wave * 2, 58);
+      const mobileBaseSpawnCap = () => compactDevice ? Math.min(12 + wave, 26) : Math.min(15 + wave, 36);
+      const mobileBurstSpawnCap = () => compactDevice ? Math.min(19 + wave, 40) : Math.min(24 + wave * 2, 58);
       const mobileBurstInterval = () => compactDevice
-        ? Math.max(.42, .68 - wave * .006)
+        ? Math.max(.34, .52 - wave * .008)
         : Math.max(.18, .38 - wave * .006);
       const MOBILE_ZOOM_MIN = .05;
       const MOBILE_ZOOM_DEFAULT = .68;
@@ -2840,16 +2840,18 @@
 
       const EASTER_COOKIE = "buy_button_signal_easter_eggs_v1";
       const eggCatalog = [
-        { id: "darkButton", glyph: "21", title: "THE DARK BUTTON", color: HOT, desc: "The command that vanished before the market opened became the first ghost in the machine.", clue: "TRACE // WAVE 1 // break the first lock" },
-        { id: "chain4663", glyph: "46", title: "CHAIN 4663", color: CYAN, desc: "A fictional route number for the green signal, hidden in the noise between two waves.", clue: "TRACE // WAVE 2+ // keep the streak alive" },
-        { id: "pco", glyph: "PC", title: "PCO // PUBLIC COMMON", color: ACID, desc: "A community phrase reframed as a protocol: the crowd is part of the ledger.", clue: "TRACE // COMBO x8 // do not drop the pressure" },
+        { id: "darkButton", glyph: "21", title: "THE DARK BUTTON", color: HOT, desc: "The command that vanished before the market opened became the first ghost in the machine.", clue: "TRACE // WAVE 2+ // defeat a LEGENDARY" },
+        { id: "chain4663", glyph: "46", title: "CHAIN 4663", color: CYAN, desc: "A fictional route number for the green signal, hidden in the noise between two waves.", clue: "TRACE // two LEGENDARIES // hold the streak" },
+        { id: "pco", glyph: "PC", title: "PCO // PUBLIC COMMON", color: ACID, desc: "A community phrase reframed as a protocol: the crowd is part of the ledger.", clue: "TRACE // COMBO x10 // finish a LEGENDARY" },
         { id: "gas", glyph: "G", title: "GASLESS GHOST", color: VIOLET, desc: "No fee, no wallet, no transaction—only a clean burst through the frontier.", clue: "TRACE // cast DASH during volatility" },
-        { id: "wallet", glyph: "K", title: "COLD WALLET", color: "#8cf7d4", desc: "There is no seed phrase here. The only key is the memory you carry out of the run.", clue: "TRACE // WAVE 4+ // recover a repair" },
-        { id: "hood", glyph: "H", title: "HOOD OF THE VOID", color: "#ff9d4d", desc: "The mascot signal survives as a boss-level echo, wearing the lockout like a crown.", clue: "TRACE // meet a boss wave" },
-        { id: "greenSignal", glyph: "BUY", title: "THE GREEN SIGNAL", color: "#fff7c2", desc: "The button is not a promise. It is a pulse. The archive opens when every other trace is home.", clue: "FINAL TRACE // recover the other six" }
+        { id: "wallet", glyph: "K", title: "COLD WALLET", color: "#8cf7d4", desc: "There is no seed phrase here. The only key is the memory you carry out of the run.", clue: "TRACE // low integrity // defeat a LEGENDARY" },
+        { id: "hood", glyph: "H", title: "HOOD OF THE VOID", color: "#ff9d4d", desc: "The mascot signal survives as a boss-level echo, wearing the lockout like a crown.", clue: "TRACE // break a LEGENDARY BOSS" },
+        { id: "greenSignal", glyph: "BUY", title: "THE GREEN SIGNAL", color: "#fff7c2", desc: "The button is not a promise. It is a pulse. The archive opens when every other trace is home.", clue: "FINAL TRACE // WAVE 10+ // recover the other six" }
       ];
       let easterEggFound = new Set();
       const easterEggRunSpawned = new Set();
+      let legendaryKillsThisRun = 0;
+      let lastLegendaryAnchor = null;
       const eggPowerDefs = {
         darkButton: { name: "DARK MATTER", tag: "TIME FRACTURE", color: HOT, desc: "Every seventh takedown fractures time around the core." },
         chain4663: { name: "CHAIN REACTION", tag: "ARC JUMP", color: CYAN, desc: "Kills leap through two nearby targets with fading damage." },
@@ -3212,6 +3214,58 @@
         return eggCatalog.find((egg) => egg.id === eggId)?.color || CYAN;
       }
 
+      function isLegendaryEnemy(enemy) {
+        return !!enemy && !!(enemy.legendary || enemy.elite || enemy.boss);
+      }
+
+      function rememberLegendaryAnchor(enemy) {
+        if (!isLegendaryEnemy(enemy)) return null;
+        const x = Number(enemy.x);
+        const y = Number(enemy.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+        return {
+          x, y,
+          elite: true,
+          boss: !!enemy.boss,
+          legendary: true,
+          bossName: enemy.bossName || ""
+        };
+      }
+
+      function tryUnlockLegendaryEggs(source) {
+        if (state !== "playing" || !isLegendaryEnemy(source)) return;
+        // Secrets appear one at a time. Missing an active trace never causes
+        // a later legendary kill to dump several rewards on the same spot.
+        if (pickups.some((pickupItem) => pickupItem.kind === "egg")) return;
+        const anchor = rememberLegendaryAnchor(source) || lastLegendaryAnchor;
+        if (!anchor) return;
+        const unlock = (id) => spawnEasterEgg(id, anchor.x, anchor.y, anchor);
+
+        if (!easterEggFound.has("darkButton") && wave >= 2 && legendaryKillsThisRun >= 1 && player.kills >= 7) {
+          unlock("darkButton");
+          return;
+        }
+        if (!easterEggFound.has("chain4663") && wave >= 3 && legendaryKillsThisRun >= 2 && combo >= 5) {
+          unlock("chain4663");
+          return;
+        }
+        if (!easterEggFound.has("pco") && wave >= 4 && legendaryKillsThisRun >= 3 && combo >= 10) {
+          unlock("pco");
+          return;
+        }
+        if (!easterEggFound.has("wallet") && wave >= 5 && legendaryKillsThisRun >= 4 && player.hp <= player.maxHp * .82) {
+          unlock("wallet");
+          return;
+        }
+        if (!easterEggFound.has("hood") && source.boss && wave >= 5) {
+          unlock("hood");
+          return;
+        }
+        if (!easterEggFound.has("greenSignal") && source.boss && wave >= 10 && legendaryKillsThisRun >= 6 && easterEggFound.size >= 6) {
+          unlock("greenSignal");
+        }
+      }
+
       function openEasterEggArchive() {
         if (state !== "menu") return;
         renderEasterEggArchive();
@@ -3245,29 +3299,32 @@
         return true;
       }
 
-      function spawnEasterEgg(id, x, y) {
-        if (state !== "playing" || easterEggFound.has(id) || easterEggRunSpawned.has(id)) return false;
+      function spawnEasterEgg(id, x, y, source = null) {
+        if (state !== "playing" || !isLegendaryEnemy(source) || easterEggFound.has(id) || easterEggRunSpawned.has(id)) return false;
+        if (pickups.some((pickupItem) => pickupItem.kind === "egg")) return false;
         const egg = eggCatalog.find((candidate) => candidate.id === id);
         if (!egg) return false;
-        const angle = Math.random() * Math.PI * 2;
-        const distanceFromPlayer = 118 + Math.random() * 78;
-        const spawnX = Number.isFinite(x) ? x : player.x + Math.cos(angle) * distanceFromPlayer;
-        const spawnY = Number.isFinite(y) ? y : player.y + Math.sin(angle) * distanceFromPlayer;
+        const sourceX = Number.isFinite(x) ? x : source.x;
+        const sourceY = Number.isFinite(y) ? y : source.y;
+        if (!Number.isFinite(sourceX) || !Number.isFinite(sourceY)) return false;
+        // Preserve the legendary enemy's location, but nudge the trace toward
+        // the player so a long-range takedown is demanding rather than lost.
+        const toPlayerX = player.x - sourceX;
+        const toPlayerY = player.y - sourceY;
+        const sourceDistance = Math.hypot(toPlayerX, toPlayerY) || 1;
+        const nudge = Math.min(76, sourceDistance * .24);
+        const spawnX = sourceX + toPlayerX / sourceDistance * nudge;
+        const spawnY = sourceY + toPlayerY / sourceDistance * nudge;
         easterEggRunSpawned.add(id);
         pickup(spawnX, spawnY, "egg", 1, { eggId: id });
-        toast(`HIDDEN SIGNAL // ${egg.title}`, 1700);
-        combatFlash("EASTER EGG DETECTED", 900);
+        toast(`LEGENDARY TRACE // ${egg.title}`, 1700);
+        combatFlash("LEGENDARY EASTER EGG", 900);
         return true;
       }
 
       function evaluateEasterEggTriggers() {
-        if (state !== "playing") return;
-        if (wave >= 1 && player.kills >= 2) spawnEasterEgg("darkButton");
-        if (wave >= 2 && player.kills >= 11) spawnEasterEgg("chain4663");
-        if (combo >= 8) spawnEasterEgg("pco");
-        if (wave >= 4 && player.hp < player.maxHp * .92) spawnEasterEgg("wallet");
-        if (wave >= 5 && bossAlive) spawnEasterEgg("hood");
-        if (easterEggFound.size >= 6 && wave >= 7) spawnEasterEgg("greenSignal");
+        // Kept as a stable update hook. Secrets are intentionally evaluated
+        // only on an Elite/Boss takedown in tryUnlockLegendaryEggs().
       }
 
       loadEasterEggs();
@@ -3391,6 +3448,12 @@
       const MAX_PICKUPS = 96;
       const MAX_CHAIN_ARCS = 34;
       const MAX_ENEMIES = 82;
+      // Explosions still create a satisfying shove, but the impulse is
+      // bounded so enemies never disappear off the tactical field—especially
+      // when the camera is pulled back to the mobile 5% view.
+      const ENEMY_KNOCKBACK_SPEED = 230;
+      const ENEMY_KNOCKBACK_CAP = 270;
+      const ENEMY_KNOCKBACK_STEP_CAP = 5.2;
       let combatMaintenanceTimer = 0;
       const frontierEvent = { key: "", title: "", color: ACID, timer: 0, cooldown: 0 };
       let polishedCombatRender = false;
@@ -3422,18 +3485,29 @@
         return Math.min(limit, value + nominalGain * damping);
       }
       function enemyEntryRadius(extra = 0, angle = 0) {
-        // Keep hostiles just beyond the visible perimeter.  The distance is
-        // zoom-aware and follows the chosen approach angle. That places an
-        // enemy just outside the actual edge of the current rectangle instead
-        // of an arbitrary circle far beyond the corners.
+        // Keep hostiles in a tactical arrival ring. The old edge-only formula
+        // became enormous at the mobile 5% camera (thousands of world units),
+        // so a phone could spend several seconds waiting for the first target
+        // to cross the arena. Prefer a near ring while retaining an angle-aware
+        // edge calculation as the upper bound.
         const zoom = Math.max(MOBILE_ZOOM_MIN, viewportZoom());
         const deepZoom = clamp((.32 - zoom) / (.32 - MOBILE_ZOOM_MIN), 0, 1);
         const cos = Math.max(.0001, Math.abs(Math.cos(angle)));
         const sin = Math.max(.0001, Math.abs(Math.sin(angle)));
         const edgeDistance = Math.min(W / 2 / cos, H / 2 / sin) / zoom;
-        const margin = (compactDevice ? 36 + deepZoom * 24 : 70) / zoom;
-        const entryCap = compactDevice ? 30000 : 6200;
-        return clamp(edgeDistance + margin + extra + rand(0, 34) / zoom, 300, entryCap);
+        const margin = (compactDevice ? 22 + deepZoom * 12 : 70) / zoom;
+        const edgeTarget = edgeDistance + margin + extra + rand(0, 34) / zoom;
+        const shortReach = Math.min(W, H) / (2 * zoom);
+        // At normal zoom this sits just outside the short edge. As the camera
+        // opens, the preferred ring grows only gently instead of tracking the
+        // full visible world, keeping enemies close and immediately readable.
+        const nearFraction = compactDevice ? .88 - deepZoom * .68 : .88;
+        const nearFloor = compactDevice ? 460 : 420;
+        const nearCap = compactDevice ? 1450 : 1850;
+        const tacticalTarget = clamp(shortReach * nearFraction, nearFloor, nearCap);
+        const entryTarget = Math.min(edgeTarget, tacticalTarget);
+        const entryCap = compactDevice ? 1450 : 2200;
+        return clamp(entryTarget, 300, entryCap);
       }
       function enemyCatchupMultiplier(enemy, distance) {
         // Long routes should resolve quickly, but close/ranged enemies still
@@ -3441,10 +3515,10 @@
         // visible world reach so it remains consistent at every zoom level.
         const zoom = viewportZoom();
         const visibleReach = Math.max(W, H) / (2 * zoom);
-        const start = Math.max(280, visibleReach * .72);
-        const span = Math.max(260, visibleReach * .78);
+        const start = Math.max(240, visibleReach * .58);
+        const span = Math.max(220, visibleReach * .64);
         const progress = clamp((distance - start) / span, 0, 1);
-        const roleBoost = enemy?.boss ? .42 : enemy?.ranged ? .7 : enemy?.elite ? .9 : 1.08;
+        const roleBoost = enemy?.boss ? .5 : enemy?.ranged ? .78 : enemy?.elite ? .98 : 1.18;
         if (enemy) enemy.catchup = progress;
         return 1 + progress * progress * roleBoost;
       }
@@ -4048,7 +4122,7 @@
         const safeAmount = kind === "coin" ? Math.max(1, Math.floor(amount)) : amount;
         pickups.push({
           x, y, kind, amount: safeAmount,
-          life: kind === "coin" ? 10 : kind === "egg" ? 24 : 14,
+          life: kind === "coin" ? 10 : kind === "egg" ? 30 : 14,
           spin: Math.random() * 6.28,
           eggId: metadata?.eggId || ""
         });
@@ -4208,7 +4282,9 @@
           spawnEnemy();
           // Give touch players a short reaction window at the start of each
           // wave.  Desktop cadence remains unchanged.
-          spawnTimer = Math.max(compactDevice ? .38 : .22, (.72 - wave * .018) * (compactDevice ? 1.18 : 1));
+          // Keep the opening pressure readable, but bring the next threat in
+          // sooner so a wave does not feel empty on a wide mobile camera.
+          spawnTimer = Math.max(compactDevice ? .28 : .22, (.56 - wave * .014) * (compactDevice ? 1.04 : 1));
         }
         for (let i = bullets.length - 1; i >= 0; i--) {
           const b = bullets[i];
@@ -4697,33 +4773,46 @@
       function drawThreatIndicators(t) {
         if (state !== "playing") return;
         const cx = W * .5, cy = H * .5;
+        const lowPower = !!gameSettings.performance;
         // Threat arrows and labels are screen-space guidance, not world
         // sprites. Keep them readable while the actual enemies scale down.
         const indicatorScale = compactDevice
-          ? clamp(.58 + viewportZoom() * .42, .58, 1)
+          ? clamp(.72 + viewportZoom() * .28, .72, 1)
           : worldRenderScale();
         const left = 28, right = W - 28;
         const top = Math.min(Math.max(112, H * .14), H * .5 - 28);
         const bottom = Math.max(top + 56, Math.min(H - 104, H * .86));
+        const farWorldThreshold = Math.max(420, (Math.max(W, H) / (2 * Math.max(.05, viewportZoom()))) * .9);
         const sectors = new Map();
         for (const e of enemies) {
           if (!e.alive) continue;
           const s = worldToScreen(e.x, e.y);
-          if (s.x >= -e.r * indicatorScale && s.x <= W + e.r * indicatorScale && s.y >= -e.r * indicatorScale && s.y <= H + e.r * indicatorScale) continue;
+          const offscreen = s.x < -e.r * indicatorScale || s.x > W + e.r * indicatorScale
+            || s.y < -e.r * indicatorScale || s.y > H + e.r * indicatorScale;
+          const worldDistance = Math.hypot(e.x - player.x, e.y - player.y) || 1;
+          // At deep zoom, an enemy can technically be inside the viewport
+          // while still being too far away to read. Keep a directional cue
+          // for that case too, without duplicating nearby targets.
+          if (!offscreen && worldDistance <= farWorldThreshold) continue;
           const dx = s.x - cx, dy = s.y - cy, distance = Math.hypot(dx, dy) || 1;
           const angle = Math.atan2(dy, dx);
           const sector = Math.round(angle / (Math.PI / 12));
           const current = sectors.get(sector);
           if (current) {
             current.count++;
-            const currentPriority = (current.e.boss ? 1000000 : current.e.elite ? 100000 : 0) - current.distance;
-            const nextPriority = (e.boss ? 1000000 : e.elite ? 100000 : 0) - distance;
-            if (nextPriority > currentPriority) current.e = e, current.distance = distance, current.angle = angle;
-          } else sectors.set(sector, { e, angle, distance, count: 1 });
+            const currentPriority = (current.e.boss ? 1000000 : current.e.elite ? 100000 : 0) - current.worldDistance;
+            const nextPriority = (e.boss ? 1000000 : e.elite ? 100000 : 0) - worldDistance;
+            if (nextPriority > currentPriority) {
+              current.e = e;
+              current.distance = distance;
+              current.worldDistance = worldDistance;
+              current.angle = angle;
+            }
+          } else sectors.set(sector, { e, angle, distance, worldDistance, count: 1 });
         }
         const threats = [...sectors.values()]
           .sort((a, b) => (b.e.boss ? 2 : b.e.elite ? 1 : 0) - (a.e.boss ? 2 : a.e.elite ? 1 : 0) || a.distance - b.distance)
-          .slice(0, 16);
+          .slice(0, compactDevice ? (lowPower ? 12 : 16) : 16);
         if (!threats.length) return;
         ctx.save();
         ctx.textAlign = "center";
@@ -4739,7 +4828,8 @@
           const color = e.boss || e.elite ? VIOLET : type.color || HOT;
           const pulse = .82 + Math.sin(t * 5 + i) * .14;
           const label = e.boss ? "BOSS" : e.elite ? "ELITE" : (type.name || "THREAT");
-          const distanceLabel = threat.distance >= 1000 ? `${(threat.distance / 1000).toFixed(1)}K` : `${Math.round(threat.distance)}`;
+          const threatDistance = Number.isFinite(threat.worldDistance) ? threat.worldDistance : threat.distance;
+          const distanceLabel = threatDistance >= 1000 ? `${(threatDistance / 1000).toFixed(1)}K` : `${Math.round(threatDistance)}`;
           ctx.save();
           ctx.translate(x, y);
           ctx.scale(indicatorScale, indicatorScale);
@@ -4748,8 +4838,8 @@
           ctx.fillStyle = color;
           ctx.beginPath(); ctx.arc(0, 0, 27, 0, Math.PI * 2); ctx.fill();
           ctx.globalAlpha = .94 * pulse;
-          ctx.shadowBlur = e.boss ? 24 : 15;
-          ctx.shadowColor = color;
+          ctx.shadowBlur = lowPower ? 0 : e.boss ? 24 : 15;
+          ctx.shadowColor = lowPower ? "transparent" : color;
           ctx.fillStyle = color;
           ctx.beginPath();
           ctx.moveTo(19, 0); ctx.lineTo(-8, -11); ctx.lineTo(-3, 0); ctx.lineTo(-8, 11); ctx.closePath(); ctx.fill();
@@ -4759,13 +4849,17 @@
           ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-31, 0); ctx.stroke();
           ctx.restore();
           ctx.save();
-          ctx.translate(x, y + (y < cy ? 27 : -27) * indicatorScale);
+          // Keep side labels fully inside narrow phone screens. The widest
+          // label is 180px, so a 96px safe inset prevents edge clipping.
+          const safeLabelX = clamp(x, compactDevice ? 96 : 98, W - (compactDevice ? 96 : 98));
+          const safeLabelY = clamp(y + (y < cy ? 27 : -27) * indicatorScale, 14, H - 14);
+          ctx.translate(safeLabelX, safeLabelY);
           ctx.scale(indicatorScale, indicatorScale);
           ctx.globalAlpha = .86;
           ctx.fillStyle = "rgba(2,5,4,.84)";
-          ctx.font = "800 9px ui-monospace, monospace";
+          ctx.font = `800 ${compactDevice ? 10 : 9}px ui-monospace, monospace`;
           const text = `${label}  ${distanceLabel}${threat.count > 1 ? `  ×${threat.count}` : ""}`;
-          const width = Math.min(180, ctx.measureText(text).width + 14);
+          const width = Math.min(compactDevice ? Math.max(116, W - 56) : 180, ctx.measureText(text).width + 14);
           ctx.fillRect(-width / 2, -8, width, 16);
           ctx.strokeStyle = color;
           ctx.lineWidth = 1;
@@ -5012,7 +5106,65 @@
             ctx.globalAlpha = 1;
           }
           ctx.beginPath();
-          if (e.type === "drone") {
+          if (e.scammerBoss) {
+            const glitch = Math.sin(t * 31 + e.phase) * radius * .09;
+            ctx.fillStyle = "#ff426d";
+            ctx.globalAlpha = .28;
+            ctx.beginPath();
+            ctx.moveTo(radius * .98 + glitch, 0);
+            ctx.lineTo(radius * .28, radius * .86);
+            ctx.lineTo(-radius * .84, radius * .52);
+            ctx.lineTo(-radius * .92, -radius * .52);
+            ctx.lineTo(radius * .28, -radius * .86);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = "#17101a";
+            ctx.strokeStyle = "#ffd1e0";
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(radius * .32, radius * .78);
+            ctx.lineTo(-radius * .74, radius * .5);
+            ctx.lineTo(-radius * .82, -radius * .5);
+            ctx.lineTo(radius * .32, -radius * .78);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#ff426d";
+            ctx.fillRect(-radius * .56, -radius * .12, radius * 1.12, radius * .24);
+            ctx.fillStyle = "#fff7c2";
+            ctx.font = `900 ${Math.max(7, radius * .27)}px ui-monospace, monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("SCAM", 0, 1);
+            ctx.globalAlpha = .42;
+            ctx.fillStyle = CYAN;
+            for (let i = -2; i <= 2; i++) {
+              const y = i * radius * .24 + glitch * .12;
+              ctx.fillRect(-radius * .68, y, radius * 1.36, Math.max(1, radius * .035));
+            }
+            ctx.globalAlpha = 1;
+          } else if (e.scammerDecoy) {
+            const glitch = Math.sin(t * 24 + e.phase) * radius * .12;
+            ctx.fillStyle = "#8cf7d4";
+            ctx.strokeStyle = "#f0ffff";
+            ctx.moveTo(glitch, -radius);
+            ctx.lineTo(radius * .88 + glitch, 0);
+            ctx.lineTo(glitch, radius);
+            ctx.lineTo(-radius * .88 + glitch, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.globalAlpha = .68;
+            ctx.fillStyle = "#07110f";
+            ctx.fillRect(-radius * .62 + glitch, -radius * .1, radius * 1.24, radius * .2);
+            ctx.fillStyle = "#fff7c2";
+            ctx.font = `900 ${Math.max(7, radius * .42)}px ui-monospace, monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("?", glitch, 1);
+            ctx.globalAlpha = 1;
+          } else if (e.type === "drone") {
             ctx.moveTo(radius, 0); ctx.lineTo(0, radius * .72); ctx.lineTo(-radius, 0); ctx.lineTo(0, -radius * .72); ctx.closePath(); ctx.fill();
             ctx.strokeStyle = "#eaffb0"; ctx.stroke();
             ctx.fillStyle = "#050607"; ctx.fillRect(-radius * .22, -radius * .22, radius * .44, radius * .44);
@@ -5114,7 +5266,10 @@
         for (const p of particles) { const s = worldToScreen(p.x, p.y); const size = p.size * particleScale; if (s.x < -24 || s.x > W + 24 || s.y < -24 || s.y > H + 24) continue; ctx.globalAlpha = clamp(p.life / p.max, 0, 1); ctx.fillStyle = p.color; ctx.shadowBlur = gameSettings.performance ? 0 : 10 * particleScale; ctx.shadowColor = p.color; ctx.fillRect(s.x, s.y, size, size); }
         ctx.globalAlpha = 1;
         drawBuyCore(t);
-        if (!gameSettings.performance || (compactDevice && viewportZoom() <= .18)) drawThreatIndicators(t);
+        // Directional threat guidance is intentionally kept on in low-power
+        // mode: it is a tiny screen-space pass and is essential on phones
+        // where zoomed-out enemies can sit outside the visible arena.
+        drawThreatIndicators(t);
         ctx.restore();
       }
       function draw(t) {
@@ -5426,13 +5581,15 @@
         lock: { name: "THE LOCKOUT", title: "THE BUTTON REMEMBERS", color: "#ffffff", hp: 1800, speed: 42, pattern: "ring", lore: "It does not hate you. It only remembers the halt." },
         clearing: { name: "CLEARING HOUSE", title: "COLLATERAL CALL", color: "#ff9d4d", hp: 2400, speed: 34, pattern: "barrage", lore: "Every shot is a margin requirement." },
         oracle: { name: "THE ORACLE", title: "THE LAST QUOTE", color: CYAN, hp: 3050, speed: 58, pattern: "orbit", lore: "It predicts your dodge, then taxes it." },
-        robin: { name: "ROBIN PRIME", title: "HOOD OF THE VOID", color: VIOLET, hp: 3700, speed: 52, pattern: "summon", lore: "The mascot became the message." }
+        robin: { name: "ROBIN PRIME", title: "HOOD OF THE VOID", color: VIOLET, hp: 3700, speed: 52, pattern: "summon", lore: "The mascot became the message." },
+        scammer: { name: "SCAMMER", title: "COUNTERFEIT SIGNAL", color: "#ff426d", hp: 2850, speed: 58, pattern: "scammer", lore: "Every quote is bait. Every receipt can lie." }
       };
       const bossRewardProfiles = {
         lock: { tier: "I", difficulty: 1, score: 1350, coins: 7, xp: 110, cache: "LOCKOUT CACHE", color: "#ffffff" },
         clearing: { tier: "II", difficulty: 1.28, score: 2050, coins: 10, xp: 155, cache: "MARGIN CACHE", color: "#ff9d4d" },
         oracle: { tier: "III", difficulty: 1.62, score: 3025, coins: 14, xp: 220, cache: "ORACLE CACHE", color: CYAN },
-        robin: { tier: "IV", difficulty: 2.02, score: 4350, coins: 19, xp: 305, cache: "PRIME CACHE", color: VIOLET }
+        robin: { tier: "IV", difficulty: 2.02, score: 4350, coins: 19, xp: 305, cache: "PRIME CACHE", color: VIOLET },
+        scammer: { tier: "X", difficulty: 2.45, score: 6400, coins: 34, xp: 460, cache: "COUNTERFEIT CACHE", color: "#ff426d" }
       };
       const bossAffixDefs = [
         { key: "overclocked", name: "OVERCLOCKED", tag: "RAPID FIRE", color: ACID, hp: .92, speed: 1.22, cadence: .68, reward: 1.1 },
@@ -5461,6 +5618,14 @@
       let lastBossAffixKey = "";
       let runSeed = 0;
       let bossRewardTimer = 0;
+      let scammerWave = 0;
+      let scammerSpawnedThisRun = false;
+
+      function scammerBossChance(nextWave) {
+        // A rare, run-limited encounter keeps the reveal special without
+        // making the normal boss rotation feel mandatory.
+        return clamp(.11 + Math.min(.12, nextWave * .012), .11, .23);
+      }
 
       function chooseRunMutator() {
         const pool = runMutatorDefs.filter((item) => item.key !== lastRunMutatorKey);
@@ -5516,7 +5681,7 @@
         const affixScale = enemy.bossAffix?.reward || 1;
         const scoreReward = Math.round(profile.score * profile.difficulty * waveScale * scoreScale * affixScale);
         const coinScale = (activeRunMutator?.coinMultiplier || 1) * (activeWaveContract?.coinMultiplier || 1);
-        const coinReward = clamp(Math.round(profile.coins * waveScale * coinScale), 5, 30);
+        const coinReward = clamp(Math.round(profile.coins * waveScale * coinScale), 5, enemy.scammerBoss ? 48 : 30);
         const xpReward = Math.round(profile.xp * profile.difficulty * waveScale * Math.min(1.35, affixScale));
         score += scoreReward;
         coins += coinReward;
@@ -5532,6 +5697,28 @@
         v3BlastRings.push({ x: enemy.x, y: enemy.y, r: 16, max: 190 + profile.difficulty * 48, life: 1.05, color: profile.color });
         shake = Math.max(shake, 24 + profile.difficulty * 8);
         arenaPulse = 1;
+      }
+
+      function scammerPayoutFor(enemy) {
+        if (!enemy?.scammerBoss || enemy.scammerPayoutPaid) return;
+        enemy.scammerPayoutPaid = true;
+        const waveScale = 1 + Math.max(0, wave - 3) * .06;
+        const coinScale = (activeRunMutator?.coinMultiplier || 1) * (activeWaveContract?.coinMultiplier || 1);
+        const jackpot = clamp(Math.round((72 + wave * 9) * waveScale * coinScale), 72, 240);
+        const visibleShard = Math.max(8, Math.round(jackpot * .14));
+        coins += jackpot;
+        score += Math.round(jackpot * 4.2);
+        pickup(enemy.x - 24, enemy.y, "coin", visibleShard);
+        pickup(enemy.x + 24, enemy.y, "coin", visibleShard);
+        v3Readout = `SCAMMER PAYOUT // +${jackpot} COINS // COUNTERFEIT RECOVERED`;
+        v3ReadoutTimer = 5.2;
+        bossRewardTimer = 5.2;
+        $("bossPhaseText").textContent = `TIER X // JACKPOT +${jackpot} // WALLET SECURED`;
+        combatFlash(`SCAMMER PAYOUT // +${jackpot} VALUE`, 1900);
+        story(`COUNTERFEIT CACHE // +${jackpot} COINS RECOVERED.`, 4.2);
+        particle(enemy.x, enemy.y, "#ff426d", 64, 480);
+        v3BlastRings.push({ x: enemy.x, y: enemy.y, r: 20, max: 250, life: 1.25, color: "#ff426d" });
+        shake = Math.max(shake, 32);
       }
 
       function mutatorKillBonus(enemy) {
@@ -5614,6 +5801,10 @@
         v3Boss = null;
         v3BlastRings.length = 0;
         v3SpawnBurstTimer = 0;
+        scammerWave = 0;
+        scammerSpawnedThisRun = false;
+        legendaryKillsThisRun = 0;
+        lastLegendaryAnchor = null;
         v3DashMax = Math.max(10, Math.ceil(player.maxEnergy / dashEnergyCost()));
         v3DashCharges = dashBudget();
         v3DashRecharge = 0;
@@ -5673,16 +5864,18 @@
           e.y = player.y + Math.sin(entryAngle) * entryRadius;
         }
         if (bossSpawn) {
-          const profile = v3BossProfiles[v3BossKey()];
+          const scammerSpawn = scammerWave === wave;
+          const bossKey = scammerSpawn ? "scammer" : v3BossKey();
+          const profile = v3BossProfiles[bossKey];
           const affix = chooseBossAffix();
           e.boss = true;
-          e.bossKind = v3BossKey();
+          e.bossKind = bossKey;
           e.bossAffix = affix;
           e.bossName = profile.name;
           e.bossPattern = profile.pattern;
           e.bossLore = profile.lore;
           e.type = "lock";
-          e.r = 52;
+          e.r = scammerSpawn ? 56 : 52;
           e.challengeScale = bossAdaptiveScale();
           e.hp = profile.hp
             * (1 + Math.max(0, wave - 5) * .18)
@@ -5706,13 +5899,24 @@
           e.guardTimer = rand(2.8, 4.2);
           e.guardWindow = 0;
           e.rewardPaid = false;
+          e.scammerBoss = scammerSpawn;
+          e.scammerPatternTimer = scammerSpawn ? rand(1.05, 1.65) : 0;
+          e.scammerGlitchTimer = scammerSpawn ? rand(3.1, 4.7) : 0;
+          e.scammerTeleportCooldown = scammerSpawn ? rand(1.8, 2.8) : 0;
+          e.scammerShieldTimer = 0;
+          e.scammerAttackIndex = 0;
+          e.scammerPayoutPaid = false;
           applySpawnContract(e, true);
           v3Boss = e;
           $("bossHud").classList.add("show");
-          $("bossNameText").textContent = `${profile.name} // ${affix.name}`;
+          $("bossNameText").textContent = scammerSpawn
+            ? `SCAMMER // ${affix.name}`
+            : `${profile.name} // ${affix.name}`;
           const reward = bossRewardProfiles[e.bossKind] || bossRewardProfiles.lock;
           $("bossPhaseText").textContent = `TIER ${reward.tier} // ${affix.tag} // PHASE 1`;
-          v3Say(`${profile.name} // ${affix.name} // ${profile.lore}`, 4.8);
+          v3Say(scammerSpawn
+            ? `SCAMMER // ${affix.name} // ${profile.lore}`
+            : `${profile.name} // ${affix.name} // ${profile.lore}`, 4.8);
         } else {
           applySpawnContract(e, false);
           if (!v3SeenTypes.has(e.type)) {
@@ -5756,8 +5960,12 @@
           const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
           if (d < blastRadius + e.r) {
             const falloff = 1 - Math.min(1, d / (blastRadius + e.r)) * .48;
-            e.knockX = (e.knockX || 0) + dx / d * (520 * falloff);
-            e.knockY = (e.knockY || 0) + dy / d * (520 * falloff);
+            const impulseX = (e.knockX || 0) + dx / d * (ENEMY_KNOCKBACK_SPEED * falloff);
+            const impulseY = (e.knockY || 0) + dy / d * (ENEMY_KNOCKBACK_SPEED * falloff);
+            const impulseMagnitude = Math.hypot(impulseX, impulseY) || 1;
+            const impulseScale = Math.min(1, ENEMY_KNOCKBACK_CAP / impulseMagnitude);
+            e.knockX = impulseX * impulseScale;
+            e.knockY = impulseY * impulseScale;
             e.stun = Math.max(e.stun || 0, .75 + falloff * .9);
             // Route blast damage through the same wrapper as bullets. This
             // keeps critical hits, boss armor/phase windows, XP, combo and
@@ -5793,7 +6001,9 @@
           particle(player.x, player.y, CYAN, 34, 420);
           v3BlastRings.push({ x: player.x, y: player.y, r: 20, max: 96, life: .36, color: CYAN });
           buttonTone(640, .09, "triangle", .04);
-          if (frontierEvent.timer > 0) spawnEasterEgg("gas");
+          if (frontierEvent.timer > 0 && wave >= 4 && legendaryKillsThisRun >= 1 && lastLegendaryAnchor) {
+            spawnEasterEgg("gas", lastLegendaryAnchor.x, lastLegendaryAnchor.y, lastLegendaryAnchor);
+          }
           triggerEggDashPower();
           syncHud();
           return;
@@ -5813,9 +6023,16 @@
       };
 
       killEnemy = function(e) {
+        const wasAlive = !!e?.alive;
         const shouldSplit = e.split && !e.splitDone;
         const wasBoss = e.boss;
+        const legendaryAnchor = wasAlive && isLegendaryEnemy(e) ? rememberLegendaryAnchor(e) : null;
         v3KillEnemy(e);
+        if (wasAlive && !e.alive && legendaryAnchor) {
+          legendaryKillsThisRun++;
+          lastLegendaryAnchor = legendaryAnchor;
+          tryUnlockLegendaryEggs(legendaryAnchor);
+        }
         if (shouldSplit) {
           e.splitDone = true;
           for (let i = 0; i < 2; i++) {
@@ -5893,22 +6110,30 @@
       startWave = function(next) {
         v3StartWave(next);
         chooseWaveContract(next);
+        const normalBossWave = !!bossAlive;
+        scammerWave = !normalBossWave && !scammerSpawnedThisRun && next >= 3 && Math.random() < scammerBossChance(next)
+          ? next
+          : 0;
+        const scammerBossWave = scammerWave === next;
+        if (scammerBossWave) {
+          scammerSpawnedThisRun = true;
+          bossAlive = true;
+        }
         const baseCount = (compactDevice
-          ? 9 + Math.floor(wave * 2.4)
-          : 12 + Math.floor(wave * 3.1)) + (bossAlive ? 1 : 0);
+          ? 10 + Math.floor(wave * 2.7)
+          : 12 + Math.floor(wave * 3.1)) + (normalBossWave || scammerBossWave ? 1 : 0);
         waveRemaining = clamp(
           Math.round(baseCount * (activeRunMutator?.spawnMultiplier || 1) * (activeWaveContract?.spawnMultiplier || 1)),
-          compactDevice ? 7 : 8,
-          compactDevice ? 42 : 52
+          compactDevice ? 8 : 8,
+          compactDevice ? 46 : 52
         );
-        // The first touch interaction should not begin with two enemies
-        // arriving on the same frame.  The grace period also makes the
-        // briefing-to-combat transition feel intentional on small screens.
+        // Start quickly enough to establish pressure, while keeping the first
+        // two arrivals staggered so touch players can still read the arena.
         spawnTimer = compactDevice
-          ? (next === 1 ? 1.05 : .72)
+          ? (next === 1 ? .46 : .52)
           : rand(.08, .22);
         v3SpawnBurstTimer = compactDevice
-          ? (next === 1 ? 1.35 : .86)
+          ? (next === 1 ? .70 : .58)
           : .46;
         armFrontierEvent(next);
         v3Boss = null;
@@ -5920,11 +6145,20 @@
           v3Say(`${activeWaveContract.name} // ${activeWaveContract.desc}`, 2.5);
           combatFlash(`${activeWaveContract.name} // CONTRACT ACTIVE`, 1000);
         }
-        if (bossAlive) {
+        if (normalBossWave) {
           const profile = v3BossProfiles[v3BossKey()];
           const reward = bossRewardProfiles[v3BossKey()] || bossRewardProfiles.lock;
           $("bossPhaseText").textContent = `TIER ${reward.tier} // PHASE 1`;
           v3Say(`${profile.name} // ${profile.title}`, 4.5);
+        }
+        if (scammerBossWave) {
+          const profile = v3BossProfiles.scammer;
+          $("waveName").textContent = "SCAMMER // BOSS";
+          $("objectiveText").textContent = "VERIFY THE COUNTERFEIT";
+          $("bossPhaseText").textContent = "TIER X // GLITCH MARKET // PHASE 1";
+          v3Say(`${profile.name} // ${profile.title}`, 4.8);
+          combatFlash(`SCAMMER WAVE ${wave} // VERIFY EVERYTHING`, 1750);
+          haptic([18, 44, 18, 44, 18]);
         }
       };
 
@@ -5936,6 +6170,117 @@
       function v3RadialFire(x, y, count, speed, damage, color = HOT, phase = 0) {
         for (let i = 0; i < count; i++) v3ShootAt(x, y, phase + i * Math.PI * 2 / count, speed, damage, color, 5, 6);
         particle(x, y, color, Math.min(20, count), 180);
+      }
+
+      function spawnScammerDecoy(x, y, life = 3.6) {
+        if (enemies.length >= MAX_ENEMIES - 2) return null;
+        const mirror = enemyTypes.mirror || enemyTypes.drone;
+        const hp = Math.max(24, mirror.hp * .52 + wave * 3.5);
+        const decoy = {
+          alive: true,
+          type: "mirror",
+          x, y,
+          r: Math.max(10, mirror.r * .82),
+          hp,
+          maxHp: hp,
+          speed: Math.max(82, mirror.speed * (1 + Math.min(.55, wave * .018))),
+          touch: Math.max(10, mirror.touch * .58),
+          value: 1,
+          ranged: false,
+          shotTimer: 9,
+          elite: false,
+          boss: false,
+          legendary: false,
+          hit: 0,
+          phase: Math.random() * 6.28,
+          knockX: 0,
+          knockY: 0,
+          stun: 0,
+          orbit: false,
+          pulse: false,
+          drain: false,
+          split: false,
+          splitDone: true,
+          contractApplied: true,
+          scammerDecoy: true,
+          decoyLife: life
+        };
+        enemies.push(decoy);
+        v3BlastRings.push({ x, y, r: 8, max: 42, life: .34, color: "#8cf7d4" });
+        return decoy;
+      }
+
+      function v3ScammerPattern(e, dt) {
+        if (!e || !e.alive) return;
+        const phase = e.hp / Math.max(1, e.maxHp) < .5 ? 2 : 1;
+        e.scammerPatternTimer = (Number.isFinite(e.scammerPatternTimer) ? e.scammerPatternTimer : 1.3) - dt;
+        e.scammerGlitchTimer = (Number.isFinite(e.scammerGlitchTimer) ? e.scammerGlitchTimer : 3.8) - dt;
+        e.scammerTeleportCooldown = Math.max(0, (e.scammerTeleportCooldown || 0) - dt);
+        e.scammerShieldTimer = Math.max(0, (e.scammerShieldTimer || 0) - dt);
+
+        // The signature trick: the real body slips away, leaves readable
+        // after-images, and briefly hardens. The rings and callout give the
+        // player a reaction window instead of silently deleting a hit.
+        if (e.scammerGlitchTimer <= 0 && e.scammerTeleportCooldown <= 0) {
+          const previousX = e.x, previousY = e.y;
+          const angle = Math.atan2(e.y - player.y, e.x - player.x) + Math.PI + rand(-.62, .62);
+          const radius = clamp(330 + wave * 13 + rand(-34, 54), 300, 620);
+          e.x = player.x + Math.cos(angle) * radius;
+          e.y = player.y + Math.sin(angle) * radius;
+          e.scammerShieldTimer = phase === 2 ? .96 : .78;
+          e.scammerGlitchTimer = phase === 2 ? 2.75 : 4.25;
+          e.scammerTeleportCooldown = phase === 2 ? 1.55 : 2.15;
+          const decoyCount = phase === 2 ? 3 : 2;
+          for (let i = 0; i < decoyCount; i++) {
+            spawnScammerDecoy(previousX + rand(-52, 52), previousY + rand(-52, 52), 2.45 + i * .35);
+          }
+          v3BlastRings.push({ x: previousX, y: previousY, r: 12, max: 118, life: .62, color: "#ff426d" });
+          v3BlastRings.push({ x: e.x, y: e.y, r: 16, max: 142, life: .86, color: CYAN });
+          particle(previousX, previousY, "#ff426d", 22, 260);
+          particle(e.x, e.y, CYAN, 28, 300);
+          v3Say("SCAMMER // VERIFY THE TARGET", 1.35);
+          combatFlash("GLITCH // QUOTE INVALID", 880);
+        }
+
+        if (e.scammerPatternTimer > 0) return;
+        e.scammerAttackIndex = (e.scammerAttackIndex || 0) + 1;
+        e.scammerPatternTimer = (phase === 2 ? 1.08 : 1.55) * (e.bossCadenceScale || 1);
+        const base = Math.atan2(player.y - e.y, player.x - e.x);
+        const attack = e.scammerAttackIndex % 4;
+        const damage = (10 + wave * .7) * (e.bossDamageScale || 1);
+
+        if (attack === 0) {
+          // A narrow fan looks like a normal quote, then widens at the edge.
+          for (let i = -2; i <= 2; i++) {
+            v3ShootAt(e.x, e.y, base + i * .13, 278 + wave * 4, damage, "#ff426d", 6, 5.2);
+          }
+          v3Say("SCAMMER // FLASH SALE", 1.05);
+        } else if (attack === 1) {
+          // The ring has a deliberate escape gap, so the attack is harsh but
+          // readable on a zoomed-out phone screen.
+          const count = phase === 2 ? 15 : 12;
+          const gap = (e.scammerAttackIndex * 3) % count;
+          for (let i = 0; i < count; i++) {
+            if (i === gap || i === (gap + 1) % count) continue;
+            v3ShootAt(e.x, e.y, e.bossAngle + i * Math.PI * 2 / count, 198 + wave * 3, damage * .92, VIOLET, 5, 6.4);
+          }
+          v3Say("SCAMMER // HIDDEN FEE", 1.05);
+        } else if (attack === 2) {
+          const decoys = enemies.filter((enemy) => enemy.alive && enemy.scammerDecoy).slice(-3);
+          for (const decoy of decoys) {
+            const decoyAngle = Math.atan2(player.y - decoy.y, player.x - decoy.x);
+            v3ShootAt(decoy.x, decoy.y, decoyAngle, 245 + wave * 4, damage * .78, "#8cf7d4", 5, 4.8);
+          }
+          v3RadialFire(e.x, e.y, phase === 2 ? 9 : 7, 172 + wave * 3, damage * .72, CYAN, e.bossAngle + .22);
+          v3Say("SCAMMER // RECEIPT DUPLICATED", 1.12);
+        } else {
+          for (let i = -1; i <= 1; i++) {
+            v3ShootAt(e.x, e.y, base + i * .2, 340 + wave * 5, damage * 1.08, HOT, 7, 4.5);
+          }
+          if (phase === 2) spawnScammerDecoy(e.x + rand(-38, 38), e.y + rand(-38, 38), 2.8);
+          v3Say("SCAMMER // CHARGEBACK", 1.05);
+        }
+        shake = Math.max(shake, phase === 2 ? 10 : 7);
       }
 
       function v3BossAffixTick(e, dt) {
@@ -5996,6 +6341,10 @@
         e.bossAngle += dt * (e.bossPattern === "orbit" ? 1.2 : .55);
         const phase = e.hp / e.maxHp < .5 ? 2 : 1;
         v3BossAffixTick(e, dt);
+        if (e.scammerBoss) {
+          v3ScammerPattern(e, dt);
+          return;
+        }
         if (e.bossTimer > 0) return;
         if (e.bossPattern === "ring") {
           v3RadialFire(e.x, e.y, 14 + phase * 4, 210 + wave * 6, (10 + wave * .7) * (e.bossDamageScale || 1), profile.color, e.bossAngle);
@@ -6038,12 +6387,28 @@
 
       function v3SpecialEnemy(e, dt) {
         if (!e.alive) return;
+        if (e.scammerDecoy) {
+          e.decoyLife = (Number.isFinite(e.decoyLife) ? e.decoyLife : 3.2) - dt;
+          if (e.decoyLife <= 0) {
+            e.alive = false;
+            particle(e.x, e.y, "#8cf7d4", gameSettings.performance ? 4 : 10, 120);
+            v3BlastRings.push({ x: e.x, y: e.y, r: 5, max: 32, life: .24, color: "#8cf7d4" });
+            return;
+          }
+        }
         const specialPreviousX = e.x, specialPreviousY = e.y;
         if (e.knockX || e.knockY) {
-          e.x += (e.knockX || 0) * dt;
-          e.y += (e.knockY || 0) * dt;
+          const knockMagnitude = Math.hypot(e.knockX || 0, e.knockY || 0) || 0;
+          if (knockMagnitude > 0) {
+            // Cap the actual per-frame displacement as a second guard
+            // against a stacked explosion or a long frame on a phone.
+            const step = Math.min(knockMagnitude * dt, ENEMY_KNOCKBACK_STEP_CAP);
+            e.x += (e.knockX / knockMagnitude) * step;
+            e.y += (e.knockY / knockMagnitude) * step;
+          }
           e.knockX *= Math.pow(.035, dt);
           e.knockY *= Math.pow(.035, dt);
+          if (Math.hypot(e.knockX, e.knockY) < 1.5) e.knockX = e.knockY = 0;
         }
         if (e.stun > 0) {
           e.stun -= dt;
@@ -6122,7 +6487,9 @@
         if (v3Boss && v3Boss.alive) {
           $("bossHud").classList.add("show");
           $("bossFill").style.width = `${clamp(v3Boss.hp / v3Boss.maxHp * 100, 0, 100)}%`;
-          $("bossPhaseText").textContent = v3Boss.hp / v3Boss.maxHp < .5 ? "PHASE 2 // BREAKPOINT" : "PHASE 1 // DISCOVERY";
+          $("bossPhaseText").textContent = v3Boss.scammerBoss
+            ? (v3Boss.scammerShieldTimer > 0 ? "TIER X // GLITCH SHIELD // VERIFY" : v3Boss.hp / v3Boss.maxHp < .5 ? "TIER X // PHASE 2 // CHARGEBACK" : "TIER X // PHASE 1 // COUNTERFEIT")
+            : v3Boss.hp / v3Boss.maxHp < .5 ? "PHASE 2 // BREAKPOINT" : "PHASE 1 // DISCOVERY";
         } else if (bossAlive && waveRemaining === 0 && aliveCount(enemies) === 0) {
           $("bossHud").classList.remove("show");
         }
@@ -6222,6 +6589,41 @@
             }
           }
           ctx.restore();
+          if (v3Boss.scammerBoss && gameSettings.effects) {
+            const glitchScale = worldRenderScale();
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.scale(glitchScale, glitchScale);
+            ctx.globalCompositeOperation = "screen";
+            const jitter = Math.sin(t * 34) * 4;
+            ctx.globalAlpha = gameSettings.performance ? .16 : .28;
+            ctx.fillStyle = "#ff426d";
+            ctx.fillRect(-v3Boss.r - 22 + jitter, -v3Boss.r * .48, (v3Boss.r + 22) * 2, 3);
+            ctx.fillStyle = CYAN;
+            ctx.fillRect(-v3Boss.r - 12 - jitter, v3Boss.r * .24, (v3Boss.r + 12) * 2, 2);
+            ctx.globalAlpha = .55;
+            ctx.strokeStyle = "#ff426d";
+            ctx.lineWidth = 2;
+            setDash([4, 7]);
+            ctx.beginPath();
+            ctx.arc(jitter * .35, -jitter * .2, v3Boss.r + 42 + Math.sin(t * 11) * 5, 0, Math.PI * 2);
+            ctx.stroke();
+            setDash([]);
+            if (v3Boss.scammerShieldTimer > 0) {
+              ctx.globalAlpha = .86;
+              ctx.strokeStyle = "#fff7c2";
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.arc(0, 0, v3Boss.r + 12 + Math.sin(t * 18) * 3, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.fillStyle = "#fff7c2";
+              ctx.font = `900 ${Math.max(7, v3Boss.r * .24)}px ui-monospace, monospace`;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText("VERIFY", 0, -v3Boss.r - 24);
+            }
+            ctx.restore();
+          }
         }
       };
 
@@ -6377,7 +6779,10 @@
           gainXp(xpForEnemy(enemy));
           mutatorKillBonus(enemy);
           triggerEggKillPower(enemy);
-          if (wasBoss) bossRewardFor(enemy);
+          if (wasBoss) {
+            bossRewardFor(enemy);
+            scammerPayoutFor(enemy);
+          }
         }
       };
 
@@ -6394,6 +6799,15 @@
         }
         if (enemy?.bossAffix?.key === "fortified" && enemy.armorTimer > 0) dealt *= .58;
         if (enemy?.bossAffix?.key === "phaseShift" && enemy.shiftFlash > 0) dealt *= .24;
+        if (enemy?.scammerBoss && enemy.scammerShieldTimer > 0) {
+          dealt *= .34;
+          if (!enemy.scammerShieldNoticed) {
+            enemy.scammerShieldNoticed = true;
+            v3Say("SCAMMER // shielded quote. wait for the reveal.", 1.05);
+          }
+        } else if (enemy?.scammerBoss) {
+          enemy.scammerShieldNoticed = false;
+        }
         if (enemy?.boss && enemy.guardWindow > 0 && enemy.armorTimer <= 0 && enemy.shiftFlash <= 0) {
           dealt *= BOSS_GUARD_DAMAGE_MULTIPLIER;
         }
@@ -6676,7 +7090,10 @@
             : v3Boss.shiftFlash > 0
               ? "PHASING"
               : v3Boss.hp / v3Boss.maxHp < .5 ? "PHASE 2 // BREAKPOINT" : "PHASE 1 // DISCOVERY";
-          $("bossPhaseText").textContent = `TIER ${reward.tier} // ${v3Boss.bossAffix?.tag || "BOSS"} // ${bossState}`;
+          const scammerState = v3Boss.scammerBoss
+            ? v3Boss.scammerShieldTimer > 0 ? "GLITCH SHIELD // VERIFY" : v3Boss.hp / v3Boss.maxHp < .5 ? "PHASE 2 // CHARGEBACK" : "PHASE 1 // COUNTERFEIT"
+            : bossState;
+          $("bossPhaseText").textContent = `TIER ${reward.tier} // ${v3Boss.bossAffix?.tag || "BOSS"} // ${scammerState}`;
         }
         // A narrative callout and the compact readout carry the same message
         // during wave/boss introductions. Keep only one visible on small
