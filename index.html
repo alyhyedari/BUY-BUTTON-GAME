@@ -266,7 +266,7 @@
     .combo { color: var(--hot); font-size: 15px; letter-spacing: .1em; min-height: 22px; }
     .objective { color: var(--muted); font-size: 10px; letter-spacing: .08em; }
     .ability-bar { display: flex; gap: 8px; justify-content: flex-end; pointer-events: auto; }
-    .ability-btn { min-width: 120px; color: var(--cyan); border-color: rgba(95,244,255,.25); }
+    .ability-btn { min-width: 120px; color: var(--cyan); border-color: rgba(95,244,255,.25); touch-action: manipulation; }
     .ability-btn.ready { box-shadow: 0 0 18px rgba(95,244,255,.16); }
     .ability-btn.cooling { opacity: .53; }
     .toast { position: absolute; left: 50%; top: 25%; transform: translateX(-50%); color: var(--acid); font-size: 14px; letter-spacing: .12em; text-shadow: 0 0 16px var(--acid); opacity: 0; transition: opacity .2s, transform .2s; white-space: nowrap; }
@@ -353,6 +353,21 @@
     .setting-control { display: flex; align-items: center; gap: 7px; color: var(--acid); font-size: 10px; white-space: nowrap; }
     .setting-control input[type="range"] { width: 118px; accent-color: var(--acid); }
     .setting-control input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--acid); }
+    .setting-control select {
+      min-width: 112px;
+      border: 1px solid rgba(204,255,0,.32);
+      border-radius: 0;
+      padding: 5px 7px;
+      background: #07100a;
+      color: var(--acid);
+      font: 10px ui-monospace, monospace;
+      cursor: pointer;
+      outline: none;
+    }
+    .setting-control select:focus-visible {
+      border-color: var(--acid);
+      box-shadow: 0 0 16px rgba(204,255,0,.18);
+    }
     .setting-control output { min-width: 36px; text-align: right; color: var(--cyan); }
     .settings-note { margin-top: 12px; color: var(--muted); font-size: 9px; line-height: 1.5; }
     .pause-card .main-btn { margin-top: 18px; }
@@ -389,6 +404,38 @@
       pointer-events: auto;
     }
     .pause-hud-btn:hover, .pause-hud-btn:focus-visible { border-color: var(--acid); color: var(--acid); outline: none; }
+    .touch-dash-btn {
+      display: none;
+      position: absolute;
+      left: max(10px, env(safe-area-inset-left));
+      bottom: max(46px, calc(env(safe-area-inset-bottom) + 42px));
+      z-index: 3;
+      width: 58px;
+      height: 40px;
+      padding: 0 5px;
+      border: 1px solid rgba(95,244,255,.72);
+      border-radius: 999px;
+      background: radial-gradient(circle at 50% 35%, rgba(95,244,255,.28), rgba(4,8,7,.9) 72%);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(95,244,255,.2), inset 0 0 14px rgba(95,244,255,.08);
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-align: center;
+    }
+    .touch-dash-btn:active,
+    .touch-dash-btn:focus-visible {
+      border-color: var(--acid);
+      color: var(--acid);
+      box-shadow: 0 0 24px rgba(204,255,0,.3), inset 0 0 16px rgba(204,255,0,.12);
+      outline: none;
+      transform: translateY(1px);
+    }
     .combat-flash {
       position: absolute;
       left: 50%;
@@ -489,6 +536,382 @@
     #stick { width: 128px; height: 128px; border: 1px solid rgba(204,255,0,.3); background: rgba(204,255,0,.05); }
     #stick-knob { width: 52px; height: 52px; background: rgba(204,255,0,.75); box-shadow: 0 0 18px var(--acid); }
     .mobile-hint { display: none; }
+    .menu-utility-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .menu-utility-row .ghost-btn {
+      min-height: 36px;
+      padding: 9px 12px;
+      font-size: 10px;
+    }
+    @media (max-width: 520px) {
+      .menu-utility-row {
+        align-items: stretch;
+      }
+      .menu-utility-row > * {
+        flex: 1 1 150px;
+      }
+      .language-picker {
+        justify-content: space-between;
+      }
+      .language-picker select {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+    }
+    .language-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+      padding: 5px 8px;
+      border: 1px solid rgba(95,244,255,.28);
+      background: rgba(4,8,7,.66);
+      color: var(--cyan);
+      font-size: 9px;
+      letter-spacing: .1em;
+    }
+    .language-picker span {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .language-picker select {
+      min-width: 112px;
+      border: 1px solid rgba(204,255,0,.32);
+      border-radius: 0;
+      padding: 5px 7px;
+      background: #07100a;
+      color: var(--acid);
+      font: 10px ui-monospace, monospace;
+      cursor: pointer;
+      outline: none;
+    }
+    .language-picker select:focus-visible {
+      border-color: var(--acid);
+      box-shadow: 0 0 16px rgba(204,255,0,.18);
+    }
+    .tutorial-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      pointer-events: auto;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(17,56,40,.34), rgba(2,5,6,.92) 72%),
+        rgba(2,5,6,.82);
+      transition: opacity .2s ease, visibility .2s ease;
+      overflow: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tutorial-layer.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .tutorial-card {
+      width: min(720px, 100%);
+      max-height: min(90dvh, 760px);
+      overflow: auto;
+      padding: clamp(20px, 4vw, 38px);
+      border: 1px solid rgba(95,244,255,.4);
+      background:
+        linear-gradient(145deg, rgba(8,22,20,.98), rgba(4,8,9,.97)),
+        radial-gradient(circle at 85% 10%, rgba(204,255,0,.1), transparent 40%);
+      box-shadow: 0 30px 100px rgba(0,0,0,.8), 0 0 70px rgba(95,244,255,.12);
+    }
+    .tutorial-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .tutorial-step {
+      color: var(--cyan);
+      font-size: 10px;
+      letter-spacing: .16em;
+    }
+    .tutorial-close {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(95,244,255,.35);
+      background: rgba(95,244,255,.05);
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+    }
+    .tutorial-close:hover,
+    .tutorial-close:focus-visible {
+      border-color: var(--acid);
+      color: var(--acid);
+      outline: none;
+    }
+    .tutorial-progress {
+      height: 4px;
+      margin: 12px 0 20px;
+      background: rgba(255,255,255,.09);
+      overflow: hidden;
+    }
+    .tutorial-progress i {
+      display: block;
+      width: 16.66%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--acid));
+      box-shadow: 0 0 14px rgba(204,255,0,.42);
+      transition: width .2s ease;
+    }
+    .tutorial-glyph {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--acid);
+      color: var(--acid);
+      background: radial-gradient(circle, rgba(204,255,0,.2), rgba(204,255,0,.03) 65%);
+      box-shadow: 0 0 30px rgba(204,255,0,.18), inset 0 0 22px rgba(95,244,255,.1);
+      font-size: 30px;
+      font-weight: 900;
+      transform: rotate(45deg);
+    }
+    .tutorial-glyph span {
+      transform: rotate(-45deg);
+    }
+    .tutorial-card h2 {
+      margin: 0 0 10px;
+      color: var(--acid);
+      text-align: center;
+      font-size: clamp(25px, 5vw, 44px);
+      line-height: .98;
+      letter-spacing: .03em;
+    }
+    .tutorial-card p {
+      max-width: 58ch;
+      margin: 0 auto;
+      color: #c8d8cb;
+      text-align: center;
+      font: 14px/1.6 system-ui, sans-serif;
+    }
+    .tutorial-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 20px auto 0;
+      max-width: 590px;
+    }
+    .tutorial-control {
+      min-height: 54px;
+      padding: 9px 11px;
+      border: 1px solid rgba(95,244,255,.2);
+      background: rgba(95,244,255,.045);
+      color: #d6e5d3;
+      font: 11px/1.35 system-ui, sans-serif;
+      text-align: center;
+    }
+    .tutorial-control b {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--cyan);
+      font: 10px ui-monospace, monospace;
+      letter-spacing: .1em;
+    }
+    .tutorial-tip {
+      min-height: 19px;
+      margin-top: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: .05em;
+    }
+    .tutorial-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .tutorial-actions .ghost-btn,
+    .tutorial-actions .main-btn {
+      min-height: 40px;
+      padding: 9px 13px;
+      font-size: 10px;
+    }
+    .tutorial-actions .main-btn {
+      min-width: 122px;
+    }
+    .touch-guide {
+      position: fixed;
+      left: 50%;
+      bottom: max(96px, calc(env(safe-area-inset-bottom) + 86px));
+      z-index: 28;
+      width: min(500px, calc(100vw - 24px));
+      padding: 8px 38px 8px 12px;
+      border: 1px solid rgba(204,255,0,.38);
+      background: rgba(3,8,6,.9);
+      color: var(--acid);
+      box-shadow: 0 0 25px rgba(204,255,0,.12);
+      font-size: 9px;
+      line-height: 1.4;
+      letter-spacing: .08em;
+      text-align: center;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate(-50%, 8px);
+      transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+    }
+    .touch-guide.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(-50%, 0);
+    }
+    .touch-guide button {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 17px;
+      line-height: 1;
+    }
+    .touch-guide button:hover,
+    .touch-guide button:focus-visible {
+      color: var(--acid);
+      outline: none;
+    }
+    @media (max-width: 520px) {
+      .tutorial-layer {
+        padding: 10px;
+      }
+      .tutorial-card {
+        max-height: calc(100dvh - 20px);
+        padding: 17px 14px;
+      }
+      .tutorial-card p {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .tutorial-controls {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        margin-top: 14px;
+      }
+      .tutorial-control {
+        min-height: 42px;
+        padding: 7px 9px;
+      }
+      .tutorial-actions {
+        margin-top: 14px;
+      }
+      .tutorial-actions .ghost-btn,
+      .tutorial-actions .main-btn {
+        min-height: 38px;
+        padding: 8px 9px;
+        font-size: 9px;
+      }
+      .touch-guide {
+        bottom: max(88px, calc(env(safe-area-inset-bottom) + 78px));
+        font-size: 8px;
+      }
+    }
+    /* Landscape phones have plenty of width but very little height. Keep the
+       complete first-run manual on one viewport so a player never has to
+       discover that the NEXT button is hidden below an internal scroll. */
+    @media (orientation: landscape) and (max-height: 600px) {
+      .tutorial-layer {
+        padding: 8px;
+      }
+      .tutorial-card {
+        max-height: calc(100dvh - 16px);
+        padding: 11px 16px;
+        overflow: hidden;
+      }
+      .tutorial-progress {
+        margin: 6px 0 9px;
+      }
+      .tutorial-glyph {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+      .tutorial-card h2 {
+        margin-bottom: 5px;
+        font-size: clamp(20px, 5.4vh, 30px);
+      }
+      .tutorial-card p {
+        font-size: 11px;
+        line-height: 1.25;
+      }
+      .tutorial-controls {
+        gap: 5px;
+        margin-top: 9px;
+      }
+      .tutorial-control {
+        min-height: 32px;
+        padding: 5px 8px;
+        font-size: 9px;
+        line-height: 1.2;
+      }
+      .tutorial-control b {
+        margin-bottom: 1px;
+        font-size: 8px;
+      }
+      .tutorial-tip {
+        min-height: 13px;
+        margin-top: 7px;
+        font-size: 8px;
+      }
+      .tutorial-actions {
+        margin-top: 9px;
+      }
+      .tutorial-actions .ghost-btn,
+      .tutorial-actions .main-btn {
+        min-height: 32px;
+        padding: 6px 10px;
+        font-size: 8px;
+      }
+      .tutorial-actions .main-btn {
+        min-width: 96px;
+      }
+    }
+    body.locale-rtl #menu,
+    body.locale-rtl #briefing,
+    body.locale-rtl #shop,
+    body.locale-rtl #pause,
+    body.locale-rtl #levelup,
+    body.locale-rtl #easterEggs,
+    body.locale-rtl #gameover,
+    body.locale-rtl .tutorial-card {
+      direction: rtl;
+    }
+    body.locale-rtl #ui,
+    body.locale-rtl .menu-art,
+    body.locale-rtl .language-picker select,
+    body.locale-rtl .setting-control {
+      direction: ltr;
+    }
+    body.locale-rtl .menu-copy,
+    body.locale-rtl .briefing-card,
+    body.locale-rtl .shop-card,
+    body.locale-rtl .pause-card,
+    body.locale-rtl .levelup-card,
+    body.locale-rtl .easter-card,
+    body.locale-rtl .gameover-card {
+      text-align: right;
+    }
     .support-notice {
       position: fixed;
       inset: 0;
@@ -1453,6 +1876,14 @@
         font-size: 6px;
         letter-spacing: 0;
       }
+      #ui .touch-dash-btn {
+        display: grid;
+        place-items: center;
+        width: 56px;
+        height: 36px;
+        bottom: max(42px, calc(env(safe-area-inset-bottom) + 37px));
+        font-size: 8px;
+      }
       #ui #autoFireBtn {
         position: absolute;
         right: 0;
@@ -1511,23 +1942,42 @@
   <section id="menu" aria-label="Main menu">
     <div class="menu-card">
       <div class="menu-copy">
-        <div class="eyebrow">UNOFFICIAL COMMUNITY ARCADE // v4.0 ECHO PROTOCOL</div>
+        <div class="eyebrow" data-i18n="menuEyebrow">UNOFFICIAL COMMUNITY ARCADE // v4.0 ECHO PROTOCOL</div>
         <h1>BUY<br /><span>BUTTON</span></h1>
-        <p>The command disappeared in 2021. The signal survived. Enter the endless Robinhood Chain frontier, survive a different market regime every run, and break every lockout that tries to close your position.</p>
+        <p data-i18n="menuDescription">The command disappeared in 2021. The signal survived. Enter the endless Robinhood Chain frontier, survive a different market regime every run, and break every lockout that tries to close your position.</p>
         <div class="menu-meta">
-          <span class="chip">ONE RUN · INFINITE WAVES</span>
-          <span class="chip">CHAIN 4663 LORE</span>
-          <span class="chip">NO WALLET · NO TX</span>
+          <span class="chip" data-i18n="chipRun">ONE RUN · INFINITE WAVES</span>
+          <span class="chip" data-i18n="chipLore">CHAIN 4663 LORE</span>
+          <span class="chip" data-i18n="chipNoWallet">NO WALLET · NO TX</span>
         </div>
         <div class="record-strip" aria-label="Saved records">
-          <div class="record-cell"><b id="menuBestScore">0</b><span>BEST SCORE</span></div>
-          <div class="record-cell"><b id="menuBestWave">0</b><span>BEST WAVE</span></div>
-          <div class="record-cell"><b id="menuRuns">0</b><span>RUNS ARCHIVED</span></div>
+          <div class="record-cell"><b id="menuBestScore">0</b><span data-i18n="bestScore">BEST SCORE</span></div>
+          <div class="record-cell"><b id="menuBestWave">0</b><span data-i18n="bestWave">BEST WAVE</span></div>
+          <div class="record-cell"><b id="menuRuns">0</b><span data-i18n="runsArchived">RUNS ARCHIVED</span></div>
         </div>
         <div class="record-badge" id="menuRecordBadge">NO RECORD YET // MAKE THE FIRST PRESS</div>
-        <button class="ghost-btn easter-archive-btn" id="easterEggBtn" type="button">OPEN EASTER EGG ARCHIVE</button>
-        <button class="main-btn" id="startBtn" type="button">BOOT THE BUTTON</button>
-        <div class="fineprint">A fictional, unofficial game inspired by the community meme “Buy Button”. No affiliation or financial advice.</div>
+        <button class="ghost-btn easter-archive-btn" id="easterEggBtn" type="button" data-i18n="easterArchive">OPEN EASTER EGG ARCHIVE</button>
+        <div class="menu-utility-row">
+          <button class="ghost-btn" id="tutorialBtn" type="button" data-i18n="howToPlay">HOW TO PLAY</button>
+          <label class="language-picker" for="languageSelect">
+            <span data-i18n="language">LANGUAGE</span>
+            <select id="languageSelect" aria-label="Choose language">
+              <option value="en">English</option>
+              <option value="fa">فارسی</option>
+              <option value="es">Español</option>
+              <option value="ar">العربية</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="pt">Português</option>
+              <option value="tr">Türkçe</option>
+              <option value="ja">日本語</option>
+              <option value="zh">简体中文</option>
+              <option value="hi">हिन्दी</option>
+            </select>
+          </label>
+        </div>
+        <button class="main-btn" id="startBtn" type="button" data-i18n="start">BOOT THE BUTTON</button>
+        <div class="fineprint" data-i18n="fineprint">A fictional, unofficial game inspired by the community meme “Buy Button”. No affiliation or financial advice.</div>
       </div>
       <div class="menu-art" aria-hidden="true">
         <div class="orbit"></div>
@@ -1540,18 +1990,18 @@
 
   <section id="briefing" class="hidden" aria-label="Mission briefing">
     <div class="briefing-card">
-      <div class="eyebrow">ARCHIVE // 01.28.2021</div>
-      <h2>THE BUTTON WENT DARK.</h2>
-      <p>One frozen command became a legend. Years later, a green pulse wakes inside Chain 4663. It is not a promise of profit; it is a signal asking to be carried.</p>
+      <div class="eyebrow" data-i18n="briefingEyebrow">ARCHIVE // 01.28.2021</div>
+      <h2 data-i18n="briefingTitle">THE BUTTON WENT DARK.</h2>
+      <p data-i18n="briefingBody">One frozen command became a legend. Years later, a green pulse wakes inside Chain 4663. It is not a promise of profit; it is a signal asking to be carried.</p>
       <div class="briefing-log">
         “Every gate is a rule someone forgot to question. Every wave is a chance to press back.”
         <br /><span style="color:var(--acid)">— SIGNAL LOG / UNKNOWN OPERATOR</span>
       </div>
       <div class="briefing-actions">
-        <button class="main-btn" id="deployBtn" type="button">ENTER THE FRONTIER</button>
-        <button class="ghost-btn" id="backBtn" type="button">BACK</button>
+        <button class="main-btn" id="deployBtn" type="button" data-i18n="deploy">ENTER THE FRONTIER</button>
+        <button class="ghost-btn" id="backBtn" type="button" data-i18n="back">BACK</button>
       </div>
-      <div class="mobile-hint">Desktop: WASD / Space / Tab lock / X echo / Z route. Mobile: rotate sideways, drag the left side to move, hold the right side to fire, then tap the weapon and ability buttons below.</div>
+      <div class="mobile-hint" id="briefingHint" data-i18n="mobileHint">Desktop: WASD / Space / Tab lock / X echo / Z route. Mobile: rotate sideways; drag the left side to move, hold the right side to fire, and tap DASH or another ability with a second finger.</div>
     </div>
   </section>
 
@@ -1559,27 +2009,27 @@
     <div class="shop-card">
       <div class="shop-head">
         <div>
-          <div class="eyebrow">CLEARANCE TERMINAL // BETWEEN WAVES</div>
-          <h2>REWIRE YOUR SIGNAL.</h2>
-          <p>Spend recovered coins on tactical patches between waves. The frontier adapts; so do you.</p>
+          <div class="eyebrow" data-i18n="shopEyebrow">CLEARANCE TERMINAL // BETWEEN WAVES</div>
+          <h2 data-i18n="shopTitle">REWIRE YOUR SIGNAL.</h2>
+          <p data-i18n="shopBody">Spend recovered coins on tactical patches between waves. The frontier adapts; so do you.</p>
         </div>
         <div class="shop-coins"><span id="shopCoins">0</span> ◈</div>
       </div>
       <div class="upgrade-grid" id="upgradeGrid"></div>
-      <div class="weapon-lab-head">WEAPON LAB // SPECIALIZED CALIBRATION</div>
+      <div class="weapon-lab-head" data-i18n="weaponLab">WEAPON LAB // SPECIALIZED CALIBRATION</div>
       <div class="upgrade-grid weapon-upgrade-grid" id="weaponUpgradeGrid"></div>
       <div class="shop-actions">
-        <div class="shop-foot">Every patch stacks. Buy as many as your recovered value allows, then press BUY to launch the next wave.</div>
-        <button class="main-btn" id="continueBtn" type="button">PRESS BUY // NEXT WAVE</button>
+        <div class="shop-foot" data-i18n="shopFoot">Every patch stacks. Buy as many as your recovered value allows, then press BUY to launch the next wave.</div>
+        <button class="main-btn" id="continueBtn" type="button" data-i18n="continueWave">PRESS BUY // NEXT WAVE</button>
       </div>
     </div>
   </section>
 
   <section id="levelup" class="hidden" aria-label="Level up choices">
     <div class="levelup-card">
-      <div class="eyebrow">SIGNAL BREAKTHROUGH // LEVEL UP</div>
-      <h2>CHOOSE YOUR EDGE.</h2>
-      <p>The crowd noticed the streak. Pick one instant mutation; the choice is yours.</p>
+      <div class="eyebrow" data-i18n="levelEyebrow">SIGNAL BREAKTHROUGH // LEVEL UP</div>
+      <h2 data-i18n="levelTitle">CHOOSE YOUR EDGE.</h2>
+      <p data-i18n="levelBody">The crowd noticed the streak. Pick one instant mutation; the choice is yours.</p>
       <div class="run-progress" id="levelProgress">LEVEL 1 // NEXT BREAKTHROUGH 100 XP</div>
       <div class="levelup-grid" id="levelupGrid"></div>
     </div>
@@ -1589,110 +2039,129 @@
     <div class="easter-card">
       <div class="easter-head">
         <div>
-          <div class="eyebrow">HIDDEN LEDGER // COMMUNITY SIGNALS</div>
-          <h2>THE EASTER EGG ARCHIVE.</h2>
-          <p>Seven traces are hidden inside the run. Find them in the frontier, bring them back alive, and the archive will remember every press on this device.</p>
+          <div class="eyebrow" data-i18n="easterEyebrow">HIDDEN LEDGER // COMMUNITY SIGNALS</div>
+          <h2 data-i18n="easterTitle">THE EASTER EGG ARCHIVE.</h2>
+          <p data-i18n="easterBody">Seven traces are hidden inside the run. Find them in the frontier, bring them back alive, and the archive will remember every press on this device.</p>
         </div>
-        <div class="easter-count" id="easterCount">0 / 7 FOUND</div>
+      <div class="easter-count" id="easterCount" data-i18n="easterFound">0 / 7 FOUND</div>
       </div>
       <div class="easter-grid" id="easterGrid"></div>
       <div class="easter-foot">
-        <span>Unofficial fan fiction inspired by public community lore. No wallet, transaction, or financial action is involved.</span>
-        <button class="ghost-btn" id="closeEasterBtn" type="button">BACK TO MENU</button>
+        <span data-i18n="easterFoot">Unofficial fan fiction inspired by public community lore. No wallet, transaction, or financial action is involved.</span>
+        <button class="ghost-btn" id="closeEasterBtn" type="button" data-i18n="backMenu">BACK TO MENU</button>
       </div>
     </div>
   </section>
 
   <section id="pause" class="hidden" aria-label="Paused">
     <div class="pause-card">
-      <div class="eyebrow">SIGNAL HOLD</div>
-      <h2>PAUSED.</h2>
-      <p>The Button is waiting. Nothing moves while the signal is on hold. Tune the run before you jump back in.</p>
+      <div class="eyebrow" data-i18n="pauseEyebrow">SIGNAL HOLD</div>
+      <h2 data-i18n="pauseTitle">PAUSED.</h2>
+      <p data-i18n="pauseBody">The Button is waiting. Nothing moves while the signal is on hold. Tune the run before you jump back in.</p>
       <div class="settings-panel" aria-label="Game settings">
-        <div class="settings-head"><b>CONTROL CENTER</b><span id="settingsStatus">LIVE PROFILE</span></div>
+        <div class="settings-head"><b data-i18n="controlCenter">CONTROL CENTER</b><span id="settingsStatus">LIVE PROFILE</span></div>
         <div class="settings-grid">
           <label class="setting-row">
-            <span class="setting-copy"><b>CAMERA ZOOM</b><span>Pull way back for the whole frontier or push in for impact.</span></span>
-            <span class="setting-control"><input id="zoomRange" type="range" min="0.32" max="1.32" step="0.02" value="1" /><output id="zoomValue">100%</output></span>
+            <span class="setting-copy"><b data-i18n="cameraZoom">CAMERA ZOOM</b><span data-i18n="cameraZoomHint">Mobile starts wider at 68%; pull back to 5% for a full frontier view.</span></span>
+            <span class="setting-control"><input id="zoomRange" type="range" min="0.05" max="1.32" step="0.01" value="0.68" /><output id="zoomValue">68%</output></span>
           </label>
           <label class="setting-row">
-            <span class="setting-copy"><b>MASTER VOLUME</b><span>All weapon, hit and menu signals.</span></span>
+            <span class="setting-copy"><b data-i18n="language">LANGUAGE</b><span data-i18n="languageHint">Choose the interface language. Your choice is saved on this device.</span></span>
+            <span class="setting-control">
+              <select id="pauseLanguageSelect" aria-label="Choose language">
+                <option value="en">English</option>
+                <option value="fa">فارسی</option>
+                <option value="es">Español</option>
+                <option value="ar">العربية</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="pt">Português</option>
+                <option value="tr">Türkçe</option>
+                <option value="ja">日本語</option>
+                <option value="zh">简体中文</option>
+                <option value="hi">हिन्दी</option>
+              </select>
+            </span>
+          </label>
+          <label class="setting-row">
+            <span class="setting-copy"><b data-i18n="masterVolume">MASTER VOLUME</b><span data-i18n="masterVolumeHint">All weapon, hit and menu signals.</span></span>
             <span class="setting-control"><input id="masterVolumeRange" type="range" min="0" max="1" step="0.05" value="0.7" /><output id="masterVolumeValue">70%</output></span>
           </label>
           <label class="setting-row">
-            <span class="setting-copy"><b>MUSIC / AMBIENCE</b><span>Disabled for combat clarity. Only shots, buttons and blasts remain.</span></span>
+            <span class="setting-copy"><b data-i18n="musicAmbience">MUSIC / AMBIENCE</b><span data-i18n="musicHint">Disabled for combat clarity. Only shots, buttons and blasts remain.</span></span>
             <span class="setting-control"><input id="musicVolumeRange" type="range" min="0" max="1" step="0.05" value="0" disabled /><output id="musicVolumeValue">OFF</output></span>
           </label>
           <label class="setting-row">
-            <span class="setting-copy"><b>PERFORMANCE MODE</b><span>Reduce particles, stars and expensive glow for phones.</span></span>
+            <span class="setting-copy"><b data-i18n="performanceMode">PERFORMANCE MODE</b><span data-i18n="performanceHint">Reduce particles, stars and expensive glow for phones.</span></span>
             <span class="setting-control"><input id="performanceToggle" type="checkbox" /><output id="performanceValue">OFF</output></span>
           </label>
           <label class="setting-row">
-            <span class="setting-copy"><b>SCREEN FX</b><span>Shake, flash and scanline drama.</span></span>
+            <span class="setting-copy"><b data-i18n="screenFx">SCREEN FX</b><span data-i18n="screenFxHint">Shake, flash and scanline drama.</span></span>
             <span class="setting-control"><input id="effectsToggle" type="checkbox" checked /><output id="effectsValue">ON</output></span>
           </label>
           <label class="setting-row">
-            <span class="setting-copy"><b>HAPTIC FEEDBACK</b><span>Short mobile pulses for hits and ability casts.</span></span>
+            <span class="setting-copy"><b data-i18n="hapticFeedback">HAPTIC FEEDBACK</b><span data-i18n="hapticHint">Short mobile pulses for hits and ability casts.</span></span>
             <span class="setting-control"><input id="hapticsToggle" type="checkbox" checked /><output id="hapticsValue">ON</output></span>
           </label>
         </div>
-        <div class="settings-note">Settings save automatically on this device. Press <b>F</b> to toggle auto-fire; press <b>+</b>/<b>-</b> to adjust zoom. <b>X</b> casts the selected Easter power; <b>Z</b> routes it.</div>
+        <div class="settings-note" id="settingsNote">Settings save automatically on this device. Press <b>F</b> to toggle auto-fire; press <b>+</b>/<b>-</b> to adjust zoom. <b>X</b> casts the selected Easter power; <b>Z</b> routes it.</div>
       </div>
       <div class="pause-actions">
-        <button class="ghost-btn" id="resetSettingsBtn" type="button">RESET SETTINGS</button>
-        <button class="danger-btn" id="menuBtn" type="button">EXIT TO MENU</button>
-        <button class="main-btn" id="resumeBtn" type="button">RESUME RUN</button>
+        <button class="ghost-btn" id="resetSettingsBtn" type="button" data-i18n="resetSettings">RESET SETTINGS</button>
+        <button class="danger-btn" id="menuBtn" type="button" data-i18n="exitMenu">EXIT TO MENU</button>
+        <button class="main-btn" id="resumeBtn" type="button" data-i18n="resume">RESUME RUN</button>
       </div>
     </div>
   </section>
 
   <section id="gameover" class="hidden" aria-label="Run complete">
       <div class="gameover-card">
-        <div class="eyebrow">SIGNAL LOST // RUN ARCHIVE</div>
-        <h2>LIQUIDATED.</h2>
-        <p>You carried the signal farther than the last run. The Button can be pressed again.</p>
+        <div class="eyebrow" data-i18n="gameoverEyebrow">SIGNAL LOST // RUN ARCHIVE</div>
+        <h2 data-i18n="gameoverTitle">LIQUIDATED.</h2>
+        <p data-i18n="gameoverBody">You carried the signal farther than the last run. The Button can be pressed again.</p>
         <div class="new-record" id="recordResult"></div>
         <div class="run-stats">
-          <div class="run-stat"><b id="finalWave">1</b><span>WAVE</span></div>
-          <div class="run-stat"><b id="finalScore">0</b><span>SCORE</span></div>
-          <div class="run-stat"><b id="finalCoins">0</b><span>COINS</span></div>
-          <div class="run-stat"><b id="finalLevel">1</b><span>LEVEL</span></div>
+          <div class="run-stat"><b id="finalWave">1</b><span data-i18n="wave">WAVE</span></div>
+          <div class="run-stat"><b id="finalScore">0</b><span data-i18n="score">SCORE</span></div>
+          <div class="run-stat"><b id="finalCoins">0</b><span data-i18n="coins">COINS</span></div>
+          <div class="run-stat"><b id="finalLevel">1</b><span data-i18n="level">LEVEL</span></div>
         </div>
         <div class="previous-record" id="previousRecord"></div>
-        <button class="danger-btn" id="restartBtn" type="button">BUY AGAIN</button>
+        <button class="danger-btn" id="restartBtn" type="button" data-i18n="buyAgain">BUY AGAIN</button>
     </div>
   </section>
 
   <section id="ui" aria-label="Game interface">
     <div class="top-hud">
       <div class="hud-box hud-left">
-        <div class="hud-label">SIGNAL INTEGRITY</div>
+        <div class="hud-label" data-i18n="signalIntegrity">SIGNAL INTEGRITY</div>
         <div class="hud-value"><span id="hpText">100</span> / <span id="maxHpText">100</span></div>
         <div class="health-track"><div class="health-fill" id="hpFill"></div></div>
-        <div class="hud-label" style="margin-top:7px">ENERGY</div>
+        <div class="hud-label" data-i18n="energy" style="margin-top:7px">ENERGY</div>
         <div class="energy-track"><div class="energy-fill" id="energyFill"></div></div>
       </div>
       <div class="hud-box wave-box">
-        <div class="hud-label">FRONTIER DEPTH</div>
-        <div class="wave-num">WAVE <span id="waveText">1</span></div>
+        <div class="hud-label" data-i18n="frontierDepth">FRONTIER DEPTH</div>
+        <div class="wave-num"><span data-i18n="wave">WAVE</span> <span id="waveText">1</span></div>
         <div class="wave-name" id="waveName">BOOT SECTOR</div>
         <div class="run-mutator" id="runMutatorText"></div>
       </div>
       <div class="hud-box hud-right">
-        <div class="hud-label">RECOVERED VALUE</div>
+        <div class="hud-label" data-i18n="recoveredValue">RECOVERED VALUE</div>
         <div class="hud-value"><span id="coinText">0</span> ◈</div>
-        <div class="hud-label" style="margin-top:7px">RUN SCORE <span id="scoreText">0</span></div>
+        <div class="hud-label" style="margin-top:7px"><span data-i18n="runScore">RUN SCORE</span> <span id="scoreText">0</span></div>
       </div>
     </div>
     <div class="boss-hud" id="bossHud">
-      <div class="boss-hud-line"><span class="boss-hud-name" id="bossNameText">BOSS</span><span id="bossPhaseText">PHASE 1</span></div>
+      <div class="boss-hud-line"><span class="boss-hud-name" id="bossNameText" data-i18n="boss">BOSS</span><span id="bossPhaseText">PHASE 1</span></div>
       <div class="boss-track"><div class="boss-fill" id="bossFill"></div></div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="story-banner" id="storyBanner"><span class="line" id="storyText"></span></div>
-    <button class="lock-status" id="lockStatus" type="button">LOCK-ON // SMART TARGET</button>
+    <button class="lock-status" id="lockStatus" type="button" data-i18n="lockOn">LOCK-ON // SMART TARGET</button>
     <div class="combat-flash" id="combatFlash" aria-live="polite"></div>
-    <button class="pause-hud-btn" id="pauseBtn" type="button" aria-label="Pause game">Ⅱ</button>
+    <button class="pause-hud-btn" id="pauseBtn" type="button" aria-label="Pause game" data-i18n-aria-label="pauseGame">Ⅱ</button>
+      <button class="touch-dash-btn" id="touchDashBtn" type="button" aria-label="Dash while moving" data-i18n="dash">DASH</button>
       <div class="bottom-hud">
         <div class="weapon-bar" id="weaponBar"></div>
         <div class="center-readout">
@@ -1701,7 +2170,7 @@
           <div class="egg-power-readout" id="eggPowerText"></div>
           <button class="hud-toggle egg-power-btn" id="eggPowerBtn" type="button" aria-keyshortcuts="X Z" title="X activates the selected power. Shift-click or Z changes the route.">ECHO // LOCKED</button>
           <div class="run-progress" id="levelText">LEVEL 1 // 0/100 XP</div>
-          <div class="objective" id="objectiveText">KEEP THE SIGNAL ALIVE</div>
+          <div class="objective" id="objectiveText" data-i18n="keepSignal">KEEP THE SIGNAL ALIVE</div>
         </div>
         <button class="hud-toggle on" id="autoFireBtn" type="button">AUTO FIRE: ON</button>
         <div class="ability-bar" id="abilityBar"></div>
@@ -1714,11 +2183,35 @@
   <div id="orientationPrompt" class="orientation-prompt" role="dialog" aria-modal="true" aria-live="polite" aria-hidden="true">
     <div class="orientation-card">
       <div class="orientation-icon" aria-hidden="true">↔</div>
-      <div class="eyebrow">MOBILE INPUT // LANDSCAPE REQUIRED</div>
-      <h2>ROTATE TO PLAY.</h2>
-      <p>Turn your phone sideways for a wider arena and room for both hands.</p>
-      <button class="main-btn" id="orientationBtn" type="button">ROTATE + FULLSCREEN</button>
+        <div class="eyebrow" data-i18n="orientationEyebrow">MOBILE INPUT // LANDSCAPE REQUIRED</div>
+        <h2 data-i18n="orientationTitle">ROTATE TO PLAY.</h2>
+        <p data-i18n="orientationBody">Turn your phone sideways for a wider arena and room for both hands.</p>
+        <button class="main-btn" id="orientationBtn" type="button" data-i18n="orientationButton">ROTATE + FULLSCREEN</button>
     </div>
+  </div>
+  <section id="tutorial" class="tutorial-layer hidden" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" aria-describedby="tutorialBody" aria-hidden="true">
+    <div class="tutorial-card">
+      <div class="tutorial-top">
+        <div class="eyebrow" id="tutorialEyebrow">FIELD MANUAL // SIGNAL SCHOOL</div>
+        <button class="tutorial-close" id="tutorialClose" type="button" aria-label="Close tutorial">×</button>
+      </div>
+      <div class="tutorial-step" id="tutorialStep">STEP 1 / 6</div>
+      <div class="tutorial-progress" aria-hidden="true"><i id="tutorialProgressBar"></i></div>
+      <div class="tutorial-glyph" id="tutorialGlyph" aria-hidden="true"><span>BUY</span></div>
+      <h2 id="tutorialTitle">WELCOME, OPERATOR.</h2>
+      <p id="tutorialBody">Learn the controls in under a minute, then carry the signal as far as you can.</p>
+      <div class="tutorial-controls" id="tutorialControls"></div>
+      <div class="tutorial-tip" id="tutorialTip"></div>
+      <div class="tutorial-actions">
+        <button class="ghost-btn" id="tutorialSkip" type="button">SKIP</button>
+        <button class="ghost-btn" id="tutorialBack" type="button">BACK</button>
+        <button class="main-btn" id="tutorialNext" type="button">NEXT</button>
+      </div>
+    </div>
+  </section>
+  <div id="touchGuide" class="touch-guide" role="status" aria-live="polite">
+    <span id="touchGuideText">LEFT DRAG: MOVE · RIGHT HOLD: AIM/FIRE · DASH: ESCAPE</span>
+    <button id="touchGuideClose" type="button" aria-label="Close touch guide">×</button>
   </div>
 
   <script>
@@ -1783,14 +2276,6 @@
         });
         return entries;
       };
-      const writeStorageEntry = (key, serialized) => {
-        ["localStorage", "sessionStorage"].forEach((source) => {
-          try {
-            const storage = window[source];
-            if (storage && typeof storage.setItem === "function") storage.setItem(key, serialized);
-          } catch (_) {}
-        });
-      };
       const pad2 = (value) => {
         const text = String(value);
         return text.length < 2 ? `0${text}` : text;
@@ -1817,6 +2302,363 @@
       const orientationPrompt = $("orientationPrompt"), orientationBtn = $("orientationBtn");
       const easterEggLayer = $("easterEggs");
       const ACID = "#ccff00", HOT = "#ff426d", CYAN = "#5ff4ff", VIOLET = "#ad84ff";
+      const LOCALE_CODES = ["en", "fa", "es", "ar", "fr", "de", "pt", "tr", "ja", "zh", "hi"];
+      const LOCALE_NAMES = {
+        en: "English", fa: "فارسی", es: "Español", ar: "العربية", fr: "Français",
+        de: "Deutsch", pt: "Português", tr: "Türkçe", ja: "日本語", zh: "简体中文", hi: "हिन्दी"
+      };
+      const LOCALE_DIR = { fa: "rtl", ar: "rtl" };
+      const localeNumber = (value) => {
+        try { return Number(value).toLocaleString(currentLocale); } catch (_) { return String(value); }
+      };
+      const detectedLocale = String(browserNavigator.language || "").toLowerCase().split("-")[0];
+      const initialLocale = LOCALE_CODES.includes(detectedLocale) ? detectedLocale : "en";
+      const LOCALES = {
+        en: {
+          menuEyebrow: "UNOFFICIAL COMMUNITY ARCADE // v4.0 ECHO PROTOCOL",
+          menuDescription: "The command disappeared in 2021. The signal survived. Enter the endless Robinhood Chain frontier, survive a different market regime every run, and break every lockout that tries to close your position.",
+          chipRun: "ONE RUN · INFINITE WAVES", chipLore: "CHAIN 4663 LORE", chipNoWallet: "NO WALLET · NO TX",
+          bestScore: "BEST SCORE", bestWave: "BEST WAVE", runsArchived: "RUNS ARCHIVED",
+          noRecord: "NO RECORD YET // MAKE THE FIRST PRESS", archiveOnline: "ARCHIVE ONLINE // WAVE {wave} // SCORE {score}",
+          howToPlay: "HOW TO PLAY", language: "LANGUAGE", start: "BOOT THE BUTTON", easterArchive: "OPEN EASTER EGG ARCHIVE", easterFound: "{found} / 7 FOUND",
+          fineprint: "A fictional, unofficial game inspired by the community meme “Buy Button”. No affiliation or financial advice.",
+          briefingEyebrow: "ARCHIVE // 01.28.2021", briefingTitle: "THE BUTTON WENT DARK.",
+          briefingBody: "One frozen command became a legend. Years later, a green pulse wakes inside Chain 4663. It is not a promise of profit; it is a signal asking to be carried.",
+          deploy: "ENTER THE FRONTIER", back: "BACK",
+          mobileHint: "Desktop: WASD / Space / Tab lock / X echo / Z route. Mobile: rotate sideways; drag the left side to move, hold the right side to fire, and tap DASH or another ability with a second finger.",
+          shopEyebrow: "CLEARANCE TERMINAL // BETWEEN WAVES", shopTitle: "REWIRE YOUR SIGNAL.",
+          shopBody: "Spend recovered coins on tactical patches between waves. The frontier adapts; so do you.",
+          weaponLab: "WEAPON LAB // SPECIALIZED CALIBRATION", shopFoot: "Every patch stacks. Buy as many as your recovered value allows, then press BUY to launch the next wave.",
+          continueWave: "PRESS BUY // NEXT WAVE", levelEyebrow: "SIGNAL BREAKTHROUGH // LEVEL UP",
+          levelTitle: "CHOOSE YOUR EDGE.", levelBody: "The crowd noticed the streak. Pick one instant mutation; the choice is yours.",
+          easterEyebrow: "HIDDEN LEDGER // COMMUNITY SIGNALS", easterTitle: "THE EASTER EGG ARCHIVE.",
+          easterBody: "Seven traces are hidden inside the run. Find them in the frontier, bring them back alive, and the archive will remember every press on this device.",
+          easterFoot: "Unofficial fan fiction inspired by public community lore. No wallet, transaction, or financial action is involved.",
+          backMenu: "BACK TO MENU", pauseEyebrow: "SIGNAL HOLD", pauseTitle: "PAUSED.",
+          pauseBody: "The Button is waiting. Nothing moves while the signal is on hold. Tune the run before you jump back in.",
+          controlCenter: "CONTROL CENTER", settingsStatus: "LIVE PROFILE", lowPowerProfile: "LOW-POWER PROFILE",
+          cameraZoom: "CAMERA ZOOM", cameraZoomHint: "Mobile starts wider at 68%; pull back to 5% for a full frontier view.",
+          masterVolume: "MASTER VOLUME", masterVolumeHint: "All weapon, hit and menu signals.",
+          musicAmbience: "MUSIC / AMBIENCE", musicHint: "Disabled for combat clarity. Only shots, buttons and blasts remain.",
+          performanceMode: "PERFORMANCE MODE", performanceHint: "Reduce particles, stars and expensive glow for phones.",
+          screenFx: "SCREEN FX", screenFxHint: "Shake, flash and scanline drama.",
+          hapticFeedback: "HAPTIC FEEDBACK", hapticHint: "Short mobile pulses for hits and ability casts.",
+          languageHint: "Choose the interface language. Your choice is saved on this device.",
+          settingsNote: "Settings save automatically on this device. Press F to toggle auto-fire; press +/− to adjust zoom. X casts the selected Easter power; Z routes it.",
+          resetSettings: "RESET SETTINGS", exitMenu: "EXIT TO MENU", resume: "RESUME RUN", buyAgain: "BUY AGAIN",
+          gameoverEyebrow: "SIGNAL LOST // RUN ARCHIVE", gameoverTitle: "LIQUIDATED.",
+          gameoverBody: "You carried the signal farther than the last run. The Button can be pressed again.",
+          wave: "WAVE", score: "SCORE", coins: "COINS", level: "LEVEL", signalIntegrity: "SIGNAL INTEGRITY",
+          energy: "ENERGY", frontierDepth: "FRONTIER DEPTH", recoveredValue: "RECOVERED VALUE", runScore: "RUN SCORE",
+          boss: "BOSS", lockOn: "LOCK-ON // SMART TARGET", keepSignal: "KEEP THE SIGNAL ALIVE", dash: "DASH",
+          pauseGame: "Pause game", orientationEyebrow: "MOBILE INPUT // LANDSCAPE REQUIRED", orientationTitle: "ROTATE TO PLAY.",
+          orientationBody: "Turn your phone sideways for a wider arena and room for both hands.",
+          orientationButton: "ROTATE + FULLSCREEN", tutorialEyebrow: "FIELD MANUAL // SIGNAL SCHOOL",
+          tutorialClose: "Close tutorial", tutorialSkip: "SKIP", tutorialBack: "BACK", tutorialNext: "NEXT",
+          tutorialDone: "READY", step: "STEP {current} / {total}", touchGuide: "LEFT DRAG: MOVE · RIGHT HOLD: AIM/FIRE · DASH: ESCAPE",
+          tutorialSteps: [
+            { glyph: "BUY", title: "WELCOME, OPERATOR.", body: "Learn the controls in under a minute, then carry the signal as far as you can.", controls: [["GOAL", "Survive every wave"], ["LOOP", "Move · aim · upgrade"]], tip: "Your best run is saved automatically." },
+            { glyph: "↖", title: "MOVE WITH YOUR LEFT THUMB.", body: "On mobile, drag anywhere on the left half to steer. The stick follows your thumb, so you never need to hunt for a tiny button.", controls: [["MOBILE", "Left-side drag"], ["DESKTOP", "WASD / arrow keys"]], tip: "Keep one finger moving while another controls your aim." },
+            { glyph: "✦", title: "AIM AND FIRE.", body: "Hold the right side of the arena to aim and fire. Auto-fire starts ON for a relaxed first run; tap the toggle whenever you want full manual control.", controls: [["MOBILE", "Right-side hold"], ["DESKTOP", "Mouse / Space"]], tip: "Tap LOCK-ON to cycle the smartest target." },
+            { glyph: "⇥", title: "DASH THROUGH DANGER.", body: "Tap DASH while moving to burst forward with brief invulnerability. Pointer Events support movement, firing and an ability on separate fingers.", controls: [["MOBILE", "Two fingers at once"], ["DESKTOP", "E / Space + direction"]], tip: "Dash costs energy; upgrades add more chained bursts." },
+            { glyph: "⌕", title: "SEE THE WHOLE FRONTIER.", body: "Open Pause → Camera Zoom and pull the slider down to 5% for a wide tactical view. Entities and projectiles scale together so distance stays fair.", controls: [["ZOOM", "5%–132% range"], ["PHONE", "Landscape recommended"]], tip: "Performance Mode trims glow and particles on older phones." },
+            { glyph: "◆", title: "PRESS, PATCH, REPEAT.", body: "Clear a wave, spend recovered value in the shop, then choose a level mutation. Every run rolls a new market regime and fresh routes.", controls: [["UPGRADES", "Damage · speed · shield"], ["ARCHIVE", "Score · waves · secrets"]], tip: "You can reopen this manual from the main menu anytime." }
+          ]
+        },
+        fa: {
+          menuEyebrow: "آرکید اجتماعی غیررسمی // پروتکل اکو نسخه ۴",
+          menuDescription: "فرمان در سال ۲۰۲۱ ناپدید شد، اما سیگنال زنده ماند. وارد مرز بی‌پایان Chain 4663 شو، هر موج را پشت سر بگذار و قفل‌هایی را که جلویت را می‌گیرند بشکن.",
+          chipRun: "یک ران · موج‌های بی‌نهایت", chipLore: "افسانهٔ Chain 4663", chipNoWallet: "بدون کیف پول · بدون تراکنش",
+          bestScore: "بهترین امتیاز", bestWave: "بهترین موج", runsArchived: "ران‌های ذخیره‌شده",
+          noRecord: "هنوز رکوردی نیست // اولین فشار را ثبت کن", archiveOnline: "آرشیو آنلاین // موج {wave} // امتیاز {score}",
+          howToPlay: "آموزش بازی", language: "زبان", start: "فعال‌سازی دکمه", easterArchive: "باز کردن آرشیو ایستراِگ", easterFound: "{found} از ۷ پیدا شد",
+          fineprint: "یک بازی تخیلی و غیررسمی با الهام از میم «Buy Button». بدون وابستگی و توصیهٔ مالی.",
+          briefingEyebrow: "آرشیو // ۲۸.۰۱.۲۰۲۱", briefingTitle: "دکمه خاموش شد.",
+          briefingBody: "یک فرمان منجمد به افسانه تبدیل شد. حالا یک پالس سبز در Chain 4663 بیدار شده؛ وعدهٔ سود نیست، سیگنالی است که باید حملش کنی.",
+          deploy: "ورود به مرز", back: "بازگشت",
+          mobileHint: "دسکتاپ: WASD / Space / قفل Tab / اکو X / مسیر Z. موبایل: گوشی را افقی کن؛ نیمهٔ چپ را بکش تا حرکت کنی، نیمهٔ راست را نگه دار تا هدف بگیری و شلیک کنی، و با انگشت دوم DASH یا توانایی‌ها را بزن.",
+          shopEyebrow: "ترمینال ارتقا // بین موج‌ها", shopTitle: "سیگنالت را بازسیم‌کشی کن.",
+          shopBody: "بین موج‌ها سکه‌های بازیابی‌شده را برای ارتقاهای تاکتیکی خرج کن. مرز سازگار می‌شود؛ تو هم همین‌طور.",
+          weaponLab: "آزمایشگاه سلاح // کالیبراسیون تخصصی", shopFoot: "هر ارتقا روی قبلی جمع می‌شود؛ هرقدر ارزش بازیابی‌شده داری بخر و بعد موج بعدی را شروع کن.",
+          continueWave: "فشار BUY // موج بعدی", levelEyebrow: "شکست سیگنال // ارتقا",
+          levelTitle: "مزیتت را انتخاب کن.", levelBody: "استریکت دیده شد؛ یک جهش فوری انتخاب کن.",
+          easterEyebrow: "دفتر مخفی // سیگنال‌های جامعه", easterTitle: "آرشیو ایستراِگ.",
+          easterBody: "هفت ردپا در ران پنهان است. آن‌ها را در مرز پیدا کن تا این دستگاه هر فشارت را به یاد بسپارد.",
+          easterFoot: "داستان هواداری و تخیلی؛ بدون کیف پول، تراکنش یا اقدام مالی.", backMenu: "بازگشت به منو",
+          pauseEyebrow: "مکث سیگنال", pauseTitle: "متوقف شد.", pauseBody: "دکمه منتظر است. در حالت مکث چیزی حرکت نمی‌کند؛ تنظیمات را تغییر بده و برگرد.",
+          controlCenter: "مرکز کنترل", settingsStatus: "پروفایل فعال", lowPowerProfile: "پروفایل کم‌مصرف",
+          cameraZoom: "زوم دوربین", cameraZoomHint: "موبایل از ۶۸٪ شروع می‌کند؛ برای دید کامل تا ۵٪ عقب برو.",
+          masterVolume: "صدای اصلی", masterVolumeHint: "صدای سلاح، ضربه و منو.",
+          musicAmbience: "موسیقی / محیط", musicHint: "برای وضوح مبارزه خاموش است؛ فقط شلیک و انفجار باقی می‌ماند.",
+          performanceMode: "حالت عملکرد", performanceHint: "ذرات و درخشش سنگین را برای گوشی کاهش می‌دهد.",
+          screenFx: "جلوه‌های صفحه", screenFxHint: "لرزش، فلش و خطوط اسکن.",
+          hapticFeedback: "بازخورد لرزشی", hapticHint: "لرزش‌های کوتاه موبایلی برای ضربه و توانایی.",
+          languageHint: "زبان رابط را انتخاب کن؛ انتخابت روی همین دستگاه ذخیره می‌شود.",
+          settingsNote: "تنظیمات خودکار ذخیره می‌شوند. F شلیک خودکار، +/− زوم، X توان اکو و Z مسیر آن را تغییر می‌دهد.",
+          resetSettings: "بازنشانی تنظیمات", exitMenu: "خروج به منو", resume: "ادامهٔ ران", buyAgain: "دوباره BUY کن",
+          gameoverEyebrow: "سیگنال از دست رفت // آرشیو ران", gameoverTitle: "لیکویید شدی.",
+          gameoverBody: "سیگنال را از ران قبلی دورتر بردی. دکمه دوباره قابل فشار است.",
+          wave: "موج", score: "امتیاز", coins: "سکه", level: "سطح", signalIntegrity: "سلامت سیگنال",
+          energy: "انرژی", frontierDepth: "عمق مرز", recoveredValue: "ارزش بازیابی‌شده", runScore: "امتیاز ران",
+          boss: "باس", lockOn: "قفل هدف // هدف هوشمند", keepSignal: "سیگنال را زنده نگه دار", dash: "DASH",
+          pauseGame: "مکث بازی", orientationEyebrow: "ورودی موبایل // حالت افقی لازم است", orientationTitle: "برای بازی بچرخان.",
+          orientationBody: "گوشی را افقی کن تا میدان بازتر و جای هر دو دست فراهم شود.", orientationButton: "چرخش + تمام‌صفحه",
+          tutorialEyebrow: "دفترچهٔ میدانی // مدرسهٔ سیگنال", tutorialClose: "بستن آموزش", tutorialSkip: "رد کردن", tutorialBack: "قبلی", tutorialNext: "بعدی", tutorialDone: "آماده‌ام",
+          step: "مرحلهٔ {current} از {total}", touchGuide: "کشیدن چپ: حرکت · نگه‌داشتن راست: هدف/شلیک · DASH: فرار",
+          tutorialSteps: [
+            { glyph: "BUY", title: "خوش آمدی، اپراتور.", body: "در کمتر از یک دقیقه کنترل‌ها را یاد بگیر و سیگنال را تا هرجا می‌توانی حمل کن.", controls: [["هدف", "زنده ماندن در موج‌ها"], ["چرخه", "حرکت · هدف · ارتقا"]], tip: "بهترین ران تو خودکار ذخیره می‌شود." },
+            { glyph: "↖", title: "با انگشت شست چپ حرکت کن.", body: "در موبایل هرجای نیمهٔ چپ را بکش؛ جوی‌استیک دنبال انگشتت می‌آید و لازم نیست دنبال دکمه بگردی.", controls: [["موبایل", "کشیدن نیمهٔ چپ"], ["دسکتاپ", "WASD / کلیدهای جهت"]], tip: "یک انگشت برای حرکت و یکی برای هدف‌گیری داشته باش." },
+            { glyph: "✦", title: "هدف بگیر و شلیک کن.", body: "نیمهٔ راست میدان را نگه دار تا هدف بگیری و شلیک کنی. شلیک خودکار در ران اول روشن است و هر زمان خواستی خاموشش کن.", controls: [["موبایل", "نگه‌داشتن نیمهٔ راست"], ["دسکتاپ", "ماوس / Space"]], tip: "روی قفل هدف بزن تا هدف هوشمند عوض شود." },
+            { glyph: "⇥", title: "از خطر DASH کن.", body: "هنگام حرکت DASH را بزن تا با مصونیت کوتاه جلو بروی. هر انگشت مستقل است و حرکت، شلیک و توانایی همزمان کار می‌کنند.", controls: [["موبایل", "دو انگشت همزمان"], ["دسکتاپ", "E / Space + جهت"]], tip: "DASH انرژی می‌خواهد؛ ارتقاها تعداد زنجیره‌ای را بیشتر می‌کنند." },
+            { glyph: "⌕", title: "کل مرز را ببین.", body: "Pause → زوم دوربین را باز کن و تا ۵٪ پایین بیا تا دید تاکتیکی وسیع داشته باشی. مقیاس بازیکن، دشمن و تیر با هم هماهنگ می‌ماند.", controls: [["زوم", "محدودهٔ ۵٪ تا ۱۳۲٪"], ["گوشی", "حالت افقی پیشنهاد می‌شود"]], tip: "حالت عملکرد روی گوشی‌های قدیمی ذرات را کم می‌کند." },
+            { glyph: "◆", title: "فشار بده، ارتقا بده، تکرار کن.", body: "موج را پاک کن، در فروشگاه ارزش بازیابی‌شده را خرج کن و یک جهش سطح انتخاب کن. هر ران رژیم و مسیر تازه‌ای دارد.", controls: [["ارتقا", "قدرت · سرعت · سپر"], ["آرشیو", "امتیاز · موج · رازها"]], tip: "آموزش را هر زمان از منوی اصلی باز کن." }
+          ]
+        }
+      };
+      const compactLocales = {
+        es: { language: "IDIOMA", howToPlay: "CÓMO JUGAR", start: "ACTIVAR BOTÓN", easterArchive: "ABRIR ARCHIVO EASTER EGG", easterFound: "{found} / 7 ENCONTRADOS", back: "VOLVER", deploy: "ENTRAR EN LA FRONTERA", continueWave: "BUY // SIGUIENTE OLA", resume: "CONTINUAR", exitMenu: "SALIR AL MENÚ", resetSettings: "RESTABLECER", tutorialNext: "SIGUIENTE", tutorialBack: "ATRÁS", tutorialSkip: "SALTAR", tutorialDone: "LISTO", cameraZoom: "ZOOM DE CÁMARA", performanceMode: "MODO RENDIMIENTO", signalIntegrity: "INTEGRIDAD DE SEÑAL", energy: "ENERGÍA", frontierDepth: "PROFUNDIDAD", recoveredValue: "VALOR RECUPERADO", runScore: "PUNTUACIÓN", keepSignal: "MANTÉN LA SEÑAL", dash: "DASH", pauseTitle: "PAUSA", wave: "OLA", score: "PUNTOS", coins: "MONEDAS", level: "NIVEL", lockOn: "BLOQUEO // OBJETIVO INTELIGENTE", languageHint: "Elige el idioma; se guarda en este dispositivo.", tutorialEyebrow: "MANUAL DE CAMPO // ESCUELA DE SEÑAL" },
+        ar: { language: "اللغة", howToPlay: "طريقة اللعب", start: "تشغيل الزر", easterArchive: "فتح أرشيف الأسرار", easterFound: "{found} / 7 مكتشفة", back: "رجوع", deploy: "دخول الحدود", continueWave: "BUY // الموجة التالية", resume: "متابعة", exitMenu: "الخروج للقائمة", resetSettings: "إعادة الإعدادات", tutorialNext: "التالي", tutorialBack: "السابق", tutorialSkip: "تخطي", tutorialDone: "جاهز", cameraZoom: "تكبير الكاميرا", performanceMode: "وضع الأداء", signalIntegrity: "سلامة الإشارة", energy: "الطاقة", frontierDepth: "عمق الحدود", recoveredValue: "القيمة المستردة", runScore: "نتيجة الجولة", keepSignal: "حافظ على الإشارة", dash: "اندفاع", pauseTitle: "متوقف", wave: "موجة", score: "نتيجة", coins: "عملات", level: "مستوى", lockOn: "قفل الهدف // ذكي", languageHint: "اختر اللغة؛ تحفظ على هذا الجهاز.", tutorialEyebrow: "دليل الميدان // مدرسة الإشارة" },
+        fr: { language: "LANGUE", howToPlay: "JOUER", start: "ACTIVER LE BOUTON", easterArchive: "OUVRIR L’ARCHIVE EASTER EGG", easterFound: "{found} / 7 TROUVÉS", back: "RETOUR", deploy: "ENTRER DANS LA FRONTIÈRE", continueWave: "BUY // VAGUE SUIVANTE", resume: "REPRENDRE", exitMenu: "QUITTER LE MENU", resetSettings: "RÉINITIALISER", tutorialNext: "SUIVANT", tutorialBack: "RETOUR", tutorialSkip: "PASSER", tutorialDone: "PRÊT", cameraZoom: "ZOOM CAMÉRA", performanceMode: "MODE PERFORMANCE", signalIntegrity: "INTÉGRITÉ DU SIGNAL", energy: "ÉNERGIE", frontierDepth: "PROFONDEUR", recoveredValue: "VALEUR RÉCUPÉRÉE", runScore: "SCORE", keepSignal: "GARDEZ LE SIGNAL", dash: "DASH", pauseTitle: "PAUSE", wave: "VAGUE", score: "SCORE", coins: "PIÈCES", level: "NIVEAU", lockOn: "VERROU // CIBLE INTELLIGENTE", languageHint: "Choisissez la langue; elle est mémorisée.", tutorialEyebrow: "MANUEL // ÉCOLE DU SIGNAL" },
+        de: { language: "SPRACHE", howToPlay: "SO SPIELT MAN", start: "BUTTON STARTEN", easterArchive: "EASTER-EGG-ARCHIV ÖFFNEN", easterFound: "{found} / 7 GEFUNDEN", back: "ZURÜCK", deploy: "GRENZE BETRETEN", continueWave: "BUY // NÄCHSTE WELLE", resume: "FORTSETZEN", exitMenu: "ZUM MENÜ", resetSettings: "ZURÜCKSETZEN", tutorialNext: "WEITER", tutorialBack: "ZURÜCK", tutorialSkip: "ÜBERSPRINGEN", tutorialDone: "BEREIT", cameraZoom: "KAMERA-ZOOM", performanceMode: "LEISTUNGSMODUS", signalIntegrity: "SIGNALINTEGRITÄT", energy: "ENERGIE", frontierDepth: "GRENZTIEFE", recoveredValue: "BERGUNGSWERT", runScore: "RUN-SCORE", keepSignal: "SIGNAL HALTEN", dash: "DASH", pauseTitle: "PAUSE", wave: "WELLE", score: "PUNKTE", coins: "MÜNZEN", level: "LEVEL", lockOn: "LOCK-ON // SMARTES ZIEL", languageHint: "Sprache wählen; wird auf diesem Gerät gespeichert.", tutorialEyebrow: "FELDHANDBUCH // SIGNALSCHULE" },
+        pt: { language: "IDIOMA", howToPlay: "COMO JOGAR", start: "ATIVAR BOTÃO", easterArchive: "ABRIR ARQUIVO EASTER EGG", easterFound: "{found} / 7 ENCONTRADOS", back: "VOLTAR", deploy: "ENTRAR NA FRONTEIRA", continueWave: "BUY // PRÓXIMA ONDA", resume: "RETOMAR", exitMenu: "SAIR AO MENU", resetSettings: "REDEFINIR", tutorialNext: "PRÓXIMO", tutorialBack: "VOLTAR", tutorialSkip: "PULAR", tutorialDone: "PRONTO", cameraZoom: "ZOOM DA CÂMERA", performanceMode: "MODO DESEMPENHO", signalIntegrity: "INTEGRIDADE DO SINAL", energy: "ENERGIA", frontierDepth: "PROFUNDIDADE", recoveredValue: "VALOR RECUPERADO", runScore: "PONTUAÇÃO", keepSignal: "MANTER SINAL", dash: "DASH", pauseTitle: "PAUSADO", wave: "ONDA", score: "PONTOS", coins: "MOEDAS", level: "NÍVEL", lockOn: "TRAVA // ALVO INTELIGENTE", languageHint: "Escolha o idioma; salvo neste dispositivo.", tutorialEyebrow: "MANUAL DE CAMPO // ESCOLA DO SINAL" },
+        tr: { language: "DİL", howToPlay: "NASIL OYNANIR", start: "DÜĞMEYİ BAŞLAT", easterArchive: "GİZLİ ARŞİVİ AÇ", easterFound: "{found} / 7 BULUNDU", back: "GERİ", deploy: "SINIRA GİR", continueWave: "BUY // SONRAKİ DALGA", resume: "DEVAM ET", exitMenu: "MENÜYE ÇIK", resetSettings: "AYARLARI SIFIRLA", tutorialNext: "İLERİ", tutorialBack: "GERİ", tutorialSkip: "ATLA", tutorialDone: "HAZIR", cameraZoom: "KAMERA YAKINLAŞTIRMA", performanceMode: "PERFORMANS MODU", signalIntegrity: "SİNYAL BÜTÜNLÜĞÜ", energy: "ENERJİ", frontierDepth: "SINIR DERİNLİĞİ", recoveredValue: "KURTARILAN DEĞER", runScore: "SKOR", keepSignal: "SİNYALİ KORU", dash: "DASH", pauseTitle: "DURAKLATILDI", wave: "DALGA", score: "SKOR", coins: "JETON", level: "SEVİYE", lockOn: "KİLİT // AKILLI HEDEF", languageHint: "Dili seç; bu cihazda saklanır.", tutorialEyebrow: "SAHA KILAVUZU // SİNYAL OKULU" },
+        ja: { language: "言語", howToPlay: "遊び方", start: "ボタンを起動", easterArchive: "イースターエッグ記録を開く", easterFound: "{found} / 7 発見", back: "戻る", deploy: "フロンティアへ", continueWave: "BUY // 次のウェーブ", resume: "再開", exitMenu: "メニューへ", resetSettings: "設定をリセット", tutorialNext: "次へ", tutorialBack: "戻る", tutorialSkip: "スキップ", tutorialDone: "準備完了", cameraZoom: "カメラズーム", performanceMode: "パフォーマンス", signalIntegrity: "シグナル耐久", energy: "エネルギー", frontierDepth: "フロンティア深度", recoveredValue: "回収価値", runScore: "スコア", keepSignal: "シグナルを守れ", dash: "ダッシュ", pauseTitle: "一時停止", wave: "ウェーブ", score: "スコア", coins: "コイン", level: "レベル", lockOn: "ロックオン // スマートターゲット", languageHint: "言語を選択。端末に保存されます。", tutorialEyebrow: "フィールドマニュアル // シグナル学校" },
+        zh: { language: "语言", howToPlay: "玩法说明", start: "启动按钮", easterArchive: "打开彩蛋档案", easterFound: "已发现 {found} / 7", back: "返回", deploy: "进入边境", continueWave: "BUY // 下一波", resume: "继续", exitMenu: "返回菜单", resetSettings: "重置设置", tutorialNext: "下一步", tutorialBack: "上一步", tutorialSkip: "跳过", tutorialDone: "准备好了", cameraZoom: "镜头缩放", performanceMode: "性能模式", signalIntegrity: "信号完整度", energy: "能量", frontierDepth: "边境深度", recoveredValue: "回收价值", runScore: "本局分数", keepSignal: "守住信号", dash: "冲刺", pauseTitle: "已暂停", wave: "波次", score: "分数", coins: "金币", level: "等级", lockOn: "锁定 // 智能目标", languageHint: "选择语言；会保存在本设备。", tutorialEyebrow: "战地手册 // 信号训练" },
+        hi: { language: "भाषा", howToPlay: "कैसे खेलें", start: "बटन शुरू करें", easterArchive: "ईस्टर एग संग्रह खोलें", easterFound: "{found} / 7 मिले", back: "वापस", deploy: "फ्रंटियर में जाएँ", continueWave: "BUY // अगली लहर", resume: "जारी रखें", exitMenu: "मेन्यू से बाहर", resetSettings: "सेटिंग रीसेट", tutorialNext: "आगे", tutorialBack: "पीछे", tutorialSkip: "छोड़ें", tutorialDone: "तैयार", cameraZoom: "कैमरा ज़ूम", performanceMode: "परफ़ॉर्मेंस मोड", signalIntegrity: "सिग्नल अखंडता", energy: "ऊर्जा", frontierDepth: "फ्रंटियर गहराई", recoveredValue: "प्राप्त मूल्य", runScore: "स्कोर", keepSignal: "सिग्नल बचाएँ", dash: "डैश", pauseTitle: "रुका हुआ", wave: "लहर", score: "स्कोर", coins: "सिक्के", level: "स्तर", lockOn: "लॉक-ऑन // स्मार्ट लक्ष्य", languageHint: "भाषा चुनें; इस डिवाइस पर सेव होगी।", tutorialEyebrow: "फील्ड मैनुअल // सिग्नल स्कूल" }
+      };
+      // The short locale tables above cover the compact HUD.  Fill the
+      // high-visibility screen copy too, so changing language never leaves
+      // a mobile player staring at an otherwise untranslated title or
+      // settings note.
+      const localeCoreFill = {
+        es: {
+          chipRun: "UNA PARTIDA · OLAS INFINITAS", chipLore: "HISTORIA CHAIN 4663", chipNoWallet: "SIN BILLETERA · SIN TX",
+          bestScore: "MEJOR PUNTUACIÓN", bestWave: "MEJOR OLA", runsArchived: "PARTIDAS ARCHIVADAS", noRecord: "SIN RÉCORD // HAZ LA PRIMERA PULSACIÓN",
+          fineprint: "Juego ficticio y no oficial inspirado en el meme «Buy Button». Sin afiliación ni consejo financiero.",
+          briefingTitle: "EL BOTÓN SE APAGÓ.", briefingBody: "Un comando congelado se volvió leyenda. Ahora un pulso verde despierta dentro de Chain 4663.",
+          mobileHint: "Móvil: gira el teléfono; arrastra la izquierda para moverte, mantén la derecha para apuntar/disparar y usa DASH con otro dedo.",
+          shopTitle: "RECABLEA TU SEÑAL.", levelTitle: "ELIGE TU VENTAJA.", easterTitle: "ARCHIVO DE SECRETOS.",
+          pauseTitle: "EN PAUSA.", gameoverTitle: "LIQUIDADO.", pauseGame: "Pausar juego", buyAgain: "COMPRAR DE NUEVO",
+          orientationTitle: "GIRA PARA JUGAR.", orientationBody: "Gira el teléfono para tener una arena más amplia y espacio para ambas manos.",
+          settingsNote: "Los ajustes se guardan en este dispositivo. F cambia el auto-disparo; +/− ajusta el zoom; X usa el poder y Z cambia la ruta."
+        },
+        ar: {
+          chipRun: "جولة واحدة · موجات لا نهائية", chipLore: "حكاية CHAIN 4663", chipNoWallet: "بلا محفظة · بلا معاملات",
+          bestScore: "أفضل نتيجة", bestWave: "أفضل موجة", runsArchived: "الجولات المؤرشفة", noRecord: "لا سجل بعد // اضغط أولاً",
+          fineprint: "لعبة خيالية غير رسمية مستوحاة من ميم «Buy Button». بلا تبعية أو نصيحة مالية.",
+          briefingTitle: "انطفأ الزر.", briefingBody: "تحوّل أمر متجمّد إلى أسطورة. والآن يستيقظ نبض أخضر داخل Chain 4663.",
+          mobileHint: "الهاتف: أدره أفقياً؛ اسحب اليسار للحركة، واضغط مطولاً على اليمين للتصويب والإطلاق، واستخدم الاندفاع بإصبع ثانٍ.",
+          shopTitle: "أعد توصيل إشارتك.", levelTitle: "اختر ميزتك.", easterTitle: "أرشيف الأسرار.",
+          pauseTitle: "متوقف مؤقتاً.", gameoverTitle: "تمت التصفية.", pauseGame: "إيقاف اللعبة", buyAgain: "اشترِ مجدداً",
+          orientationTitle: "أدر الهاتف للعب.", orientationBody: "أدر هاتفك لتحصل على ساحة أوسع ومساحة لكلتا اليدين.",
+          settingsNote: "تُحفظ الإعدادات على هذا الجهاز. يبدّل F الإطلاق التلقائي؛ +/− للزوم؛ X للقوة وZ للمسار."
+        },
+        fr: {
+          chipRun: "UN RUN · VAGUES INFINIES", chipLore: "LORE CHAIN 4663", chipNoWallet: "SANS PORTEFEUILLE · SANS TX",
+          bestScore: "MEILLEUR SCORE", bestWave: "MEILLEURE VAGUE", runsArchived: "RUNS ARCHIVÉS", noRecord: "AUCUN RECORD // PRESSEZ D’ABORD",
+          fineprint: "Jeu fictif et non officiel inspiré du mème « Buy Button ». Sans affiliation ni conseil financier.",
+          briefingTitle: "LE BOUTON S’EST ÉTEINT.", briefingBody: "Une commande figée est devenue une légende. Un pouls vert se réveille dans Chain 4663.",
+          mobileHint: "Mobile : tournez le téléphone; glissez à gauche pour bouger, maintenez à droite pour viser/tirer et utilisez DASH avec l’autre doigt.",
+          shopTitle: "RECÂBLEZ VOTRE SIGNAL.", levelTitle: "CHOISISSEZ VOTRE ATOUT.", easterTitle: "ARCHIVE DES SECRETS.",
+          pauseTitle: "EN PAUSE.", gameoverTitle: "LIQUIDÉ.", pauseGame: "Mettre en pause", buyAgain: "ACHETER À NOUVEAU",
+          orientationTitle: "TOURNEZ POUR JOUER.", orientationBody: "Tournez le téléphone pour élargir l’arène et libérer vos deux mains.",
+          settingsNote: "Les réglages sont enregistrés sur cet appareil. F active le tir auto; +/− règle le zoom; X lance le pouvoir et Z change la route."
+        },
+        de: {
+          chipRun: "EIN RUN · UNENDLICHE WELLEN", chipLore: "CHAIN-4663-LORE", chipNoWallet: "KEINE WALLET · KEINE TX",
+          bestScore: "BESTER SCORE", bestWave: "BESTE WELLE", runsArchived: "ARCHIVIERTE RUNS", noRecord: "NOCH KEIN REKORD // DRÜCKE ZUERST",
+          fineprint: "Fiktives, inoffizielles Spiel inspiriert vom Meme „Buy Button“. Keine Verbindung und keine Finanzberatung.",
+          briefingTitle: "DER BUTTON WURDE DUNKEL.", briefingBody: "Ein eingefrorener Befehl wurde zur Legende. Jetzt erwacht ein grüner Puls in Chain 4663.",
+          mobileHint: "Mobil: quer drehen; links ziehen zum Bewegen, rechts halten zum Zielen/Feuern und DASH mit dem zweiten Finger nutzen.",
+          shopTitle: "DEIN SIGNAL NEU VERKABELN.", levelTitle: "WÄHLE DEINEN VORTEIL.", easterTitle: "ARCHIV DER GEHEIMNISSE.",
+          pauseTitle: "PAUSIERT.", gameoverTitle: "LIQUIDIERT.", pauseGame: "Spiel pausieren", buyAgain: "NOCHMAL KAUFEN",
+          orientationTitle: "DREHE ZUM SPIELEN.", orientationBody: "Drehe dein Telefon für eine größere Arena und Platz für beide Hände.",
+          settingsNote: "Einstellungen werden auf diesem Gerät gespeichert. F schaltet Auto-Feuer; +/− Zoom; X nutzt die Kraft und Z ändert die Route."
+        },
+        pt: {
+          chipRun: "UMA PARTIDA · ONDAS INFINITAS", chipLore: "LORE CHAIN 4663", chipNoWallet: "SEM CARTEIRA · SEM TX",
+          bestScore: "MELHOR PONTUAÇÃO", bestWave: "MELHOR ONDA", runsArchived: "PARTIDAS ARQUIVADAS", noRecord: "SEM RECORDE // FAÇA O PRIMEIRO TOQUE",
+          fineprint: "Jogo fictício e não oficial inspirado no meme «Buy Button». Sem afiliação ou conselho financeiro.",
+          briefingTitle: "O BOTÃO ESCURECEU.", briefingBody: "Um comando congelado virou lenda. Agora um pulso verde desperta dentro da Chain 4663.",
+          mobileHint: "Celular: vire na horizontal; arraste à esquerda para mover, segure à direita para mirar/atirar e use DASH com o outro dedo.",
+          shopTitle: "RECONECTE SEU SINAL.", levelTitle: "ESCOLHA SUA VANTAGEM.", easterTitle: "ARQUIVO DE SEGREDOS.",
+          pauseTitle: "PAUSADO.", gameoverTitle: "LIQUIDADO.", pauseGame: "Pausar jogo", buyAgain: "COMPRAR NOVAMENTE",
+          orientationTitle: "VIRE PARA JOGAR.", orientationBody: "Vire o celular para ampliar a arena e liberar as duas mãos.",
+          settingsNote: "As configurações são salvas neste dispositivo. F alterna o tiro automático; +/− ajusta o zoom; X usa o poder e Z muda a rota."
+        },
+        tr: {
+          chipRun: "TEK KOŞU · SINIRSIZ DALGA", chipLore: "CHAIN 4663 HİKÂYESİ", chipNoWallet: "CÜZDAN YOK · TX YOK",
+          bestScore: "EN İYİ SKOR", bestWave: "EN İYİ DALGA", runsArchived: "ARŞİVLENEN KOŞU", noRecord: "KAYIT YOK // İLK BASIŞI YAP",
+          fineprint: "«Buy Button» memesinden ilham alan kurgusal, gayriresmî oyun. Bağlantı veya finansal tavsiye yoktur.",
+          briefingTitle: "DÜĞME KARARDI.", briefingBody: "Donmuş bir komut efsaneye dönüştü. Şimdi Chain 4663 içinde yeşil bir darbe uyanıyor.",
+          mobileHint: "Mobil: telefonu yatay çevir; hareket için solu sürükle, nişan/ateş için sağı basılı tut ve DASH’i ikinci parmakla kullan.",
+          shopTitle: "SİNYALİNİ YENİDEN KUR.", levelTitle: "AVANTAJINI SEÇ.", easterTitle: "GİZEM ARŞİVİ.",
+          pauseTitle: "DURAKLATILDI.", gameoverTitle: "LİKİDE.", pauseGame: "Oyunu duraklat", buyAgain: "TEKRAR AL",
+          orientationTitle: "OYNAMAK İÇİN ÇEVİR.", orientationBody: "Daha geniş arena ve iki el için telefonu yatay çevir.",
+          settingsNote: "Ayarlar bu cihaza kaydedilir. F otomatik ateşi değiştirir; +/− zoomu ayarlar; X gücü, Z rotayı değiştirir."
+        },
+        ja: {
+          chipRun: "1ラン · 無限ウェーブ", chipLore: "CHAIN 4663の物語", chipNoWallet: "ウォレット不要 · TXなし",
+          bestScore: "ハイスコア", bestWave: "最高ウェーブ", runsArchived: "保存されたラン", noRecord: "記録なし // 最初にプレス",
+          fineprint: "ミーム「Buy Button」に着想を得た非公式フィクションゲーム。金融助言ではありません。",
+          briefingTitle: "ボタンが暗転した。", briefingBody: "凍ったコマンドは伝説になった。今、Chain 4663で緑のパルスが目を覚ます。",
+          mobileHint: "モバイル：横向きにして、左側ドラッグで移動、右側長押しで照準/射撃、もう一方の指でDASH。",
+          shopTitle: "シグナルを再配線。", levelTitle: "強みを選ぶ。", easterTitle: "秘密のアーカイブ。",
+          pauseTitle: "一時停止。", gameoverTitle: "清算された。", pauseGame: "ゲームを一時停止", buyAgain: "もう一度BUY",
+          orientationTitle: "横向きでプレイ。", orientationBody: "横向きにすると広いアリーナと両手のスペースが得られます。",
+          settingsNote: "設定はこの端末に保存されます。Fでオート射撃、+/−でズーム、Xでパワー、Zでルートを切替。"
+        },
+        zh: {
+          chipRun: "单局 · 无限波次", chipLore: "CHAIN 4663 故事", chipNoWallet: "无需钱包 · 无交易",
+          bestScore: "最高分", bestWave: "最高波次", runsArchived: "已保存对局", noRecord: "暂无记录 // 按下开始",
+          fineprint: "受“Buy Button”梗启发的非官方虚构游戏，不提供金融建议。",
+          briefingTitle: "按钮熄灭了。", briefingBody: "冻结的指令成为传说。现在绿色脉冲在 Chain 4663 中苏醒。",
+          mobileHint: "手机：横屏；拖动左侧移动，按住右侧瞄准/射击，用另一根手指冲刺。",
+          shopTitle: "重接你的信号。", levelTitle: "选择你的优势。", easterTitle: "秘密档案。",
+          pauseTitle: "已暂停。", gameoverTitle: "已清算。", pauseGame: "暂停游戏", buyAgain: "再次购买",
+          orientationTitle: "横屏开始游戏。", orientationBody: "横屏可获得更宽的战场和双手操作空间。",
+          settingsNote: "设置会保存在本设备。F切换自动射击；+/−调整缩放；X使用能力，Z切换路线。"
+        },
+        hi: {
+          chipRun: "एक रन · अनंत लहरें", chipLore: "CHAIN 4663 कथा", chipNoWallet: "वॉलेट नहीं · TX नहीं",
+          bestScore: "सर्वश्रेष्ठ स्कोर", bestWave: "सर्वश्रेष्ठ लहर", runsArchived: "सहेजे गए रन", noRecord: "अभी रिकॉर्ड नहीं // पहली प्रेस करें",
+          fineprint: "“Buy Button” मीम से प्रेरित काल्पनिक, अनौपचारिक गेम। कोई वित्तीय सलाह नहीं।",
+          briefingTitle: "बटन अंधेरा हो गया।", briefingBody: "जमा हुआ आदेश किंवदंती बना। अब Chain 4663 में हरी तरंग जागती है।",
+          mobileHint: "मोबाइल: फोन क्षैतिज करें; बाईं ओर ड्रैग से चलें, दाईं ओर होल्ड से निशाना/फायर करें और दूसरी उंगली से DASH करें।",
+          shopTitle: "अपने सिग्नल को फिर जोड़ें।", levelTitle: "अपना लाभ चुनें।", easterTitle: "गुप्त संग्रह।",
+          pauseTitle: "रुका हुआ।", gameoverTitle: "लिक्विडेटेड।", pauseGame: "गेम रोकें", buyAgain: "फिर खरीदें",
+          orientationTitle: "खेलने के लिए घुमाएँ।", orientationBody: "फोन को क्षैतिज करने से बड़ा मैदान और दोनों हाथों की जगह मिलती है।",
+          settingsNote: "सेटिंग इस डिवाइस पर सेव होती हैं। F ऑटो-फायर बदलता है; +/− ज़ूम; X शक्ति और Z मार्ग बदलते हैं।"
+        }
+      };
+      for (const [code, values] of Object.entries(localeCoreFill)) {
+        compactLocales[code] = { ...compactLocales[code], ...values };
+      }
+      const localeFillKeys = ["menuEyebrow", "menuDescription", "chipRun", "chipLore", "chipNoWallet", "bestScore", "bestWave", "runsArchived", "noRecord", "fineprint", "briefingEyebrow", "briefingTitle", "briefingBody", "deploy", "back", "mobileHint", "shopEyebrow", "shopTitle", "shopBody", "weaponLab", "shopFoot", "continueWave", "levelEyebrow", "levelTitle", "levelBody", "easterEyebrow", "easterTitle", "easterBody", "easterFoot", "backMenu", "pauseEyebrow", "pauseTitle", "pauseBody", "controlCenter", "settingsStatus", "lowPowerProfile", "cameraZoom", "cameraZoomHint", "masterVolume", "masterVolumeHint", "musicAmbience", "musicHint", "performanceMode", "performanceHint", "screenFx", "screenFxHint", "hapticFeedback", "hapticHint", "languageHint", "settingsNote", "resetSettings", "exitMenu", "resume", "buyAgain", "gameoverEyebrow", "gameoverTitle", "gameoverBody", "wave", "score", "coins", "level", "signalIntegrity", "energy", "frontierDepth", "recoveredValue", "runScore", "boss", "lockOn", "keepSignal", "dash", "pauseGame", "orientationEyebrow", "orientationTitle", "orientationBody", "orientationButton", "tutorialEyebrow", "tutorialClose", "tutorialSkip", "tutorialBack", "tutorialNext", "tutorialDone", "step", "touchGuide", "easterArchive", "easterFound"];
+      // English is the deliberate fallback for a secondary string that has
+      // not yet received a human translation; the primary mobile surfaces
+      // above are all filled per locale.
+      const tutorialStepLocales = {
+        es: [
+          { glyph: "BUY", title: "BIENVENIDO, OPERADOR.", body: "Aprende los controles en menos de un minuto y lleva la señal tan lejos como puedas.", controls: [["OBJETIVO", "Sobrevive cada ola"], ["CICLO", "Mueve · apunta · mejora"]], tip: "Tu mejor partida se guarda automáticamente." },
+          { glyph: "↖", title: "MUEVE CON EL PULGAR IZQUIERDO.", body: "En móvil, arrastra cualquier punto de la mitad izquierda para conducir. El stick sigue tu dedo.", controls: [["MÓVIL", "Arrastre izquierdo"], ["PC", "WASD / flechas"]], tip: "Deja un dedo para mover y otro para apuntar." },
+          { glyph: "✦", title: "APUNTA Y DISPARA.", body: "Mantén pulsada la mitad derecha para apuntar y disparar. El auto-disparo empieza activado.", controls: [["MÓVIL", "Mantener derecha"], ["PC", "Ratón / Espacio"]], tip: "Pulsa BLOQUEO para cambiar de objetivo." },
+          { glyph: "⇥", title: "DASH A TRAVÉS DEL PELIGRO.", body: "Pulsa DASH mientras te mueves para avanzar con invulnerabilidad breve. Los dedos funcionan en paralelo.", controls: [["MÓVIL", "Dos dedos"], ["PC", "E / dirección"]], tip: "DASH consume energía; las mejoras añaden cargas." },
+          { glyph: "⌕", title: "VE TODA LA FRONTERA.", body: "Abre Pausa → Zoom y baja a 5% para una vista táctica amplia. Todo escala de forma justa.", controls: [["ZOOM", "5%–132%"], ["TELÉFONO", "Paisaje recomendado"]], tip: "Modo rendimiento reduce brillo y partículas." },
+          { glyph: "◆", title: "PULSA, MEJORA, REPITE.", body: "Limpia una ola, gasta el valor recuperado y elige una mutación. Cada partida cambia.", controls: [["MEJORAS", "Daño · velocidad · escudo"], ["ARCHIVO", "Puntos · olas · secretos"]], tip: "Puedes abrir este manual desde el menú." }
+        ],
+        ar: [
+          { glyph: "BUY", title: "مرحباً أيها المشغّل.", body: "تعلّم التحكم خلال دقيقة واحمل الإشارة إلى أبعد مكان.", controls: [["الهدف", "النجاة من كل موجة"], ["الدورة", "تحرك · صوب · طوّر"]], tip: "أفضل جولة تُحفظ تلقائياً." },
+          { glyph: "↖", title: "تحرك بإبهامك الأيسر.", body: "اسحب أي مكان في النصف الأيسر للتحكم؛ العصا تتبع إصبعك.", controls: [["الهاتف", "سحب اليسار"], ["الحاسوب", "WASD / الأسهم"]], tip: "اترك إصبعاً للحركة وآخر للتصويب." },
+          { glyph: "✦", title: "صوّب وأطلق.", body: "اضغط مطولاً على النصف الأيمن للتصويب والإطلاق. الإطلاق التلقائي يبدأ مفعلاً.", controls: [["الهاتف", "ضغط يمين"], ["الحاسوب", "الفأرة / Space"]], tip: "اضغط قفل الهدف لتبديل الهدف الذكي." },
+          { glyph: "⇥", title: "اندفع عبر الخطر.", body: "اضغط اندفاع أثناء الحركة لتحصل على حصانة قصيرة. يمكن استخدام إصبعين معاً.", controls: [["الهاتف", "إصبعان"], ["الحاسوب", "E / اتجاه"]], tip: "الاندفاع يستهلك الطاقة؛ الترقيات تضيف شحنات." },
+          { glyph: "⌕", title: "شاهد الحدود كلها.", body: "افتح الإيقاف المؤقت ثم الزوم وانزل إلى ٥٪ لرؤية تكتيكية واسعة؛ المقاييس تبقى عادلة.", controls: [["الزوم", "٥٪–١٣٢٪"], ["الهاتف", "الوضع الأفقي أفضل"]], tip: "وضع الأداء يقلل الوهج والجزيئات." },
+          { glyph: "◆", title: "اضغط، طوّر، كرر.", body: "نظّف الموجة، أنفق القيمة واختر طفرة مستوى. كل جولة تحمل مساراً جديداً.", controls: [["الترقيات", "ضرر · سرعة · درع"], ["الأرشيف", "نقاط · موجات · أسرار"]], tip: "يمكنك فتح الدليل من القائمة الرئيسية." }
+        ],
+        fr: [
+          { glyph: "BUY", title: "BIENVENUE, OPÉRATEUR.", body: "Apprenez les commandes en moins d’une minute et portez le signal le plus loin possible.", controls: [["BUT", "Survivre à chaque vague"], ["BOUCLE", "Bouger · viser · améliorer"]], tip: "Votre meilleur run est sauvegardé." },
+          { glyph: "↖", title: "BOUGEZ AVEC LE POUCE GAUCHE.", body: "Sur mobile, glissez sur la moitié gauche; le stick suit votre doigt.", controls: [["MOBILE", "Glisser à gauche"], ["PC", "WASD / flèches"]], tip: "Gardez un doigt pour bouger et un autre pour viser." },
+          { glyph: "✦", title: "VISEZ ET TIREZ.", body: "Maintenez la moitié droite pour viser et tirer. Le tir automatique commence activé.", controls: [["MOBILE", "Maintenir à droite"], ["PC", "Souris / Espace"]], tip: "Touchez le verrou pour changer de cible." },
+          { glyph: "⇥", title: "DASH À TRAVERS LE DANGER.", body: "Touchez DASH en mouvement pour bondir avec une brève invulnérabilité. Deux doigts fonctionnent ensemble.", controls: [["MOBILE", "Deux doigts"], ["PC", "E / direction"]], tip: "Le dash consomme de l’énergie; les améliorations ajoutent des charges." },
+          { glyph: "⌕", title: "VOYEZ TOUTE LA FRONTIÈRE.", body: "Pause → Zoom, puis descendez à 5% pour une vue tactique large et équitable.", controls: [["ZOOM", "5%–132%"], ["TÉLÉPHONE", "Paysage conseillé"]], tip: "Le mode performance réduit les effets." },
+          { glyph: "◆", title: "PRESSEZ, AMÉLIOREZ, RECOMMENCEZ.", body: "Nettoyez une vague, dépensez la valeur récupérée et choisissez une mutation.", controls: [["AMÉLIORATIONS", "Dégâts · vitesse · bouclier"], ["ARCHIVE", "Score · vagues · secrets"]], tip: "Le manuel reste accessible depuis le menu." }
+        ],
+        de: [
+          { glyph: "BUY", title: "WILLKOMMEN, OPERATOR.", body: "Lerne die Steuerung in weniger als einer Minute und trage das Signal so weit wie möglich.", controls: [["ZIEL", "Jede Welle überleben"], ["LOOP", "Bewegen · zielen · verbessern"]], tip: "Dein bester Lauf wird automatisch gespeichert." },
+          { glyph: "↖", title: "BEWEGE DICH MIT DEM LINKEN DAUMEN.", body: "Ziehe mobil auf der linken Hälfte; der Stick folgt deinem Finger.", controls: [["MOBIL", "Links ziehen"], ["PC", "WASD / Pfeile"]], tip: "Ein Finger bewegt, der andere zielt." },
+          { glyph: "✦", title: "ZIELEN UND FEUERN.", body: "Halte die rechte Hälfte gedrückt. Auto-Feuer startet aktiviert.", controls: [["MOBIL", "Rechts halten"], ["PC", "Maus / Leertaste"]], tip: "Tippe auf LOCK-ON für ein neues Ziel." },
+          { glyph: "⇥", title: "DASH DURCH DIE GEFAHR.", body: "Drücke DASH während der Bewegung für einen kurzen unverwundbaren Schub.", controls: [["MOBIL", "Zwei Finger"], ["PC", "E / Richtung"]], tip: "Dash verbraucht Energie; Upgrades geben mehr Ladungen." },
+          { glyph: "⌕", title: "SIEH DIE GESAMTE GRENZE.", body: "Pause → Zoom und bis 5% zurückziehen. Alle Größen bleiben fair.", controls: [["ZOOM", "5%–132%"], ["TELEFON", "Querformat empfohlen"]], tip: "Leistungsmodus reduziert Glanz und Partikel." },
+          { glyph: "◆", title: "DRÜCKEN, PATCHEN, WIEDERHOLEN.", body: "Welle räumen, Wert ausgeben und Mutation wählen. Jeder Lauf ist neu.", controls: [["UPGRADES", "Schaden · Tempo · Schild"], ["ARCHIV", "Punkte · Wellen · Geheimnisse"]], tip: "Das Handbuch bleibt im Hauptmenü verfügbar." }
+        ],
+        pt: [
+          { glyph: "BUY", title: "BEM-VINDO, OPERADOR.", body: "Aprenda os controles em menos de um minuto e leve o sinal o mais longe possível.", controls: [["META", "Sobreviva a cada onda"], ["CICLO", "Mover · mirar · melhorar"]], tip: "Sua melhor corrida é salva automaticamente." },
+          { glyph: "↖", title: "MOVA COM O POLEGAR ESQUERDO.", body: "No celular, arraste na metade esquerda; o controle segue seu dedo.", controls: [["CELULAR", "Arraste à esquerda"], ["PC", "WASD / setas"]], tip: "Use um dedo para mover e outro para mirar." },
+          { glyph: "✦", title: "MIRE E ATIRE.", body: "Segure a metade direita para mirar e atirar. O disparo automático começa ligado.", controls: [["CELULAR", "Segure à direita"], ["PC", "Mouse / Espaço"]], tip: "Toque no bloqueio para trocar de alvo." },
+          { glyph: "⇥", title: "USE DASH NO PERIGO.", body: "Toque DASH enquanto se move para avançar com breve invulnerabilidade.", controls: [["CELULAR", "Dois dedos"], ["PC", "E / direção"]], tip: "Dash consome energia; melhorias dão mais cargas." },
+          { glyph: "⌕", title: "VEJA TODA A FRONTEIRA.", body: "Pause → Zoom e reduza para 5% para uma visão ampla e justa.", controls: [["ZOOM", "5%–132%"], ["CELULAR", "Paisagem recomendada"]], tip: "Modo desempenho reduz brilho e partículas." },
+          { glyph: "◆", title: "PRESSIONE, MELHORE, REPITA.", body: "Limpe a onda, gaste o valor e escolha uma mutação. Cada corrida é diferente.", controls: [["MELHORIAS", "Dano · velocidade · escudo"], ["ARQUIVO", "Pontos · ondas · segredos"]], tip: "Abra este manual novamente no menu." }
+        ],
+        tr: [
+          { glyph: "BUY", title: "HOŞ GELDİN OPERATÖR.", body: "Kontrolleri bir dakikadan kısa sürede öğren ve sinyali mümkün olduğunca uzağa taşı.", controls: [["AMAÇ", "Her dalgayı atlat"], ["DÖNGÜ", "Hareket · nişan · yükselt"]], tip: "En iyi koşun otomatik kaydedilir." },
+          { glyph: "↖", title: "SOL BAŞPARMAKLA HAREKET ET.", body: "Mobilde sol yarıda sürükle; çubuk parmağını takip eder.", controls: [["MOBİL", "Sola sürükle"], ["PC", "WASD / oklar"]], tip: "Bir parmak hareket, diğeri nişan için." },
+          { glyph: "✦", title: "NİŞAN AL VE ATEŞ ET.", body: "Sağ yarıya basılı tut. Otomatik ateş başlangıçta açıktır.", controls: [["MOBİL", "Sağda basılı tut"], ["PC", "Fare / Boşluk"]], tip: "Akıllı hedefi değiştirmek için kilide dokun." },
+          { glyph: "⇥", title: "TEHLİKEDEN DASH AT.", body: "Hareket ederken DASH'e dokun; kısa süre dokunulmaz olursun.", controls: [["MOBİL", "İki parmak"], ["PC", "E / yön"]], tip: "Dash enerji harcar; yükseltmeler yük ekler." },
+          { glyph: "⌕", title: "SINIRIN TAMAMINI GÖR.", body: "Duraklat → Zoom ve 5%'e çek. Tüm ölçekler adil kalır.", controls: [["ZOOM", "5%–132%"], ["TELEFON", "Yatay önerilir"]], tip: "Performans modu efektleri azaltır." },
+          { glyph: "◆", title: "BAS, GELİŞTİR, TEKRARLA.", body: "Dalgayı temizle, değeri harca ve mutasyon seç. Her koşu yenidir.", controls: [["YÜKSELTMELER", "Hasar · hız · kalkan"], ["ARŞİV", "Skor · dalga · sırlar"]], tip: "Bu kılavuz ana menüden tekrar açılır." }
+        ],
+        ja: [
+          { glyph: "BUY", title: "ようこそ、オペレーター。", body: "1分以内に操作を覚え、シグナルをできるだけ遠くへ運びましょう。", controls: [["目的", "各ウェーブを生き残る"], ["流れ", "移動 · 狙う · 強化"]], tip: "最高記録は自動保存されます。" },
+          { glyph: "↖", title: "左手の親指で移動。", body: "モバイルでは左半分をドラッグ。スティックが指についてきます。", controls: [["モバイル", "左側をドラッグ"], ["PC", "WASD / 矢印"]], tip: "片手で移動、もう片手で照準。" },
+          { glyph: "✦", title: "狙って撃つ。", body: "右半分を長押しして照準と射撃。オート射撃は最初からオンです。", controls: [["モバイル", "右側を長押し"], ["PC", "マウス / Space"]], tip: "LOCK-ONで対象を切り替え。" },
+          { glyph: "⇥", title: "危険をダッシュで抜ける。", body: "移動中にDASHを押すと短い無敵で突進。2本指操作に対応しています。", controls: [["モバイル", "2本指同時"], ["PC", "E / 方向"]], tip: "エネルギーを消費し、強化で回数が増えます。" },
+          { glyph: "⌕", title: "フロンティア全体を見る。", body: "Pause → Zoomを5%まで下げると広い戦術視界。全ての大きさは公平に連動します。", controls: [["ズーム", "5%–132%"], ["スマホ", "横向き推奨"]], tip: "性能モードは光と粒子を抑えます。" },
+          { glyph: "◆", title: "押す、強化、繰り返す。", body: "ウェーブを制圧し、価値を使い、変異を選択。毎回新しいルートです。", controls: [["強化", "ダメージ · 速度 · シールド"], ["記録", "スコア · ウェーブ · 秘密"]], tip: "このマニュアルはメニューから再表示できます。" }
+        ],
+        zh: [
+          { glyph: "BUY", title: "欢迎，操作员。", body: "不到一分钟掌握操作，把信号带得尽可能远。", controls: [["目标", "存活每一波"], ["循环", "移动 · 瞄准 · 升级"]], tip: "最高纪录会自动保存。" },
+          { glyph: "↖", title: "用左手拇指移动。", body: "手机上拖动左半屏，摇杆会跟随手指。", controls: [["手机", "左侧拖动"], ["电脑", "WASD / 方向键"]], tip: "一根手指移动，另一根手指瞄准。" },
+          { glyph: "✦", title: "瞄准并射击。", body: "按住右半屏进行瞄准和射击。自动射击默认开启。", controls: [["手机", "右侧长按"], ["电脑", "鼠标 / 空格"]], tip: "点击锁定切换智能目标。" },
+          { glyph: "⇥", title: "用冲刺穿过危险。", body: "移动时点击冲刺，可短暂无敌突进；支持双指同时操作。", controls: [["手机", "双指同时"], ["电脑", "E / 方向"]], tip: "冲刺消耗能量，升级可增加次数。" },
+          { glyph: "⌕", title: "看清整个边境。", body: "打开暂停 → 镜头缩放，拉到5%获得广阔战术视野，比例始终公平。", controls: [["缩放", "5%–132%"], ["手机", "建议横屏"]], tip: "性能模式会减少光效和粒子。" },
+          { glyph: "◆", title: "按下、升级、重复。", body: "清理波次，花费回收价值并选择变异。每局都有新路线。", controls: [["升级", "伤害 · 速度 · 护盾"], ["档案", "分数 · 波次 · 秘密"]], tip: "主菜单随时可以重新打开手册。" }
+        ],
+        hi: [
+          { glyph: "BUY", title: "स्वागत है, ऑपरेटर।", body: "एक मिनट से कम में नियंत्रण सीखें और सिग्नल को जितना दूर हो सके ले जाएँ।", controls: [["लक्ष्य", "हर लहर बचाएँ"], ["चक्र", "चलें · निशाना · अपग्रेड"]], tip: "आपका सर्वश्रेष्ठ रन अपने आप सेव होता है।" },
+          { glyph: "↖", title: "बाएँ अंगूठे से चलें।", body: "मोबाइल पर बाईं आधी स्क्रीन खींचें; स्टिक उंगली का पीछा करती है।", controls: [["मोबाइल", "बाईं ओर ड्रैग"], ["पीसी", "WASD / तीर"]], tip: "एक उंगली चलने के लिए, दूसरी निशाने के लिए।" },
+          { glyph: "✦", title: "निशाना लगाएँ और फायर करें।", body: "दाईं आधी स्क्रीन दबाकर निशाना और फायर करें। ऑटो-फायर शुरू से चालू है।", controls: [["मोबाइल", "दाईं ओर होल्ड"], ["पीसी", "माउस / Space"]], tip: "स्मार्ट लक्ष्य बदलने के लिए लॉक-ऑन दबाएँ।" },
+          { glyph: "⇥", title: "खतरे से DASH करें।", body: "चलते समय DASH दबाएँ और थोड़ी देर अजेय होकर आगे बढ़ें; दो उंगलियाँ साथ चलती हैं।", controls: [["मोबाइल", "दो उंगलियाँ"], ["पीसी", "E / दिशा"]], tip: "DASH ऊर्जा खर्च करता है; अपग्रेड चार्ज बढ़ाते हैं।" },
+          { glyph: "⌕", title: "पूरा फ्रंटियर देखें।", body: "Pause → Camera Zoom खोलकर 5% तक खींचें। सभी स्केल साथ बदलते हैं, इसलिए खेल निष्पक्ष रहता है।", controls: [["ज़ूम", "5%–132%"], ["फोन", "लैंडस्केप सुझाया"]], tip: "परफ़ॉर्मेंस मोड चमक और पार्टिकल घटाता है।" },
+          { glyph: "◆", title: "दबाएँ, अपग्रेड करें, दोहराएँ।", body: "लहर साफ़ करें, रिकवर मूल्य खर्च करें और म्यूटेशन चुनें। हर रन नया है।", controls: [["अपग्रेड", "डैमेज · गति · शील्ड"], ["आर्काइव", "स्कोर · लहर · रहस्य"]], tip: "यह मैनुअल मुख्य मेन्यू से फिर खोला जा सकता है।" }
+        ]
+      };
+      for (const [code, steps] of Object.entries(tutorialStepLocales)) {
+        if (LOCALES[code]) LOCALES[code].tutorialSteps = steps;
+      }
+      for (const code of LOCALE_CODES) {
+        if (!LOCALES[code]) LOCALES[code] = { ...LOCALES.en, ...(compactLocales[code] || {}) };
+        else if (code !== "en" && code !== "fa") {
+          LOCALES[code] = { ...LOCALES.en, ...LOCALES[code], tutorialSteps: LOCALES[code].tutorialSteps || LOCALES.en.tutorialSteps };
+        }
+      }
+      for (const code of LOCALE_CODES) {
+        for (const key of localeFillKeys) {
+          if (LOCALES[code][key] === undefined && compactLocales[code]?.[key] !== undefined) {
+            LOCALES[code][key] = compactLocales[code][key];
+          }
+        }
+      }
+      // Labels that are updated continuously while a run is active live
+      // outside the static HTML, so keep them in the same locale pipeline.
+      // This prevents a language switch from leaving ON/OFF/READY controls
+      // in English while the rest of the HUD is translated.
+      const dynamicLocaleLabels = {
+        en: { autoFire: "AUTO FIRE", on: "ON", off: "OFF", ready: "READY", levelXp: "LEVEL", buyAgain: "BUY AGAIN" },
+        fa: { autoFire: "شلیک خودکار", on: "روشن", off: "خاموش", ready: "آماده", levelXp: "سطح", buyAgain: "دوباره BUY کن" },
+        es: { autoFire: "DISPARO AUTO", on: "ACT.", off: "APAG.", ready: "LISTO", levelXp: "NIVEL", buyAgain: "COMPRAR DE NUEVO" },
+        ar: { autoFire: "إطلاق تلقائي", on: "تشغيل", off: "إيقاف", ready: "جاهز", levelXp: "مستوى", buyAgain: "اشترِ مجدداً" },
+        fr: { autoFire: "TIR AUTO", on: "ON", off: "OFF", ready: "PRÊT", levelXp: "NIVEAU", buyAgain: "ACHETER À NOUVEAU" },
+        de: { autoFire: "AUTO-FEUER", on: "AN", off: "AUS", ready: "BEREIT", levelXp: "LEVEL", buyAgain: "NOCHMAL KAUFEN" },
+        pt: { autoFire: "TIRO AUTO", on: "LIG.", off: "DESL.", ready: "PRONTO", levelXp: "NÍVEL", buyAgain: "COMPRAR NOVAMENTE" },
+        tr: { autoFire: "OTO ATEŞ", on: "AÇIK", off: "KAPALI", ready: "HAZIR", levelXp: "SEVİYE", buyAgain: "TEKRAR AL" },
+        ja: { autoFire: "オート射撃", on: "オン", off: "オフ", ready: "準備完了", levelXp: "レベル", buyAgain: "もう一度BUY" },
+        zh: { autoFire: "自动射击", on: "开", off: "关", ready: "就绪", levelXp: "等级", buyAgain: "再次购买" },
+        hi: { autoFire: "ऑटो फायर", on: "चालू", off: "बंद", ready: "तैयार", levelXp: "स्तर", buyAgain: "फिर खरीदें" }
+      };
+      for (const code of LOCALE_CODES) {
+        LOCALES[code] = { ...LOCALES[code], ...(dynamicLocaleLabels[code] || {}) };
+      }
+      let currentLocale = initialLocale;
+      const localeValue = (key, fallback = "") => {
+        const active = LOCALES[currentLocale] || LOCALES.en;
+        const value = active[key] ?? LOCALES.en[key] ?? fallback;
+        return Array.isArray(value) ? value : String(value);
+      };
+      const translate = (key, vars = {}) => {
+        const value = localeValue(key, key);
+        if (typeof value !== "string") return value;
+        return value.replace(/\{(\w+)\}/g, (_, name) => vars[name] === undefined ? `{${name}}` : String(vars[name]));
+      };
       // Combat feel tuning: a dash is a quick, repeatable escape paid for by
       // energy instead of a tiny fixed bank.  This keeps the move exciting
       // while still giving the player a clear resource limit.
@@ -1850,16 +2692,58 @@
       const mobileBurstInterval = () => compactDevice
         ? Math.max(.42, .68 - wave * .006)
         : Math.max(.18, .38 - wave * .006);
+      const MOBILE_ZOOM_MIN = .05;
+      const MOBILE_ZOOM_DEFAULT = .68;
+      const ZOOM_MIN = .32;
+      const ZOOM_MAX = 1.32;
+      const MOBILE_ZOOM_PROFILE = 2;
+      const MOBILE_ZOOM_REFERENCE = .60;
       const landscapeCompactViewport = () => {
         const width = Number(window.innerWidth) || 0;
         const height = Number(window.innerHeight) || 0;
         return width > height && width <= 1100 && height <= 700;
       };
+      const zoomFloor = () => compactDevice ? MOBILE_ZOOM_MIN : ZOOM_MIN;
       const viewportZoom = () => {
-        const base = clamp(Number(gameSettings.zoom) || 1, .32, 1.32);
-        return landscapeCompactViewport() ? base * .88 : base;
+        const base = clamp(Number(gameSettings.zoom) || 1, zoomFloor(), ZOOM_MAX);
+        // The compact landscape layout still gets its breathing-room factor,
+        // but never lets the effective camera fall below the advertised 5%
+        // floor. This keeps the slider value and the real camera contract in
+        // sync on phones.
+        return landscapeCompactViewport() ? Math.max(MOBILE_ZOOM_MIN, base * .88) : base;
       };
-      const coreVisualScale = () => landscapeCompactViewport() ? .82 : 1;
+      const zoomTempoScale = () => {
+        // Keep the apparent screen-space rhythm stable as the camera opens:
+        // world units must move faster when fewer pixels represent each unit.
+        // The cap is high enough for the 5% mobile view, but still bounded so
+        // a missed frame cannot turn into an uncontrolled teleport.
+        const visibleZoom = Math.max(.05, viewportZoom());
+        const referenceZoom = compactDevice ? MOBILE_ZOOM_REFERENCE : .72;
+        return clamp(referenceZoom / visibleZoom, .92, compactDevice ? 14.5 : 1.08);
+      };
+      const worldRenderScale = () => clamp(viewportZoom(), .05, 1.18);
+      // Camera zoom may go down to 5%, but a literal 5% sprite would be
+      // sub-pixel on a phone. Keep hit silhouettes legible with a very small
+      // visual floor; positions and camera visibility still use the true zoom.
+      const entityRenderScale = () => compactDevice
+        ? clamp(.22 + viewportZoom() * .78, .22, 1.08)
+        : worldRenderScale();
+      const enemyRenderScale = () => compactDevice
+        ? clamp(.30 + viewportZoom() * .70, .30, 1.08)
+        : worldRenderScale();
+      const projectileRenderScale = () => compactDevice
+        ? clamp(.28 + viewportZoom() * .72, .28, 1.08)
+        : worldRenderScale();
+      // World-space positions are always converted through viewportZoom().
+      // Keep screen-space silhouettes readable when zoomed out, but let them
+      // shrink slightly so visual size never implies a larger collision box.
+      const coreVisualScale = () => {
+        // Keep the player avatar readable as the camera opens up.  World
+        // objects still shrink exactly with the camera, while this deliberate
+        // readability floor keeps the touch-controlled anchor easy to track.
+        const base = entityRenderScale();
+        return clamp(base * (landscapeCompactViewport() ? .96 : 1), .18, 1.02);
+      };
       const isPortraitMobile = () => {
         const width = Number(window.innerWidth) || 0;
         const height = Number(window.innerHeight) || 0;
@@ -1912,13 +2796,17 @@
       }
       let storyTimer = 0, flash = 0, arenaPulse = 0, bossAlive = false, audioCtx = null, explosionSoundCooldown = 0;
       const SETTINGS_COOKIE = "buy_button_signal_settings_v1";
+      const LEGACY_SETTINGS_KEYS = ["buy-button-settings-v4"];
       const defaultSettings = {
-        zoom: compactDevice ? .82 : 1,
+        zoom: compactDevice ? MOBILE_ZOOM_DEFAULT : 1,
         masterVolume: .7,
         musicVolume: 0,
         performance: compactDevice,
         effects: true,
         haptics: true,
+        language: initialLocale,
+        tutorialSeen: false,
+        mobileZoomProfile: 0,
         updatedAt: 0
       };
       let gameSettings = { ...defaultSettings };
@@ -1934,6 +2822,14 @@
       const keys = Object.create(null);
       const pointer = { x: 0, y: 0, down: false, id: null };
       const joystick = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
+      // Pointer Events keep each finger independent: one pointer can own the
+      // movement stick while one or more other pointers keep firing/aiming.
+      const aimPointerIds = new Set();
+      const pointerPositions = new Map();
+      const legacyTouchRoles = new Map();
+      const syncPointerFire = () => {
+        pointer.down = aimPointerIds.size > 0 || !!keys.Space;
+      };
       const heroImage = new Image();
       let heroImageReady = false;
       heroImage.onload = () => { heroImageReady = true; };
@@ -2275,22 +3171,28 @@
       function saveEasterEggs() {
         const serialized = JSON.stringify({ found: [...easterEggFound], updatedAt: Date.now() });
         try { document.cookie = `${EASTER_COOKIE}=${encodeURIComponent(serialized)}; max-age=31536000; path=/; SameSite=Lax`; } catch (_) {}
-        writeStorageEntry(EASTER_COOKIE, serialized);
+        try {
+          if (window.localStorage && typeof window.localStorage.setItem === "function") {
+            window.localStorage.setItem(EASTER_COOKIE, serialized);
+          }
+        } catch (_) {}
       }
 
       function updateEasterEggButton() {
         const button = $("easterEggBtn");
-        if (!button) return;
         const found = easterEggFound.size;
-        button.classList.toggle("show", found > 0);
-        button.textContent = `EASTER EGG ARCHIVE // ${found}/${eggCatalog.length}`;
+        if (button) {
+          button.classList.add("show");
+          button.textContent = `${translate("easterArchive")} // ${found}/${eggCatalog.length}`;
+        }
+        if ($("easterCount")) $("easterCount").textContent = translate("easterFound", { found });
       }
 
       function renderEasterEggArchive() {
         const grid = $("easterGrid");
         if (!grid) return;
         const foundCount = easterEggFound.size;
-        if ($("easterCount")) $("easterCount").textContent = `${foundCount} / ${eggCatalog.length} FOUND`;
+        if ($("easterCount")) $("easterCount").textContent = translate("easterFound", { found: foundCount });
         grid.innerHTML = eggCatalog.map((egg) => {
           const found = easterEggFound.has(egg.id);
           return `<article class="egg-entry ${found ? "found" : "locked"}" style="--egg-color:${egg.color}" aria-label="${found ? egg.title : "Locked easter egg"}">
@@ -2471,6 +3373,18 @@
       // shot can never travel forever across the arena.
       const MAX_PLAYER_RANGE = 1120;
       const MAX_PROJECTILE_RANGE = 1480;
+      const mobileWorldRangeScale = () => compactDevice
+        ? clamp(MOBILE_ZOOM_REFERENCE / Math.max(MOBILE_ZOOM_MIN, viewportZoom()), 1, 24)
+        : 1;
+      const playerRangeLimit = () => compactDevice
+        ? Math.round(clamp(1650 * mobileWorldRangeScale(), 1650, 30000))
+        : MAX_PLAYER_RANGE;
+      const projectileRangeLimit = () => compactDevice
+        ? Math.round(clamp(2100 * mobileWorldRangeScale(), 2100, 30000))
+        : MAX_PROJECTILE_RANGE;
+      const enemyProjectileRangeLimit = () => compactDevice
+        ? Math.round(clamp(2100 * mobileWorldRangeScale(), 2100, 30000))
+        : 1450;
       const MAX_PLAYER_BULLETS = 84;
       const MAX_ENEMY_BULLETS = 72;
       const MAX_PARTICLES = 620;
@@ -2507,13 +3421,19 @@
         const damping = .32 + (1 - progress) * .68;
         return Math.min(limit, value + nominalGain * damping);
       }
-      function enemyEntryRadius(extra = 0) {
+      function enemyEntryRadius(extra = 0, angle = 0) {
         // Keep hostiles just beyond the visible perimeter.  The distance is
-        // zoom-aware, capped for very wide arenas, and short enough that the
-        // player reaches a real engagement quickly on both desktop and phone.
-        const zoom = viewportZoom();
-        const viewportSpan = Math.max(W, H) / zoom;
-        return clamp(viewportSpan * .55 + rand(70, 150) + extra, 300, 1180);
+        // zoom-aware and follows the chosen approach angle. That places an
+        // enemy just outside the actual edge of the current rectangle instead
+        // of an arbitrary circle far beyond the corners.
+        const zoom = Math.max(MOBILE_ZOOM_MIN, viewportZoom());
+        const deepZoom = clamp((.32 - zoom) / (.32 - MOBILE_ZOOM_MIN), 0, 1);
+        const cos = Math.max(.0001, Math.abs(Math.cos(angle)));
+        const sin = Math.max(.0001, Math.abs(Math.sin(angle)));
+        const edgeDistance = Math.min(W / 2 / cos, H / 2 / sin) / zoom;
+        const margin = (compactDevice ? 36 + deepZoom * 24 : 70) / zoom;
+        const entryCap = compactDevice ? 30000 : 6200;
+        return clamp(edgeDistance + margin + extra + rand(0, 34) / zoom, 300, entryCap);
       }
       function enemyCatchupMultiplier(enemy, distance) {
         // Long routes should resolve quickly, but close/ranged enemies still
@@ -2529,13 +3449,20 @@
         return 1 + progress * progress * roleBoost;
       }
       function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+      function segmentDistance(px, py, x1, y1, x2, y2) {
+        const dx = x2 - x1, dy = y2 - y1;
+        const lengthSq = dx * dx + dy * dy;
+        if (lengthSq <= .000001) return Math.hypot(px - x1, py - y1);
+        const t = clamp(((px - x1) * dx + (py - y1) * dy) / lengthSq, 0, 1);
+        return Math.hypot(px - (x1 + dx * t), py - (y1 + dy * t));
+      }
       function aliveCount(list) { let n = 0; for (const e of list) if (e.alive) n++; return n; }
       function pushEnemyBullet(spec) {
         if (enemyBullets.length >= MAX_ENEMY_BULLETS) {
           enemyBullets.splice(0, enemyBullets.length - MAX_ENEMY_BULLETS + 1);
         }
         spec.traveled = 0;
-        spec.maxTravel = spec.maxTravel || 1450;
+        spec.maxTravel = spec.maxTravel || enemyProjectileRangeLimit();
         enemyBullets.push(spec);
       }
       function compactAlive(list) {
@@ -2629,15 +3556,116 @@
         gameSettings = {
           ...defaultSettings,
           ...source,
-          zoom: clamp(Number(source.zoom) || defaultSettings.zoom, .32, 1.32),
+          zoom: clamp(Number(source.zoom) || defaultSettings.zoom, zoomFloor(), ZOOM_MAX),
           masterVolume: clamp(Number.isFinite(Number(source.masterVolume)) ? Number(source.masterVolume) : defaultSettings.masterVolume, 0, 1),
           musicVolume: 0,
           performance: boolValue(source.performance, defaultSettings.performance),
           effects: boolValue(source.effects, defaultSettings.effects),
           haptics: boolValue(source.haptics, defaultSettings.haptics),
+          language: LOCALE_CODES.includes(String(source.language)) ? String(source.language) : defaultSettings.language,
+          tutorialSeen: boolValue(source.tutorialSeen, defaultSettings.tutorialSeen),
+          mobileZoomProfile: Number.isFinite(Number(source.mobileZoomProfile)) ? Number(source.mobileZoomProfile) : 0,
           updatedAt: Number.isFinite(Number(source.updatedAt)) ? Number(source.updatedAt) : 0
         };
         return gameSettings;
+      }
+
+      let tutorialIndex = 0;
+      let tutorialWasOpen = false;
+      let touchGuideTimer = 0;
+      function applyLocale() {
+        currentLocale = LOCALE_CODES.includes(String(gameSettings.language)) ? String(gameSettings.language) : initialLocale;
+        document.documentElement.lang = currentLocale;
+        document.documentElement.dir = LOCALE_DIR[currentLocale] || "ltr";
+        document.body.classList.toggle("locale-rtl", document.documentElement.dir === "rtl");
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          if (!key) return;
+          const value = translate(key);
+          if (typeof value === "string") node.textContent = value;
+        });
+        document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-aria-label");
+          if (key) node.setAttribute("aria-label", translate(key));
+        });
+        const settingsNote = $("settingsNote");
+        if (settingsNote) settingsNote.textContent = translate("settingsNote");
+        ["languageSelect", "pauseLanguageSelect"].forEach((id) => {
+          const field = $(id);
+          if (field) field.value = currentLocale;
+        });
+        if ($("settingsStatus")) $("settingsStatus").textContent = gameSettings.performance ? translate("lowPowerProfile") : translate("settingsStatus");
+        updateSettingsLabels();
+        renderTutorialStep();
+        if (typeof syncHud === "function") syncHud();
+        if (typeof refreshArchiveUi === "function") refreshArchiveUi();
+        if (typeof updateEasterEggButton === "function") updateEasterEggButton();
+      }
+      function setLocale(nextLocale) {
+        const next = LOCALE_CODES.includes(String(nextLocale)) ? String(nextLocale) : "en";
+        gameSettings.language = next;
+        applySettings();
+        saveSettings();
+        applyLocale();
+        toast(`${LOCALE_NAMES[next]} // ${translate("language")}`, 900);
+      }
+      function renderTutorialStep() {
+        const layer = $("tutorial");
+        if (!layer) return;
+        const steps = localeValue("tutorialSteps", LOCALES.en.tutorialSteps);
+        const safeSteps = Array.isArray(steps) && steps.length ? steps : LOCALES.en.tutorialSteps;
+        tutorialIndex = clamp(tutorialIndex, 0, safeSteps.length - 1);
+        const step = safeSteps[tutorialIndex];
+        if ($("tutorialEyebrow")) $("tutorialEyebrow").textContent = translate("tutorialEyebrow");
+        if ($("tutorialStep")) $("tutorialStep").textContent = translate("step", { current: tutorialIndex + 1, total: safeSteps.length });
+        if ($("tutorialProgressBar")) $("tutorialProgressBar").style.width = `${((tutorialIndex + 1) / safeSteps.length) * 100}%`;
+        if ($("tutorialGlyph")) {
+          const glyph = $("tutorialGlyph");
+          const span = glyph.querySelector("span");
+          if (span) span.textContent = step.glyph || "BUY";
+        }
+        if ($("tutorialTitle")) $("tutorialTitle").textContent = step.title;
+        if ($("tutorialBody")) $("tutorialBody").textContent = step.body;
+        if ($("tutorialTip")) $("tutorialTip").textContent = step.tip || "";
+        const controls = $("tutorialControls");
+        if (controls) {
+          controls.innerHTML = (step.controls || []).map((item) => `<div class="tutorial-control"><b>${item[0]}</b><span>${item[1]}</span></div>`).join("");
+        }
+        if ($("tutorialBack")) $("tutorialBack").disabled = tutorialIndex === 0;
+        if ($("tutorialNext")) $("tutorialNext").textContent = tutorialIndex >= safeSteps.length - 1 ? translate("tutorialDone") : translate("tutorialNext");
+        if ($("tutorialSkip")) $("tutorialSkip").textContent = translate("tutorialSkip");
+        if ($("tutorialClose")) $("tutorialClose").setAttribute("aria-label", translate("tutorialClose"));
+      }
+      function openTutorial(force = false) {
+        const layer = $("tutorial");
+        if (!layer) return;
+        tutorialWasOpen = true;
+        tutorialIndex = 0;
+        renderTutorialStep();
+        layer.classList.remove("hidden");
+        layer.setAttribute("aria-hidden", "false");
+        layer.dataset.force = force ? "true" : "false";
+        clearInput();
+      }
+      function closeTutorial(markSeen = true) {
+        const layer = $("tutorial");
+        if (!layer) return;
+        layer.classList.add("hidden");
+        layer.setAttribute("aria-hidden", "true");
+        if (markSeen && !gameSettings.tutorialSeen) {
+          gameSettings.tutorialSeen = true;
+          saveSettings();
+        }
+        tutorialWasOpen = false;
+      }
+      function showTouchGuide() {
+        const guide = $("touchGuide");
+        if (!guide || !compactDevice || gameSettings.tutorialSeen === false) return;
+        const text = $("touchGuideText");
+        if (text) text.textContent = translate("touchGuide");
+        guide.classList.add("show");
+        clearTimeout(touchGuideTimer);
+        touchGuideTimer = window.setTimeout(() => guide.classList.remove("show"), 7200);
       }
 
       function parseSettingsPayload(raw, encoded = false) {
@@ -2651,38 +3679,52 @@
       }
 
       function loadSettings() {
-        const candidates = [];
-        // localStorage is usually the more reliable backend for file://
-        // pages, while cookies are useful when the file is served locally.
-        // Read both and choose the newest write instead of trusting whichever
-        // backend happens to be listed first.
-        for (const entry of readStorageEntries(SETTINGS_COOKIE)) {
-          const stored = parseSettingsPayload(entry.raw);
-          if (stored) candidates.push({ source: entry.source, value: stored });
-        }
+        // Preferences are device-local and intentionally single-source. A
+        // previous build mirrored writes into several backends, which meant a
+        // stale tab could win a timestamp race and silently restore an older
+        // language or zoom value on reload. Read the durable local record
+        // first, then fall back to legacy session/cookie records only when it
+        // is genuinely absent.
+        let storedSettings = null;
         try {
-          const prefix = `${SETTINGS_COOKIE}=`;
-          const row = document.cookie.split("; ").find((part) => part.startsWith(prefix));
-          const stored = row ? parseSettingsPayload(row.slice(prefix.length), true) : null;
-          if (stored) candidates.push({ source: "cookie", value: stored });
+          storedSettings = parseSettingsPayload(window.localStorage?.getItem(SETTINGS_COOKIE));
         } catch (_) {}
-
-        candidates.sort((a, b) => {
-          const revision = (Number(b.value.updatedAt) || 0) - (Number(a.value.updatedAt) || 0);
-          // If old records have no revision, prefer localStorage because it
-          // survives file:// sessions more consistently than a cookie.
-          return revision || (a.source === "localStorage" ? -1 : 1);
-        });
-        const storedSettings = candidates.length ? candidates[0].value : null;
+        // Also recognize the short-lived v4 key used by an earlier patch.
+        // Prefer the canonical record when it exists; the legacy key is only
+        // a migration source and is never written again.
+        if (!storedSettings) {
+          for (const legacyKey of LEGACY_SETTINGS_KEYS) {
+            try {
+              storedSettings = parseSettingsPayload(window.localStorage?.getItem(legacyKey));
+              if (storedSettings) break;
+            } catch (_) {}
+          }
+        }
+        if (!storedSettings) {
+          try {
+            storedSettings = parseSettingsPayload(window.sessionStorage?.getItem(SETTINGS_COOKIE));
+          } catch (_) {}
+        }
+        if (!storedSettings) {
+          try {
+            const prefix = `${SETTINGS_COOKIE}=`;
+            const row = document.cookie.split("; ").find((part) => part.startsWith(prefix));
+            storedSettings = row ? parseSettingsPayload(row.slice(prefix.length), true) : null;
+          } catch (_) {}
+        }
         normalizeSettings(storedSettings || defaultSettings);
         // Migrate an untouched desktop-sized profile the first time it is
         // opened on a phone.  Once the player changes the zoom slider, the
         // marker preserves that explicit preference on later visits.
-        if (compactDevice && !storedSettings?.mobileOptimized) {
-          if (!Number.isFinite(Number(storedSettings?.zoom)) || Number(storedSettings.zoom) === 1) {
+        if (compactDevice && (!Number.isFinite(Number(storedSettings?.mobileZoomProfile)) || Number(storedSettings?.mobileZoomProfile) < MOBILE_ZOOM_PROFILE)) {
+          const storedZoom = Number(storedSettings?.zoom);
+          // Migrate the old automatic mobile defaults (.82/1.0), while
+          // preserving a value the player deliberately chose.
+          if (!Number.isFinite(storedZoom) || storedZoom === 1 || storedZoom === .82) {
             gameSettings.zoom = defaultSettings.zoom;
           }
           gameSettings.mobileOptimized = true;
+          gameSettings.mobileZoomProfile = MOBILE_ZOOM_PROFILE;
         }
       }
 
@@ -2692,7 +3734,15 @@
         gameSettings.updatedAt = Math.max(Date.now(), previousRevision + 1);
         const serialized = JSON.stringify(gameSettings);
         try { document.cookie = `${SETTINGS_COOKIE}=${encodeURIComponent(serialized)}; max-age=31536000; path=/; SameSite=Lax`; } catch (_) {}
-        writeStorageEntry(SETTINGS_COOKIE, serialized);
+        // localStorage is the durable preference store.  sessionStorage is
+        // intentionally read for legacy migration, but mirroring writes into
+        // it made a stale tab able to overwrite a newer language/zoom choice
+        // during reload.
+        try {
+          if (window.localStorage && typeof window.localStorage.setItem === "function") {
+            window.localStorage.setItem(SETTINGS_COOKIE, serialized);
+          }
+        } catch (_) {}
       }
 
       function readSettingsControls() {
@@ -2709,6 +3759,8 @@
           if (!field) continue;
           gameSettings[key] = parser === Boolean ? field.checked : parser(field.value);
         }
+        const languageField = $("pauseLanguageSelect") || $("languageSelect");
+        if (languageField && LOCALE_CODES.includes(String(languageField.value))) gameSettings.language = String(languageField.value);
         return normalizeSettings();
       }
 
@@ -2719,27 +3771,32 @@
         if (masterGainNode) masterGainNode.gain.value = gameSettings.masterVolume;
         if (musicGainNode) musicGainNode.gain.value = gameSettings.musicVolume * .008;
         if (W && H) resize();
+        const zoomField = $("zoomRange");
+        if (zoomField) zoomField.min = zoomFloor().toFixed(2);
         const fields = [
           ["zoomRange", gameSettings.zoom], ["masterVolumeRange", gameSettings.masterVolume], ["musicVolumeRange", gameSettings.musicVolume],
           ["performanceToggle", gameSettings.performance], ["effectsToggle", gameSettings.effects], ["hapticsToggle", gameSettings.haptics]
         ];
         for (const [id, value] of fields) { const field = $(id); if (!field) continue; if (field.type === "checkbox") field.checked = !!value; else field.value = value; }
+        ["languageSelect", "pauseLanguageSelect"].forEach((id) => {
+          const field = $(id);
+          if (field) field.value = gameSettings.language;
+        });
         updateSettingsLabels();
       }
       function updateSettingsLabels() {
         if ($("zoomValue")) $("zoomValue").textContent = `${Math.round(gameSettings.zoom * 100)}%`;
         if ($("masterVolumeValue")) $("masterVolumeValue").textContent = `${Math.round(gameSettings.masterVolume * 100)}%`;
-        if ($("musicVolumeValue")) $("musicVolumeValue").textContent = gameSettings.musicVolume > 0 ? `${Math.round(gameSettings.musicVolume * 100)}%` : "OFF";
-        if ($("performanceValue")) $("performanceValue").textContent = gameSettings.performance ? "ON" : "OFF";
-        if ($("effectsValue")) $("effectsValue").textContent = gameSettings.effects ? "ON" : "OFF";
-        if ($("hapticsValue")) $("hapticsValue").textContent = gameSettings.haptics ? "ON" : "OFF";
-        if ($("settingsStatus")) $("settingsStatus").textContent = gameSettings.performance ? "LOW-POWER PROFILE" : "LIVE PROFILE";
+        if ($("musicVolumeValue")) $("musicVolumeValue").textContent = gameSettings.musicVolume > 0 ? `${Math.round(gameSettings.musicVolume * 100)}%` : translate("off");
+        if ($("performanceValue")) $("performanceValue").textContent = gameSettings.performance ? translate("on") : translate("off");
+        if ($("effectsValue")) $("effectsValue").textContent = gameSettings.effects ? translate("on") : translate("off");
+        if ($("hapticsValue")) $("hapticsValue").textContent = gameSettings.haptics ? translate("on") : translate("off");
+        if ($("settingsStatus")) $("settingsStatus").textContent = gameSettings.performance ? translate("lowPowerProfile") : translate("settingsStatus");
       }
       loadSettings();
       applySettings();
-      // Rewrite the selected record to both backends once at startup.  This
-      // migrates older v1 entries and guarantees the next resume/reload sees
-      // the same zoom profile regardless of which backend was available.
+      // Normalize/migrate the selected record once at startup so the durable
+      // profile contains the current schema and mobile zoom marker.
       saveSettings();
       // Legacy tone calls are intentionally muted.  The game now uses an
       // explicit audio whitelist: weapon fire, explosions, and UI buttons.
@@ -2810,7 +3867,9 @@
         } catch (_) {}
       }
       function toast(message, duration = 1900) {
-        $("toast").textContent = message; $("toast").classList.add("show");
+        const node = $("toast");
+        if (!node) return;
+        node.textContent = message; node.classList.add("show");
         clearTimeout(toast.timer); toast.timer = setTimeout(() => $("toast").classList.remove("show"), duration);
       }
       function story(message, duration = 4.2) {
@@ -2818,7 +3877,19 @@
         clearTimeout(story.timer); story.timer = setTimeout(() => $("storyBanner").classList.remove("show"), duration * 1000);
       }
       function setLayer(layer, visible) { layer.classList.toggle("hidden", !visible); }
-      function clearInput() { for (const k in keys) keys[k] = false; pointer.down = false; joystick.active = false; $("stick").style.display = "none"; $("stick-knob").style.display = "none"; }
+      function clearInput() {
+        for (const k in keys) keys[k] = false;
+        aimPointerIds.clear();
+        pointerPositions.clear();
+        legacyTouchRoles.clear();
+        pointer.id = null;
+        pointer.down = false;
+        joystick.active = false;
+        joystick.id = null;
+        joystick.x = joystick.y = 0;
+        $("stick").style.display = "none";
+        $("stick-knob").style.display = "none";
+      }
       function combatFlash(message, duration = 850) {
         const node = $("combatFlash");
         if (!node || !gameSettings.effects) return;
@@ -2878,11 +3949,13 @@
         unlockAudio();
         setLayer(menu, false); setLayer(easterEggLayer, false); setLayer(gameover, false); setLayer(shop, false); setLayer(pause, false); setLayer(levelup, false); setLayer(briefing, true);
         state = "briefing"; buttonTone(220, .12, "square"); buttonTone(330, .2, "sine");
+        if (compactDevice && !gameSettings.tutorialSeen) window.setTimeout(() => openTutorial(false), 180);
       }
       function deploy() {
         unlockAudio();
         requestLandscapeMode(false);
         setLayer(briefing, false); setLayer(levelup, false); ui.classList.add("show"); resetRun(); state = "playing"; startWave(1); startAmbient(); updateOrientationGuard(); story("SIGNAL LOG 01 // The command is alive. Hold the line.", 5); buttonTone(440, .14, "square");
+        if (compactDevice) window.setTimeout(showTouchGuide, 360);
       }
       function resetRun() {
         resetEntities(); setLayer(levelup, false); wave = 0; waveRemaining = 0; spawnTimer = 0; score = 0; coins = 0; combo = 0; comboTimer = 0; storyTimer = 0; shake = 0; flash = 0; arenaPulse = 0; bossAlive = false;
@@ -2914,14 +3987,14 @@
         if (waveRemaining <= 0) return;
         const typeKey = bossAlive && waveRemaining === 1 ? "lock" : chooseType();
         const t = enemyTypes[typeKey];
-        const angle = Math.random() * Math.PI * 2, radius = enemyEntryRadius();
+        const angle = Math.random() * Math.PI * 2, radius = enemyEntryRadius(0, angle);
         const e = { alive: true, type: typeKey, x: player.x + Math.cos(angle) * radius, y: player.y + Math.sin(angle) * radius, r: t.r, hp: t.hp * (1 + (wave - 1) * .16), maxHp: t.hp * (1 + (wave - 1) * .16), speed: t.speed * (1 + Math.min(.95, (wave - 1) * .035)), touch: t.touch, value: Math.max(2, Math.round(t.value * (.72 + wave * .022))), ranged: !!t.ranged, shotTimer: rand(1.2, 2.7), elite: !!t.elite, hit: 0, phase: Math.random() * 6.28 };
         if (bossAlive && waveRemaining === 1) { e.r = 46; e.hp *= 9; e.maxHp = e.hp; e.speed *= .72; e.value = Math.min(72, Math.round(e.value * 2.2)); e.elite = true; e.type = "lock"; }
         enemies.push(e); waveRemaining--;
       }
       function nearestEnemy() {
         let best = null, bestD = Infinity, fallback = null, fallbackD = Infinity;
-        const assistRange = 980 / viewportZoom();
+        const assistRange = 980 / Math.max(.05, viewportZoom());
         if (hardLockTarget?.alive && dist(hardLockTarget, player) <= assistRange * 1.25) return (lockTarget = hardLockTarget);
         if (hardLockTarget && !hardLockTarget.alive) hardLockTarget = null;
         for (const e of enemies) if (e.alive) {
@@ -3015,6 +4088,10 @@
         const target = lockTarget && lockTarget.alive ? lockTarget : nearestEnemy();
         if (!target && !pointer.down && !keys.Space) return;
         const w = weaponProfile(player.weapon);
+        const tempo = zoomTempoScale();
+        const projectileSpeed = w.speed * tempo;
+        const visibleZoom = Math.max(.05, viewportZoom());
+        const returnDistance = (w.returnDistance || 0) / visibleZoom;
         const eventFireBoost = (frontierEvent.key === "overclock" && frontierEvent.timer > 0 ? 1.62 : 1) * (typeof eggFireRateMultiplier === "function" ? eggFireRateMultiplier() : 1);
         const cadence = w.cooldown / player.fireRate / (player.surge > 0 ? 2.25 : 1) / eventFireBoost;
         player.cooldown = cadence; const base = aimAngle();
@@ -3025,17 +4102,17 @@
         while (bullets.length + pelletCount > MAX_PLAYER_BULLETS) bullets.shift();
         for (let i = 0; i < pelletCount; i++) {
           const angle = base + rand(-w.spread, w.spread);
-          const range = clamp(player.range * w.range, 360, MAX_PROJECTILE_RANGE);
-          const maxLife = Math.min(2.35, range / Math.max(1, w.speed));
+          const range = clamp(player.range * w.range / visibleZoom, 420, projectileRangeLimit());
+          const maxLife = Math.min(2.8, range / Math.max(1, projectileSpeed));
           const travelLife = w.returning
-            ? Math.min(3.2, maxLife + (w.returnDistance || 0) / Math.max(1, w.speed) * 1.35)
+            ? Math.min(3.8, maxLife + returnDistance / Math.max(1, projectileSpeed) * 1.35)
             : maxLife;
           bullets.push({
             x: player.x + Math.cos(angle) * 22,
             y: player.y + Math.sin(angle) * 22,
-            vx: Math.cos(angle) * w.speed,
-            vy: Math.sin(angle) * w.speed,
-            speed: w.speed,
+            vx: Math.cos(angle) * projectileSpeed,
+            vy: Math.sin(angle) * projectileSpeed,
+            speed: projectileSpeed,
             angle,
             weapon: w.key,
             spin: Math.random() * 6.28,
@@ -3052,7 +4129,7 @@
             chainFalloff: w.chainFalloff || .6,
             chainHits: 0,
             returning: !!w.returning,
-            returnDistance: w.returnDistance || 0,
+            returnDistance,
             returningNow: false,
             hit: []
           });
@@ -3122,7 +4199,7 @@
         if (joystick.active) { mx += joystick.x; my += joystick.y; }
         const mag = Math.hypot(mx, my); if (mag > 1) { mx /= mag; my /= mag; }
         if (frontierEvent.key === "reverseFlow" && frontierEvent.timer > 0) { mx *= -1; my *= -1; }
-        const speed = player.speed * (player.dash > 0 ? DASH_SPEED_MULTIPLIER : 1);
+        const speed = player.speed * zoomTempoScale() * (player.dash > 0 ? DASH_SPEED_MULTIPLIER : 1);
         player.x += mx * speed * dt; player.y += my * speed * dt;
         if (player.dash > 0) player.dash -= dt; if (player.invuln > 0) player.invuln -= dt;
         if (aimAssist || pointer.down || keys.Space) fire();
@@ -3135,6 +4212,7 @@
         }
         for (let i = bullets.length - 1; i >= 0; i--) {
           const b = bullets[i];
+          const previousX = b.x, previousY = b.y;
           b.spin += dt * (b.returning ? 8 : 4);
           if (b.returning && !b.returningNow && b.traveled >= b.returnDistance) b.returningNow = true;
           if (b.returningNow) {
@@ -3144,10 +4222,13 @@
           }
           b.x += b.vx * dt; b.y += b.vy * dt; b.traveled += Math.hypot(b.vx, b.vy) * dt; b.life -= dt;
           if (b.returningNow && Math.hypot(player.x - b.x, player.y - b.y) < player.r + 18) { bullets.splice(i, 1); continue; }
-          if (b.life <= 0 || (!b.returningNow && b.traveled > (b.maxTravel || MAX_PROJECTILE_RANGE))) { bullets.splice(i, 1); continue; }
+          if (b.life <= 0 || (!b.returningNow && b.traveled > (b.maxTravel || projectileRangeLimit()))) { bullets.splice(i, 1); continue; }
           let removed = false;
           for (const e of enemies) if (e.alive && !b.hit.includes(e)) {
-            if (Math.hypot(b.x - e.x, b.y - e.y) < e.r + b.size) {
+            // Use the complete frame segment, not only the final point. This
+            // prevents a fast mobile shot from visually crossing an enemy
+            // between frames without applying damage.
+            if (segmentDistance(e.x, e.y, previousX, previousY, b.x, b.y) < e.r + b.size) {
               b.hit.push(e);
               hitEnemy(e, b.damage, b);
               if (b.explosive) detonate(b.x, b.y, b.explosive + player.bombRadius * .25, b.damage * 1.8, b.color);
@@ -3165,21 +4246,24 @@
         }
         for (let i = enemyBullets.length - 1; i >= 0; i--) {
           const b = enemyBullets[i];
+          const previousX = b.x, previousY = b.y;
           const step = Math.hypot(b.vx, b.vy) * dt;
           b.x += b.vx * dt; b.y += b.vy * dt; b.traveled += step; b.life -= dt;
-          if (b.life <= 0 || b.traveled > (b.maxTravel || 1450)) { enemyBullets.splice(i, 1); continue; }
-          if (Math.hypot(b.x - player.x, b.y - player.y) < player.r + b.r) { if (player.invuln <= 0) hurt(b.damage); enemyBullets.splice(i, 1); }
+          if (b.life <= 0 || b.traveled > (b.maxTravel || enemyProjectileRangeLimit())) { enemyBullets.splice(i, 1); continue; }
+          if (segmentDistance(player.x, player.y, previousX, previousY, b.x, b.y) < player.r + b.r) { if (player.invuln <= 0) hurt(b.damage); enemyBullets.splice(i, 1); }
         }
         for (const e of enemies) if (e.alive) {
+          const previousX = e.x, previousY = e.y;
           const dx = player.x - e.x, dy = player.y - e.y, d = Math.hypot(dx, dy) || 1;
           const catchup = enemyCatchupMultiplier(e, d);
-          const enemySpeed = e.speed * catchup * mobileOpeningScale() * (frontierEvent.key === "flashCrash" && frontierEvent.timer > 0 ? 1.48 : 1) * (typeof eggEnemySpeedMultiplier === "function" ? eggEnemySpeedMultiplier() : 1);
+          const enemySpeed = e.speed * zoomTempoScale() * catchup * mobileOpeningScale() * (frontierEvent.key === "flashCrash" && frontierEvent.timer > 0 ? 1.48 : 1) * (typeof eggEnemySpeedMultiplier === "function" ? eggEnemySpeedMultiplier() : 1);
           let move = enemySpeed;
           if (e.type === "broker" || e.type === "hunter" || e.type === "pulse" || e.type === "mirror" || e.type === "warden") {
-            const desired = e.type === "broker" ? 300 : e.type === "hunter" ? 390 : e.type === "pulse" ? 360 : e.type === "mirror" ? 285 : 470;
+            const desired = (e.type === "broker" ? 300 : e.type === "hunter" ? 390 : e.type === "pulse" ? 360 : e.type === "mirror" ? 285 : 470) / Math.max(.05, viewportZoom());
             move = d > desired ? enemySpeed : -enemySpeed * (e.type === "warden" ? .35 : .55);
            } else if (e.type === "leech") {
-             move = d > 190 ? enemySpeed * 1.18 : enemySpeed * .42;
+              const leechDistance = 190 / Math.max(.05, viewportZoom());
+              move = d > leechDistance ? enemySpeed * 1.18 : enemySpeed * .42;
            }
            if (e.stun > 0) move *= .12;
            e.x += dx / d * move * dt; e.y += dy / d * move * dt; e.phase += dt * 2.4; e.hit = Math.max(0, e.hit - dt);
@@ -3190,10 +4274,12 @@
               const a = Math.atan2(player.y - e.y, player.x - e.x);
               const bulletColor = enemyTypes[e.type]?.color || HOT;
               const projectileSpeed = 260 * mobileProjectileScale();
-              pushEnemyBullet({ x: e.x, y: e.y, vx: Math.cos(a) * projectileSpeed, vy: Math.sin(a) * projectileSpeed, r: e.type === "warden" ? 8 : 6, life: 4, damage: e.type === "hunter" ? 12 : e.type === "warden" ? 15 : 8, color: bulletColor, kind: e.type });
+              const tunedProjectileSpeed = projectileSpeed * zoomTempoScale();
+              pushEnemyBullet({ x: e.x, y: e.y, vx: Math.cos(a) * tunedProjectileSpeed, vy: Math.sin(a) * tunedProjectileSpeed, r: e.type === "warden" ? 8 : 6, life: 4, damage: e.type === "hunter" ? 12 : e.type === "warden" ? 15 : 8, color: bulletColor, kind: e.type });
             }
           }
-          if (d < e.r + player.r + 2 && player.invuln <= 0) hurt(e.touch * dt);
+          const contactDistance = segmentDistance(player.x, player.y, previousX, previousY, e.x, e.y);
+          if (contactDistance < e.r + player.r + 2 && player.invuln <= 0) hurt(e.touch * dt);
         }
         for (let i = pickups.length - 1; i >= 0; i--) {
           const p = pickups[i]; p.life -= dt; p.spin += dt * (p.kind === "egg" ? 2.4 : 4);
@@ -3250,7 +4336,7 @@
       function buyUpgrade(key, cost) {
         if (coins < cost || upgradeLevels[key] >= upgrades.find((u) => u.key === key).max) return;
         coins -= cost; upgradeLevels[key]++;
-        if (key === "range") player.range = Math.min(MAX_PLAYER_RANGE, player.range * 1.22);
+        if (key === "range") player.range = Math.min(playerRangeLimit(), player.range * 1.22);
         if (key === "damage") player.damage = applySoftGrowth(player.damage, 1.16, PLAYER_DAMAGE_CAP);
         if (key === "fireRate") player.fireRate = applySoftGrowth(player.fireRate, 1.12, PLAYER_FIRE_RATE_CAP);
         if (key === "maxHp") { player.maxHp += 18; player.hp = Math.min(player.maxHp, player.hp + 28); }
@@ -3274,10 +4360,53 @@
           b.style.borderColor = active ? w.color : "";
           b.style.color = active ? w.color : "";
           b.style.boxShadow = active ? `0 0 20px ${w.color}44` : "";
+          const label = b.firstChild;
+          if (label) label.textContent = `${i + 1} · ${w.short}`;
           const small = b.querySelector("small");
-          if (small) small.textContent = `${w.name} // LV ${level}`;
+          if (small) small.textContent = `${localizedWeaponName(i, w.name)} // LV ${level}`;
         });
-        ["surge", "dash", "bomb"].forEach((name) => { const b = document.querySelector(`[data-ability="${name}"]`); if (b) { const cd = player.ability[name]; b.classList.toggle("cooling", cd > 0); b.classList.toggle("ready", cd <= 0); b.querySelector("small").textContent = cd > 0 ? `${cd.toFixed(1)}s` : "READY"; } });
+        ["surge", "dash", "bomb"].forEach((name) => {
+          const b = document.querySelector(`[data-ability="${name}"]`);
+          if (!b) return;
+          const cd = player.ability[name];
+          b.classList.toggle("cooling", cd > 0);
+          b.classList.toggle("ready", cd <= 0);
+          const text = b.firstChild;
+          if (text) text.textContent = `${name === "surge" ? "Q" : name === "dash" ? "E" : "R"} · ${localizedAbilityName(name, name.toUpperCase())}`;
+          b.querySelector("small").textContent = cd > 0 ? `${cd.toFixed(1)}s` : "READY";
+        });
+      }
+      const weaponLocaleNames = {
+        en: ["MARKET PULSE", "SPREADSHEET", "SHORT SQUEEZE", "LANCE"],
+        fa: ["پالس بازار", "اسپردشیت", "شورت اسکوییز", "نیزه"],
+        es: ["PULSO", "HOJA", "SHORT", "LANZA"],
+        ar: ["نبض السوق", "جدول", "ضغط قصير", "رمح"],
+        fr: ["IMPULSION", "TABLEUR", "SHORT", "LANCE"],
+        de: ["MARKTPULS", "TABELLE", "SHORT", "LANZE"],
+        pt: ["PULSO", "PLANILHA", "SHORT", "LANÇA"],
+        tr: ["PİYASA", "TABLO", "SHORT", "MIZRAK"],
+        ja: ["パルス", "スプレッド", "ショート", "ランス"],
+        zh: ["市场脉冲", "表格", "轧空", "长枪"],
+        hi: ["मार्केट पल्स", "शीट", "शॉर्ट", "लांस"]
+      };
+      const abilityLocaleNames = {
+        en: { surge: "BUY SURGE", dash: "EXIT LIQUIDITY", bomb: "MARGIN CALL" },
+        fa: { surge: "موج BUY", dash: "نقدینگی خروج", bomb: "کال مارجین" },
+        es: { surge: "OLEADA BUY", dash: "LIQUIDEZ DE SALIDA", bomb: "LLAMADA DE MARGEN" },
+        ar: { surge: "اندفاع BUY", dash: "سيولة الخروج", bomb: "نداء الهامش" },
+        fr: { surge: "SURGE BUY", dash: "LIQUIDITÉ", bomb: "APPEL DE MARGE" },
+        de: { surge: "BUY-SCHUB", dash: "EXIT-LIQUIDITÄT", bomb: "MARGIN CALL" },
+        pt: { surge: "SURTO BUY", dash: "LIQUIDEZ DE SAÍDA", bomb: "MARGIN CALL" },
+        tr: { surge: "BUY ATAĞI", dash: "ÇIKIŞ LİKİDİTESİ", bomb: "TEMİNAT ÇAĞRISI" },
+        ja: { surge: "BUY サージ", dash: "出口流動性", bomb: "マージンコール" },
+        zh: { surge: "BUY 涌流", dash: "退出流动性", bomb: "追加保证金" },
+        hi: { surge: "BUY सर्ज", dash: "एग्ज़िट लिक्विडिटी", bomb: "मार्जिन कॉल" }
+      };
+      function localizedWeaponName(index, fallback) {
+        return (weaponLocaleNames[currentLocale] || weaponLocaleNames.en)[index] || fallback;
+      }
+      function localizedAbilityName(key, fallback) {
+        return (abilityLocaleNames[currentLocale] || abilityLocaleNames.en)[key] || fallback;
       }
       function buildHud() {
         const weaponBar = $("weaponBar"), abilityBar = $("abilityBar");
@@ -3333,7 +4462,7 @@
         }
         if (!gameSettings.performance) {
           const markCount = hardwareConcurrency && hardwareConcurrency <= 4 ? 18 : arenaMarks.length;
-          for (let i = 0; i < markCount; i++) { const m = arenaMarks[i], p = worldToScreen(m.x, m.y); if (p.x < -120 || p.x > W + 120 || p.y < -120 || p.y > H + 120) continue; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((m.x + m.y) * .002); ctx.strokeStyle = `rgba(95,244,255,${m.a * .22})`; ctx.strokeRect(-m.s, -m.s * .34, m.s * 2, m.s * .68); ctx.restore(); }
+          for (let i = 0; i < markCount; i++) { const m = arenaMarks[i], p = worldToScreen(m.x, m.y); if (p.x < -120 || p.x > W + 120 || p.y < -120 || p.y > H + 120) continue; ctx.save(); ctx.translate(p.x, p.y); ctx.scale(worldRenderScale(), worldRenderScale()); ctx.rotate((m.x + m.y) * .002); ctx.strokeStyle = `rgba(95,244,255,${m.a * .22})`; ctx.strokeRect(-m.s, -m.s * .34, m.s * 2, m.s * .68); ctx.restore(); }
         }
         ctx.globalAlpha = 1;
       }
@@ -3568,6 +4697,11 @@
       function drawThreatIndicators(t) {
         if (state !== "playing") return;
         const cx = W * .5, cy = H * .5;
+        // Threat arrows and labels are screen-space guidance, not world
+        // sprites. Keep them readable while the actual enemies scale down.
+        const indicatorScale = compactDevice
+          ? clamp(.58 + viewportZoom() * .42, .58, 1)
+          : worldRenderScale();
         const left = 28, right = W - 28;
         const top = Math.min(Math.max(112, H * .14), H * .5 - 28);
         const bottom = Math.max(top + 56, Math.min(H - 104, H * .86));
@@ -3575,7 +4709,7 @@
         for (const e of enemies) {
           if (!e.alive) continue;
           const s = worldToScreen(e.x, e.y);
-          if (s.x >= -e.r && s.x <= W + e.r && s.y >= -e.r && s.y <= H + e.r) continue;
+          if (s.x >= -e.r * indicatorScale && s.x <= W + e.r * indicatorScale && s.y >= -e.r * indicatorScale && s.y <= H + e.r * indicatorScale) continue;
           const dx = s.x - cx, dy = s.y - cy, distance = Math.hypot(dx, dy) || 1;
           const angle = Math.atan2(dy, dx);
           const sector = Math.round(angle / (Math.PI / 12));
@@ -3608,6 +4742,7 @@
           const distanceLabel = threat.distance >= 1000 ? `${(threat.distance / 1000).toFixed(1)}K` : `${Math.round(threat.distance)}`;
           ctx.save();
           ctx.translate(x, y);
+          ctx.scale(indicatorScale, indicatorScale);
           ctx.rotate(threat.angle);
           ctx.globalAlpha = .1 * pulse;
           ctx.fillStyle = color;
@@ -3624,7 +4759,8 @@
           ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-31, 0); ctx.stroke();
           ctx.restore();
           ctx.save();
-          ctx.translate(x, y + (y < cy ? 27 : -27));
+          ctx.translate(x, y + (y < cy ? 27 : -27) * indicatorScale);
+          ctx.scale(indicatorScale, indicatorScale);
           ctx.globalAlpha = .86;
           ctx.fillStyle = "rgba(2,5,4,.84)";
           ctx.font = "800 9px ui-monospace, monospace";
@@ -3647,6 +4783,8 @@
           const p = worldToScreen(locked.x, locked.y);
           ctx.save();
           ctx.translate(p.x, p.y);
+          const entityScale = enemyRenderScale();
+          ctx.scale(entityScale, entityScale);
           ctx.rotate(t * 2.2);
           ctx.strokeStyle = locked.elite ? VIOLET : ACID;
           ctx.globalAlpha = .82;
@@ -3668,6 +4806,8 @@
           if (s.x < -40 || s.x > W + 40 || s.y < -40 || s.y > H + 40) continue;
           ctx.save();
           ctx.translate(s.x, s.y);
+          const pickupScale = entityRenderScale();
+          ctx.scale(pickupScale, pickupScale);
           ctx.rotate(p.spin);
           ctx.globalAlpha = Math.min(1, p.life);
           const pickupColor = p.kind === "coin" ? ACID : p.kind === "egg" ? eggColor(p.eggId) : HOT;
@@ -3704,6 +4844,8 @@
           const angle = Math.atan2(b.vy, b.vx);
           ctx.save();
           ctx.translate(s.x, s.y);
+          const enemyBulletScale = projectileRenderScale();
+          ctx.scale(enemyBulletScale, enemyBulletScale);
           ctx.rotate(angle);
           ctx.fillStyle = color;
           ctx.strokeStyle = color;
@@ -3746,6 +4888,8 @@
           const weapon = weapons.find((item) => item.key === b.weapon) || weapons[player.weapon];
           ctx.save();
           ctx.translate(s.x, s.y);
+          const playerBulletScale = projectileRenderScale();
+          ctx.scale(playerBulletScale, playerBulletScale);
           ctx.rotate(Math.atan2(b.vy, b.vx));
           ctx.globalAlpha = .22;
           ctx.fillStyle = b.color;
@@ -3839,6 +4983,8 @@
           const pulse = .5 + .5 * Math.sin(t * 5 + e.phase);
           ctx.save();
           ctx.translate(s.x, s.y);
+          const enemyScale = enemyRenderScale();
+          ctx.scale(enemyScale, enemyScale);
           ctx.rotate(e.phase * .2);
           if (e.boss && e.guardWindow > 0 && gameSettings.effects && !gameSettings.performance) {
             ctx.save();
@@ -3919,7 +5065,7 @@
             for (let i = -1; i <= 1; i++) {
               ctx.beginPath(); ctx.moveTo(i * radius * .25, radius * .35); ctx.lineTo(i * radius * .42, radius * 1.15); ctx.stroke();
             }
-            if (dist(e, player) < 165) {
+            if (dist(e, player) < 165 / Math.max(.05, viewportZoom())) {
               const target = worldToScreen(player.x, player.y);
               const here = worldToScreen(e.x, e.y);
               ctx.restore();
@@ -3951,7 +5097,11 @@
           ctx.restore();
           if (e.hp < e.maxHp) {
             ctx.save();
-            ctx.translate(s.x, s.y - radius - 10);
+            const barScale = compactDevice
+              ? clamp(.58 + viewportZoom() * .42, .58, 1)
+              : enemyRenderScale();
+            ctx.translate(s.x, s.y - (radius + 10) * barScale);
+            ctx.scale(barScale, barScale);
             ctx.fillStyle = "rgba(0,0,0,.62)";
             ctx.fillRect(-radius, -2, radius * 2, 4);
             ctx.fillStyle = type.color;
@@ -3960,8 +5110,12 @@
             ctx.restore();
           }
         }
-        for (const p of particles) { const s = worldToScreen(p.x, p.y); if (s.x < -24 || s.x > W + 24 || s.y < -24 || s.y > H + 24) continue; ctx.globalAlpha = clamp(p.life / p.max, 0, 1); ctx.fillStyle = p.color; ctx.shadowBlur = gameSettings.performance ? 0 : 10; ctx.shadowColor = p.color; ctx.fillRect(s.x, s.y, p.size, p.size); }
-        ctx.globalAlpha = 1; drawBuyCore(t); if (!gameSettings.performance) drawThreatIndicators(t); ctx.restore();
+        const particleScale = entityRenderScale();
+        for (const p of particles) { const s = worldToScreen(p.x, p.y); const size = p.size * particleScale; if (s.x < -24 || s.x > W + 24 || s.y < -24 || s.y > H + 24) continue; ctx.globalAlpha = clamp(p.life / p.max, 0, 1); ctx.fillStyle = p.color; ctx.shadowBlur = gameSettings.performance ? 0 : 10 * particleScale; ctx.shadowColor = p.color; ctx.fillRect(s.x, s.y, size, size); }
+        ctx.globalAlpha = 1;
+        drawBuyCore(t);
+        if (!gameSettings.performance || (compactDevice && viewportZoom() <= .18)) drawThreatIndicators(t);
+        ctx.restore();
       }
       function draw(t) {
         drawBackground(t); if (state === "menu") { if (heroImageReady && heroImage.complete && heroImage.naturalWidth > 0) { ctx.save(); ctx.globalAlpha = .04; ctx.globalCompositeOperation = "screen"; ctx.drawImage(heroImage, W * .55, H * .25, Math.min(470, W * .42), Math.min(350, W * .31)); ctx.restore(); } } else if (state === "briefing") { drawBuyCore(t); } else if (state === "playing") drawWorld(t); else if (state === "shop" || state === "pause" || state === "gameover") { drawWorld(t); ctx.fillStyle = "rgba(0,0,0,.42)"; ctx.fillRect(0, 0, W, H); }
@@ -4019,48 +5173,107 @@
         if (!code) return;
         unlockAudio();
         keys[code] = true;
-        if (code === "Space") { e.preventDefault(); pointer.down = true; }
+        if (code === "Space") { e.preventDefault(); syncPointerFire(); }
         if (code === "Digit1") setWeapon(0); if (code === "Digit2") setWeapon(1); if (code === "Digit3") setWeapon(2); if (code === "Digit4") setWeapon(3); if (code === "Digit5") setWeapon(4); if (code === "Digit6") setWeapon(5); if (code === "Digit7") setWeapon(6);
         if (code === "KeyQ") activate("surge"); if (code === "KeyE") activate("dash"); if (code === "KeyR") activate("bomb");
         if (code === "Tab" && state === "playing") { e.preventDefault(); cycleTarget(); }
         if ((code === "Equal" || code === "NumpadAdd") && (state === "playing" || state === "pause")) {
-          e.preventDefault(); gameSettings.zoom = clamp(gameSettings.zoom + .04, .32, 1.32); applySettings(); saveSettings(); toast(`ZOOM ${Math.round(gameSettings.zoom * 100)}%`, 800);
+          e.preventDefault(); gameSettings.zoom = clamp(gameSettings.zoom + .04, zoomFloor(), ZOOM_MAX); applySettings(); saveSettings(); toast(`ZOOM ${Math.round(gameSettings.zoom * 100)}%`, 800);
         }
         if ((code === "Minus" || code === "NumpadSubtract") && (state === "playing" || state === "pause")) {
-          e.preventDefault(); gameSettings.zoom = clamp(gameSettings.zoom - .04, .32, 1.32); applySettings(); saveSettings(); toast(`ZOOM ${Math.round(gameSettings.zoom * 100)}%`, 800);
+          e.preventDefault(); gameSettings.zoom = clamp(gameSettings.zoom - .04, zoomFloor(), ZOOM_MAX); applySettings(); saveSettings(); toast(`ZOOM ${Math.round(gameSettings.zoom * 100)}%`, 800);
         }
         if (code === "Escape" && state === "playing") pauseRun();
         else if (code === "Escape" && state === "pause") resumeRun();
         else if (code === "Escape" && !easterEggLayer.classList.contains("hidden")) closeEasterEggArchive();
       });
-      window.addEventListener("keyup", (e) => { const code = getKeyCode(e); keys[code] = false; if (code === "Space") pointer.down = false; });
+      window.addEventListener("keyup", (e) => { const code = getKeyCode(e); keys[code] = false; if (code === "Space") syncPointerFire(); });
+      const isTouchPointer = (event) => event && (event.pointerType === "touch" || event.pointerType === "pen");
+      const setStickPosition = (x, y) => {
+        $("stick").style.display = "block";
+        $("stick-knob").style.display = "block";
+        $("stick").style.left = `${x - 64}px`;
+        $("stick").style.top = `${y - 64}px`;
+        $("stick-knob").style.left = `${x - 26}px`;
+        $("stick-knob").style.top = `${y - 26}px`;
+      };
+      const updateStickFromPoint = (x, y) => {
+        let dx = x - joystick.ox, dy = y - joystick.oy, d = Math.hypot(dx, dy);
+        if (d > 48) { dx = dx / d * 48; dy = dy / d * 48; }
+        joystick.x = dx / 48;
+        joystick.y = dy / 48;
+        $("stick-knob").style.left = `${joystick.ox + dx - 26}px`;
+        $("stick-knob").style.top = `${joystick.oy + dy - 26}px`;
+      };
+      const releaseJoystick = (id = null) => {
+        if (!joystick.active || (id !== null && id !== joystick.id)) return;
+        joystick.active = false;
+        joystick.id = null;
+        joystick.x = joystick.y = 0;
+        $("stick").style.display = "none";
+        $("stick-knob").style.display = "none";
+      };
       canvas.addEventListener("pointermove", (e) => {
-        pointer.x = e.clientX; pointer.y = e.clientY;
+        pointerPositions.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (aimPointerIds.has(e.pointerId)) {
+          pointer.id = e.pointerId;
+          pointer.x = e.clientX;
+          pointer.y = e.clientY;
+        }
         if (joystick.active && e.pointerId === joystick.id) {
-          let dx = e.clientX - joystick.ox, dy = e.clientY - joystick.oy, d = Math.hypot(dx, dy);
-          if (d > 48) { dx = dx / d * 48; dy = dy / d * 48; }
-          joystick.x = dx / 48; joystick.y = dy / 48;
-          $("stick-knob").style.left = `${joystick.ox + dx - 26}px`;
-          $("stick-knob").style.top = `${joystick.oy + dy - 26}px`;
+          updateStickFromPoint(e.clientX, e.clientY);
         }
       });
       canvas.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse" && e.button !== undefined && e.button !== 0) return;
         unlockAudio();
         if (state !== "playing" || orientationHold) return;
-        pointer.id = e.pointerId;
-        if (e.clientX < W * .45 && safeMatchMedia("(pointer:coarse)")) {
-          joystick.active = true; joystick.id = e.pointerId; joystick.ox = e.clientX; joystick.oy = e.clientY; joystick.x = joystick.y = 0;
-          $("stick").style.display = "block"; $("stick-knob").style.display = "block";
-          $("stick").style.left = `${e.clientX - 64}px`; $("stick").style.top = `${e.clientY - 64}px`;
-          $("stick-knob").style.left = `${e.clientX - 26}px`; $("stick-knob").style.top = `${e.clientY - 26}px`;
+        if (e.cancelable) e.preventDefault();
+        try { canvas.setPointerCapture?.(e.pointerId); } catch (_) {}
+        pointerPositions.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const touchLike = isTouchPointer(e);
+        const wantsMove = touchLike && e.clientX < W * .45 && !joystick.active;
+        if (wantsMove) {
+          joystick.active = true;
+          joystick.id = e.pointerId;
+          joystick.ox = e.clientX;
+          joystick.oy = e.clientY;
+          joystick.x = joystick.y = 0;
+          setStickPosition(e.clientX, e.clientY);
         } else {
-          pointer.down = true;
+          aimPointerIds.add(e.pointerId);
+          pointer.id = e.pointerId;
+          pointer.x = e.clientX;
+          pointer.y = e.clientY;
+          syncPointerFire();
           hardLockTarget ||= nearestEnemy();
           fire();
         }
       });
-      const endPointer = (e) => { if (joystick.active && (!e || e.pointerId === joystick.id)) { joystick.active = false; joystick.x = joystick.y = 0; $("stick").style.display = "none"; $("stick-knob").style.display = "none"; } if (!joystick.active) pointer.down = false; };
-      window.addEventListener("pointerup", endPointer); window.addEventListener("pointercancel", endPointer); window.addEventListener("blur", clearInput); document.addEventListener("visibilitychange", () => { if (document.hidden) clearInput(); }); window.addEventListener("resize", resize); window.addEventListener("orientationchange", () => { window.setTimeout(updateOrientationGuard, 80); });
+      const endPointer = (e) => {
+        if (!e) {
+          clearInput();
+          return;
+        }
+        const id = e.pointerId;
+        releaseJoystick(id);
+        aimPointerIds.delete(id);
+        pointerPositions.delete(id);
+        if (pointer.id === id) {
+          const nextId = [...aimPointerIds].pop();
+          const next = nextId === undefined ? null : pointerPositions.get(nextId);
+          pointer.id = nextId === undefined ? null : nextId;
+          if (next) { pointer.x = next.x; pointer.y = next.y; }
+        }
+        syncPointerFire();
+      };
+      window.addEventListener("pointerup", endPointer);
+      window.addEventListener("pointercancel", endPointer);
+      canvas.addEventListener("lostpointercapture", endPointer);
+      window.addEventListener("blur", clearInput);
+      document.addEventListener("visibilitychange", () => { if (document.hidden) clearInput(); });
+      window.addEventListener("resize", resize);
+      window.addEventListener("orientationchange", () => { window.setTimeout(updateOrientationGuard, 80); });
       // Older Safari/WebViews and embedded browsers may not expose Pointer
       // Events even though they still support mouse and touch input. Keep a
       // small compatibility path without double-binding modern browsers.
@@ -4070,45 +5283,90 @@
           if (e.button !== undefined && e.button !== 0) return;
           unlockAudio();
           if (state !== "playing" || orientationHold) return;
-          pointer.down = true; hardLockTarget ||= nearestEnemy(); fire();
+          pointerPositions.set("mouse", { x: e.clientX, y: e.clientY });
+          aimPointerIds.add("mouse");
+          pointer.id = "mouse";
+          pointer.x = e.clientX;
+          pointer.y = e.clientY;
+          syncPointerFire();
+          hardLockTarget ||= nearestEnemy();
+          fire();
         });
-        window.addEventListener("mouseup", () => endPointer(null));
-        const touchPoint = (event) => event && event.changedTouches && event.changedTouches[0];
+        window.addEventListener("mouseup", () => endPointer({ pointerId: "mouse" }));
         canvas.addEventListener("touchstart", (e) => {
-          const touch = touchPoint(e);
-          if (!touch) return;
-          e.preventDefault(); unlockAudio();
+          e.preventDefault();
+          unlockAudio();
           if (state !== "playing" || orientationHold) return;
-          pointer.id = touch.identifier; pointer.x = touch.clientX; pointer.y = touch.clientY;
-          if (touch.clientX < W * .45) {
-            joystick.active = true; joystick.id = touch.identifier; joystick.ox = touch.clientX; joystick.oy = touch.clientY; joystick.x = joystick.y = 0;
-            $("stick").style.display = "block"; $("stick-knob").style.display = "block";
-            $("stick").style.left = `${touch.clientX - 64}px`; $("stick").style.top = `${touch.clientY - 64}px`;
-            $("stick-knob").style.left = `${touch.clientX - 26}px`; $("stick-knob").style.top = `${touch.clientY - 26}px`;
-          } else {
-            pointer.down = true; hardLockTarget ||= nearestEnemy(); fire();
+          for (const touch of Array.from(e.changedTouches || [])) {
+            const id = `touch:${touch.identifier}`;
+            pointerPositions.set(id, { x: touch.clientX, y: touch.clientY });
+            const wantsMove = touch.clientX < W * .45 && !joystick.active;
+            if (wantsMove) {
+              legacyTouchRoles.set(id, "joystick");
+              joystick.active = true; joystick.id = id; joystick.ox = touch.clientX; joystick.oy = touch.clientY; joystick.x = joystick.y = 0;
+              setStickPosition(touch.clientX, touch.clientY);
+            } else {
+              legacyTouchRoles.set(id, "aim");
+              aimPointerIds.add(id);
+              pointer.id = id; pointer.x = touch.clientX; pointer.y = touch.clientY;
+              syncPointerFire();
+              hardLockTarget ||= nearestEnemy();
+              fire();
+            }
           }
         }, { passive: false });
         canvas.addEventListener("touchmove", (e) => {
-          const touch = touchPoint(e);
-          if (!touch) return;
-          e.preventDefault(); pointer.x = touch.clientX; pointer.y = touch.clientY;
-          if (joystick.active && touch.identifier === joystick.id) {
-            let dx = touch.clientX - joystick.ox, dy = touch.clientY - joystick.oy, d = Math.hypot(dx, dy);
-            if (d > 48) { dx = dx / d * 48; dy = dy / d * 48; }
-            joystick.x = dx / 48; joystick.y = dy / 48;
-            $("stick-knob").style.left = `${joystick.ox + dx - 26}px`; $("stick-knob").style.top = `${joystick.oy + dy - 26}px`;
+          e.preventDefault();
+          for (const touch of Array.from(e.changedTouches || [])) {
+            const id = `touch:${touch.identifier}`;
+            pointerPositions.set(id, { x: touch.clientX, y: touch.clientY });
+            if (legacyTouchRoles.get(id) === "joystick" && joystick.active && id === joystick.id) {
+              updateStickFromPoint(touch.clientX, touch.clientY);
+            } else if (legacyTouchRoles.get(id) === "aim" && aimPointerIds.has(id)) {
+              pointer.id = id;
+              pointer.x = touch.clientX;
+              pointer.y = touch.clientY;
+            }
           }
         }, { passive: false });
-        canvas.addEventListener("touchend", (e) => { e.preventDefault(); endPointer(null); }, { passive: false });
-        canvas.addEventListener("touchcancel", (e) => { e.preventDefault(); endPointer(null); }, { passive: false });
+        const endLegacyTouch = (e) => {
+          e.preventDefault();
+          for (const touch of Array.from(e.changedTouches || [])) {
+            const id = `touch:${touch.identifier}`;
+            legacyTouchRoles.delete(id);
+            endPointer({ pointerId: id });
+          }
+        };
+        canvas.addEventListener("touchend", endLegacyTouch, { passive: false });
+        canvas.addEventListener("touchcancel", endLegacyTouch, { passive: false });
       }
       orientationBtn?.addEventListener("click", () => {
         requestLandscapeMode(true);
         updateOrientationGuard();
       });
       $("startBtn").addEventListener("click", startSequence); $("deployBtn").addEventListener("click", deploy); $("backBtn").addEventListener("click", () => { setLayer(briefing, false); setLayer(menu, true); state = "menu"; }); $("resumeBtn").addEventListener("click", resumeRun); $("pauseBtn")?.addEventListener("click", pauseRun); $("lockStatus")?.addEventListener("click", cycleTarget); $("restartBtn").addEventListener("click", () => { setLayer(gameover, false); setLayer(levelup, false); setLayer(briefing, true); state = "briefing"; }); $("menuBtn")?.addEventListener("click", exitToMenu); $("easterEggBtn")?.addEventListener("click", openEasterEggArchive); $("closeEasterBtn")?.addEventListener("click", closeEasterEggArchive); shop.addEventListener("click", (e) => { if (e.target === shop) continueWave(); });
-      const continueButton = document.createElement("button"); continueButton.type = "button"; continueButton.className = "main-btn"; continueButton.textContent = "PRESS BUY // CONTINUE"; continueButton.style.display = "block"; continueButton.style.margin = "22px auto 0"; $("shopCoins").parentElement.insertAdjacentElement("afterend", continueButton); continueButton.addEventListener("click", continueWave);
+      $("tutorialBtn")?.addEventListener("click", () => openTutorial(true));
+      $("tutorialClose")?.addEventListener("click", () => closeTutorial(true));
+      $("tutorialSkip")?.addEventListener("click", () => closeTutorial(true));
+      $("tutorialBack")?.addEventListener("click", () => {
+        if (tutorialIndex > 0) { tutorialIndex--; renderTutorialStep(); buttonTone(300, .06, "sine", .018); }
+      });
+      $("tutorialNext")?.addEventListener("click", () => {
+        const steps = localeValue("tutorialSteps", LOCALES.en.tutorialSteps);
+        if (tutorialIndex >= steps.length - 1) closeTutorial(true);
+        else { tutorialIndex++; renderTutorialStep(); buttonTone(520, .07, "triangle", .02); }
+      });
+      $("tutorial")?.addEventListener("click", (event) => {
+        if (event.target === $("tutorial")) closeTutorial(true);
+      });
+      ["languageSelect", "pauseLanguageSelect"].forEach((id) => {
+        $(id)?.addEventListener("change", (event) => setLocale(event.target.value));
+      });
+      $("touchGuideClose")?.addEventListener("click", () => {
+        $("touchGuide")?.classList.remove("show");
+        clearTimeout(touchGuideTimer);
+      });
+      const continueButton = document.createElement("button"); continueButton.type = "button"; continueButton.className = "main-btn"; continueButton.textContent = translate("continueWave"); continueButton.style.display = "block"; continueButton.style.margin = "22px auto 0"; continueButton.setAttribute("data-i18n", "continueWave"); $("shopCoins").parentElement.insertAdjacentElement("afterend", continueButton); continueButton.addEventListener("click", continueWave);
       // SIGNAL RUN // COMBAT EXPANSION PATCH
       // Defer the hot-swap layer until the IIFE has finished initializing.
       // This keeps the original function bindings out of the temporal-dead-zone
@@ -4129,6 +5387,32 @@
       }
       function dashCooldown() {
         return Math.max(.09, DASH_COOLDOWN - (Number(upgradeLevels.overdrive) || 0) * .015);
+      }
+      function dashDistance() {
+        // Preserve a readable on-screen escape length after the camera pulls
+        // back, without allowing a single tap to teleport across the arena.
+        // Use the real camera scale all the way down to the mobile floor so a
+        // dash does not become a tiny nudge at the widest view.
+        return DASH_DISTANCE * clamp(MOBILE_ZOOM_REFERENCE / Math.max(MOBILE_ZOOM_MIN, viewportZoom()), .9, 14.5);
+      }
+      function movementVector() {
+        let x = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+        let y = (keys.KeyS || keys.ArrowDown ? 1 : 0) - (keys.KeyW || keys.ArrowUp ? 1 : 0);
+        if (joystick.active) { x += joystick.x; y += joystick.y; }
+        const magnitude = Math.hypot(x, y);
+        if (magnitude < .14) return null;
+        return { x: x / magnitude, y: y / magnitude };
+      }
+      function dashAngle() {
+        const move = movementVector();
+        if (move) {
+          if (frontierEvent.key === "reverseFlow" && frontierEvent.timer > 0) {
+            move.x *= -1;
+            move.y *= -1;
+          }
+          return Math.atan2(move.y, move.x);
+        }
+        return aimAngle();
       }
       function dashBudget() {
         return Math.max(0, Math.floor(player.energy / dashEnergyCost()));
@@ -4384,7 +5668,7 @@
         e.splitDone = false;
         if (!bossSpawn) {
           const entryAngle = Math.atan2(e.y - player.y, e.x - player.x);
-          const entryRadius = enemyEntryRadius();
+          const entryRadius = enemyEntryRadius(0, entryAngle);
           e.x = player.x + Math.cos(entryAngle) * entryRadius;
           e.y = player.y + Math.sin(entryAngle) * entryRadius;
         }
@@ -4445,11 +5729,12 @@
         v3Fire();
         for (let i = before; i < bullets.length; i++) {
           bullets[i].traveled = 0;
-          bullets[i].maxTravel = Math.min(bullets[i].maxTravel || MAX_PROJECTILE_RANGE, MAX_PROJECTILE_RANGE);
+          const rangeCap = projectileRangeLimit();
+          bullets[i].maxTravel = Math.min(bullets[i].maxTravel || rangeCap, rangeCap);
           const rangeLife = bullets[i].maxTravel / Math.max(1, bullets[i].speed || 1);
           bullets[i].life = bullets[i].returning
-            ? Math.min(3.2, Math.max(bullets[i].life || 2.35, rangeLife + (bullets[i].returnDistance || 0) / Math.max(1, bullets[i].speed || 1) * 1.2))
-            : Math.min(bullets[i].life || 2.35, rangeLife);
+            ? Math.min(3.8, Math.max(bullets[i].life || 2.8, rangeLife + (bullets[i].returnDistance || 0) / Math.max(1, bullets[i].speed || 1) * 1.2))
+            : Math.min(bullets[i].life || 2.8, rangeLife);
           bullets[i].weapon = bullets[i].weapon || weapons[player.weapon]?.key;
           bullets[i].color = weapons[player.weapon]?.color || bullets[i].color;
         }
@@ -4491,15 +5776,18 @@
             toast("DASH ENERGY EMPTY // recharge in motion", 1100);
             return;
           }
-          const angle = aimAngle();
+          // When the stick/keyboard is already moving, dash follows that
+          // vector. Otherwise it keeps the smart-target direction.
+          const angle = dashAngle();
           playerFx.dashFlashUntil = nowMs() + 700;
           playerFx.dashAngle = angle;
           v3DashRecharge = 0;
           player.dash = DASH_DURATION;
           player.invuln = DASH_INVULN;
           player.ability.dash = dashCooldown();
-          player.x += Math.cos(angle) * DASH_DISTANCE;
-          player.y += Math.sin(angle) * DASH_DISTANCE;
+          const distance = dashDistance();
+          player.x += Math.cos(angle) * distance;
+          player.y += Math.sin(angle) * distance;
           player.energy = clamp(player.energy - energyCost, 0, player.maxEnergy);
           syncDashBudget();
           particle(player.x, player.y, CYAN, 34, 420);
@@ -4641,7 +5929,7 @@
       };
 
       function v3ShootAt(x, y, angle, speed, damage, color = HOT, radius = 6, life = 5) {
-        const scaledSpeed = speed * mobileProjectileScale();
+        const scaledSpeed = speed * mobileProjectileScale() * zoomTempoScale();
         pushEnemyBullet({ x, y, vx: Math.cos(angle) * scaledSpeed, vy: Math.sin(angle) * scaledSpeed, r: radius, life, damage, color });
       }
 
@@ -4750,6 +6038,7 @@
 
       function v3SpecialEnemy(e, dt) {
         if (!e.alive) return;
+        const specialPreviousX = e.x, specialPreviousY = e.y;
         if (e.knockX || e.knockY) {
           e.x += (e.knockX || 0) * dt;
           e.y += (e.knockY || 0) * dt;
@@ -4764,10 +6053,11 @@
         if (e.orbit) {
           const dx = player.x - e.x, dy = player.y - e.y, d = Math.hypot(dx, dy) || 1;
           const tangent = Math.atan2(dy, dx) + Math.PI / 2;
-          e.x += Math.cos(tangent) * 70 * dt;
-          e.y += Math.sin(tangent) * 70 * dt;
+          const orbitSpeed = 70 * zoomTempoScale();
+          e.x += Math.cos(tangent) * orbitSpeed * dt;
+          e.y += Math.sin(tangent) * orbitSpeed * dt;
         }
-        if (e.drain && dist(e, player) < 165) {
+        if (e.drain && dist(e, player) < 165 / Math.max(.05, viewportZoom())) {
           player.energy = clamp(player.energy - dt * 16, 0, player.maxEnergy);
           v3Readout = "LEECH // momentum siphoned";
           v3ReadoutTimer = .35;
@@ -4778,6 +6068,12 @@
             e.pulseTimer = Math.max(.7, 1.55 - wave * .025);
             v3RadialFire(e.x, e.y, 8, 165 + wave * 3, 7 + wave * .35, enemyTypes.pulse.color, e.phase);
           }
+        }
+        // Special movement (orbit, knockback and phase effects) can also
+        // cross the player between fixed frames at deep zoom. Preserve the
+        // same swept contact guarantee as the main enemy integrator.
+        if (player.invuln <= 0 && segmentDistance(player.x, player.y, specialPreviousX, specialPreviousY, e.x, e.y) < e.r + player.r + 2) {
+          hurt(e.touch * dt);
         }
       }
 
@@ -4790,6 +6086,11 @@
         }
         arenaPulse = Math.max(0, arenaPulse - dt);
         if (v3ReadoutTimer > 0) v3ReadoutTimer -= dt;
+        // Level-up choices must interrupt the combat frame before extra
+        // spawns or a second update can award another level.  On a phone this
+        // keeps the first minute readable instead of stacking mutations while
+        // the player is still learning the controls.
+        if (player.levelQueue > 0) return;
         // Dash is now energy-backed rather than charge-gated.  Keep the
         // readout live so players can see exactly how many chained bursts
         // their current battery can afford.
@@ -4810,7 +6111,7 @@
           ring.r += (ring.max - ring.r) * Math.min(1, dt * 9);
           if (ring.life <= 0) v3BlastRings.splice(i, 1);
         }
-        const magnetRadius = 95 + upgradeLevels.magnet * 46;
+        const magnetRadius = (95 + upgradeLevels.magnet * 46) / Math.max(.05, viewportZoom());
         for (const p of pickups) {
           const dx = player.x - p.x, dy = player.y - p.y, d = Math.hypot(dx, dy) || 1;
           if (d < magnetRadius) {
@@ -4854,13 +6155,14 @@
           ctx.save();
           for (const ring of v3BlastRings) {
             const p = worldToScreen(ring.x, ring.y);
+            const scale = worldRenderScale();
             ctx.globalAlpha = clamp(ring.life / .82, 0, 1);
             ctx.strokeStyle = ring.color;
             ctx.shadowBlur = 18;
             ctx.shadowColor = ring.color;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = Math.max(1, 3 * scale);
             ctx.beginPath();
-            ctx.arc(p.x, p.y, ring.r, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, ring.r * scale, 0, Math.PI * 2);
             ctx.stroke();
           }
           ctx.restore();
@@ -4870,6 +6172,7 @@
           const profile = v3BossProfiles[v3Boss.bossKind];
           ctx.save();
           ctx.translate(p.x, p.y);
+          ctx.scale(worldRenderScale(), worldRenderScale());
           ctx.rotate(t * .35);
           ctx.globalAlpha = .55 + Math.sin(t * 3) * .12;
           ctx.strokeStyle = profile.color;
@@ -4968,7 +6271,14 @@
         archive = { ...defaultArchive, ...archive, updatedAt: Math.max(Date.now(), previousRevision + 1) };
         const serialized = JSON.stringify(archive);
         try { document.cookie = `${SAVE_COOKIE}=${encodeURIComponent(serialized)}; max-age=31536000; path=/; SameSite=Lax`; } catch (_) {}
-        writeStorageEntry(SAVE_COOKIE, serialized);
+        // Keep the run archive durable in one place. A legacy session record
+        // may still be read by `readArchive`, but new writes stay in the
+        // durable local profile so an old tab cannot overwrite a newer run.
+        try {
+          if (window.localStorage && typeof window.localStorage.setItem === "function") {
+            window.localStorage.setItem(SAVE_COOKIE, serialized);
+          }
+        } catch (_) {}
       }
       function refreshArchiveUi() {
         const bestScore = Math.floor(archive.bestScore || 0);
@@ -4979,8 +6289,8 @@
         if ($("menuRuns")) $("menuRuns").textContent = runs;
         if ($("menuRecordBadge")) {
           $("menuRecordBadge").textContent = bestScore > 0
-            ? `ARCHIVE ONLINE // WAVE ${bestWave} // SCORE ${bestScore.toLocaleString()}`
-            : "NO RECORD YET // MAKE THE FIRST PRESS";
+            ? translate("archiveOnline", { wave: bestWave, score: bestScore.toLocaleString() })
+            : translate("noRecord");
         }
       }
 
@@ -5094,7 +6404,7 @@
         return Math.round(upgrade.base * Math.pow(1.27, level));
       }
       function applyShopUpgrade(key) {
-        if (key === "range") player.range = Math.min(MAX_PLAYER_RANGE, player.range * 1.18);
+        if (key === "range") player.range = Math.min(playerRangeLimit(), player.range * 1.18);
         if (key === "damage") player.damage = applySoftGrowth(player.damage, 1.16, PLAYER_DAMAGE_CAP);
         if (key === "fireRate") player.fireRate = applySoftGrowth(player.fireRate, 1.12, PLAYER_FIRE_RATE_CAP);
         if (key === "maxHp") { player.maxHp += 18; player.hp = Math.min(player.maxHp, player.hp + 30); }
@@ -5215,6 +6525,27 @@
         if ($("shopCoins")) $("shopCoins").textContent = Math.floor(coins);
       };
 
+      const levelChoiceLocale = {
+        hardPress: { title: "HARD PRESS", tag: "DAMAGE", desc: "Controlled weapon growth with a soft power ceiling. Make every click count." },
+        rapidRoute: { title: "RAPID ROUTE", tag: "FIRE RATE", desc: "Controlled fire-rate growth plus a small energy refill." },
+        ghostLiquidity: { title: "GHOST LIQUIDITY", tag: "MOBILITY", desc: "+14% movement speed and a burst of dash energy." },
+        shieldDividend: { title: "SHIELD DIVIDEND", tag: "DEFENSE", desc: "+24 shield capacity and refill it immediately." },
+        deepBattery: { title: "DEEP BATTERY", tag: "ENERGY", desc: "+24 max energy and recharge all abilities by 15%." },
+        openInterest: { title: "OPEN INTEREST", tag: "COLLECTION", desc: "Coins and repairs fly in from +130 range." }
+      };
+      const localizedChoice = (choice) => {
+        const base = levelChoiceLocale[choice.key] || choice;
+        const local = currentLocale === "fa" ? {
+          hardPress: { title: "فشار سخت", tag: "آسیب", desc: "رشد کنترل‌شدهٔ سلاح؛ هر کلیک مهم است." },
+          rapidRoute: { title: "مسیر سریع", tag: "نرخ شلیک", desc: "نرخ شلیک بیشتر همراه با کمی شارژ انرژی." },
+          ghostLiquidity: { title: "نقدینگی شبح", tag: "تحرک", desc: "۱۴٪ سرعت حرکت بیشتر و انفجار انرژی DASH." },
+          shieldDividend: { title: "سود سپر", tag: "دفاع", desc: "ظرفیت سپر بیشتر و شارژ فوری." },
+          deepBattery: { title: "باتری عمیق", tag: "انرژی", desc: "حداکثر انرژی بیشتر و شارژ توانایی‌ها." },
+          openInterest: { title: "علاقهٔ باز", tag: "جمع‌آوری", desc: "سکه و تعمیرات از فاصلهٔ ۱۳۰ واحدی جذب می‌شوند." }
+        }[choice.key] : null;
+        return local || base;
+      };
+
       const levelChoices = [
         { key: "hardPress", title: "HARD PRESS", tag: "DAMAGE", desc: "Controlled weapon growth with a soft power ceiling. Make every click count.", apply() { player.damage = applySoftGrowth(player.damage, 1.24, PLAYER_DAMAGE_CAP); } },
         { key: "rapidRoute", title: "RAPID ROUTE", tag: "FIRE RATE", desc: "Controlled fire-rate growth plus a small energy refill.", apply() { player.fireRate = applySoftGrowth(player.fireRate, 1.18, PLAYER_FIRE_RATE_CAP); player.energy = Math.min(player.maxEnergy, player.energy + 25); } },
@@ -5243,7 +6574,8 @@
           const button = document.createElement("button");
           button.type = "button";
           button.className = "level-choice";
-          button.innerHTML = `<small>${choice.tag}</small><b>${choice.title}</b><span>${choice.desc}</span>`;
+          const localized = localizedChoice(choice);
+          button.innerHTML = `<small>${localized.tag}</small><b>${localized.title}</b><span>${localized.desc}</span>`;
           button.addEventListener("click", () => {
             choice.apply();
             player.levelQueue = Math.max(0, player.levelQueue - 1);
@@ -5318,11 +6650,11 @@
 
       syncHud = function() {
         patchBaseSyncHud();
-        if ($("levelText")) $("levelText").textContent = `LEVEL ${player.level || 1} // ${Math.floor(player.xp || 0)}/${player.xpToNext || 100} XP`;
+        if ($("levelText")) $("levelText").textContent = `${translate("levelXp")} ${player.level || 1} // ${Math.floor(player.xp || 0)}/${player.xpToNext || 100} XP`;
         const autoButton = $("autoFireBtn");
         if (autoButton) {
           autoButton.classList.toggle("on", aimAssist);
-          autoButton.textContent = `AUTO FIRE: ${aimAssist ? "ON" : "OFF"}`;
+          autoButton.textContent = `${translate("autoFire")}: ${aimAssist ? translate("on") : translate("off")}`;
         }
         if ($("shopCoins") && state === "shop") $("shopCoins").textContent = Math.floor(coins);
         refreshEggPowerHud();
@@ -5370,7 +6702,7 @@
         archive.autoFire = aimAssist;
         saveArchive();
         syncHud();
-        toast(`AUTO FIRE ${aimAssist ? "ONLINE" : "OFFLINE"} // SPACE TO FIRE`, 1300);
+        toast(`${translate("autoFire")} ${aimAssist ? translate("on") : translate("off")} // SPACE TO FIRE`, 1300);
       });
       const settingsFields = [
         ["zoomRange", "zoom", Number],
@@ -5383,6 +6715,7 @@
       settingsFields.forEach(([id, key, parser]) => {
         const commitSetting = (event) => {
           gameSettings[key] = parser === Boolean ? event.target.checked : parser(event.target.value);
+          if (key === "zoom" && compactDevice) gameSettings.mobileZoomProfile = MOBILE_ZOOM_PROFILE;
           applySettings();
           saveSettings();
           if (key === "masterVolume") buttonTone(430, .045, "sine", .02);
@@ -5394,7 +6727,8 @@
         gameSettings = { ...defaultSettings };
         applySettings();
         saveSettings();
-        toast("SETTINGS RESET // LIVE PROFILE RESTORED", 1400);
+        applyLocale();
+        toast(`${translate("resetSettings")} // ${translate("settingsStatus")}`, 1400);
         buttonTone(560, .1, "triangle", .025);
       });
       window.addEventListener("keydown", (event) => {
@@ -5403,7 +6737,7 @@
           archive.autoFire = aimAssist;
           saveArchive();
           syncHud();
-          toast(`AUTO FIRE ${aimAssist ? "ONLINE" : "OFFLINE"}`, 1000);
+          toast(`${translate("autoFire")} ${aimAssist ? translate("on") : translate("off")}`, 1000);
         }
         // Q and E already belong to the combat abilities (BUY SURGE and
         // EXIT LIQUIDITY).  Keep the Easter controls on their own keys so a
@@ -5411,24 +6745,58 @@
         if (event.code === "KeyX") activateEggEcho();
         if (event.code === "KeyZ") cycleEggPower();
       });
-      const persistSettings = () => {
-        // Pull directly from the controls before persisting.  This catches a
-        // final slider position even if a browser delays its input/change
-        // event until the pointer is released.
-        readSettingsControls();
-        saveSettings();
-      };
-      window.addEventListener("pagehide", persistSettings);
-      window.addEventListener("beforeunload", persistSettings);
       document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          clearInput();
-          persistSettings();
-        }
+        if (document.hidden) clearInput();
       });
       refreshArchiveUi();
 
       buildHud();
+      applyLocale();
+      // Touch abilities cast on contact, which keeps a second finger free for
+      // the movement stick. Capture-phase click suppression prevents the
+      // delayed synthetic click from spending the same ability a second time.
+      document.querySelectorAll(".ability-btn").forEach((button) => {
+        let touchAt = 0;
+        button.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse") return;
+          event.preventDefault();
+          event.stopPropagation();
+          touchAt = nowMs();
+          unlockAudio();
+          activate(button.dataset.ability);
+        });
+        button.addEventListener("click", (event) => {
+          if (touchAt && nowMs() - touchAt < 520) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            touchAt = 0;
+          }
+        }, true);
+      });
+      const touchDashButton = $("touchDashBtn");
+      if (touchDashButton) {
+        let touchDashAt = 0;
+        touchDashButton.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse") return;
+          event.preventDefault();
+          event.stopPropagation();
+          touchDashAt = nowMs();
+          unlockAudio();
+          activate("dash");
+        });
+        touchDashButton.addEventListener("click", (event) => {
+          if (touchDashAt) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            touchDashAt = 0;
+          }
+        }, true);
+        // Fallback for older Safari/WebViews where Pointer Events are absent:
+        // the browser still delivers a regular click after a touch.
+        touchDashButton.addEventListener("click", () => {
+          if (!touchDashAt) activate("dash");
+        });
+      }
       document.querySelectorAll(".weapon-btn").forEach((button) => {
         button.addEventListener("click", (event) => {
           event.stopImmediatePropagation();
