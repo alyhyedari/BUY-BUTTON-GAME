@@ -1,0 +1,10 @@
+{
+  "name": "BUY BUTTON // SIGNAL RUN",
+  "source": "modular-v6",
+  "files": [
+    "index.html",
+    "assets/game.css",
+    "assets/game.js",
+    "buy-button-hero.png"
+  ]
+}
