@@ -1389,70 +1389,70 @@ const LOCALES = {
       const compactUiCopy = {
         en: {
           menuEyebrow: "UNOFFICIAL ARCADE // ROBINHOOD CHAIN 4663",
-          menuDescription: "A quick neon run inspired by Robinhood Chain. Dodge lockouts, collect value and see how far you get.",
+          menuDescription: "Dodge. Shoot. Reach Wave 20.",
           chipRun: "ONE RUN · MANY WAVES",
           chipLore: "CHAIN 4663",
           chipNoWallet: "NO WALLET · NO TRADES",
-          noRecord: "NO RECORD YET // TAKE THE FIRST SHOT",
-          fineprint: "Fan-made fiction. No wallet, token sale or financial advice.",
-          briefingBody: "The old button is back. Chain 4663 is only the setting; this is a fictional arcade run.",
-          briefingQuote: "“Move fast. Press back.”",
+          noRecord: "NO RECORD YET",
+          fineprint: "Fan-made fiction. No wallet or trades.",
+          briefingBody: "The old button is back. Survive the run.",
+          briefingQuote: "“Move fast. Hit hard.”",
           briefingOperator: "— FIELD NOTE",
-          mobileHint: "Desktop: WASD to move; hold SPACE or mouse to fire. Mobile: landscape, left drag to move, hold PRESS // FIRE.",
-          shopBody: "Spend your coins between waves. Pick a patch and keep moving.",
+          mobileHint: "Desktop: WASD + SPACE. Mobile: left drag + PRESS // FIRE.",
+          shopBody: "Spend coins. Pick a patch. Go again.",
           weaponLab: "WEAPON LAB",
-          shopFoot: "Patches stack. Press BUY when ready.",
+          shopFoot: "Patches stack.",
           continueWave: "BUY // NEXT WAVE",
           levelBody: "Pick one upgrade.",
-          easterBody: "Seven small secrets are hidden in the run. Find them all.",
-          easterFoot: "Fan-made fiction. Nothing here connects to a wallet or token.",
-          pauseBody: "Everything is held. Change a setting, then jump back in.",
+          easterBody: "Seven secrets are hidden in the run.",
+          easterFoot: "Fan-made fiction. No wallet connection.",
+          pauseBody: "Paused. Change a setting or jump back in.",
           cameraZoomHint: "Pull back for a wider view.",
           languageHint: "Saved on this device.",
-          musicHint: "A subtle reactive bed under the combat cues.",
-          settingsNote: "Settings save here. Hold SPACE to fire; +/- changes zoom.",
-          gameoverBody: "Good run. The button is ready again.",
+          musicHint: "Reactive combat audio.",
+          settingsNote: "Saved here. SPACE fires; +/- zooms.",
+          gameoverBody: "Good run. Ready when you are.",
           tutorialSteps: [
             { glyph: "BUY", title: "WELCOME.", body: "Move, aim and survive.", controls: [["GOAL", "Clear each wave"], ["LOOP", "Move · shoot · patch"]], tip: "Your best run saves here." },
             { glyph: "←", title: "MOVE.", body: "Drag the left side on mobile. Use WASD on desktop.", controls: [["MOBILE", "Left drag"], ["DESKTOP", "WASD / arrows"]], tip: "Keep one finger free for aim." },
-            { glyph: "✦", title: "AIM + FIRE.", body: "Aim on the right. On mobile, hold PRESS // FIRE. On PC, hold SPACE or the mouse button to fire.", controls: [["MOBILE", "PRESS // hold"], ["DESKTOP", "SPACE // hold"]], tip: "Tap lock-on to change target." },
+            { glyph: "✦", title: "AIM + FIRE.", body: "Aim right. Hold PRESS // FIRE or SPACE.", controls: [["MOBILE", "PRESS // hold"], ["DESKTOP", "SPACE // hold"]], tip: "Lock-on changes target." },
             { glyph: "⇥", title: "DASH.", body: "Tap DASH to slip through danger.", controls: [["MOBILE", "Second finger"], ["DESKTOP", "E"]], tip: "Energy comes back while you move." },
-            { glyph: "⌕", title: "ZOOM.", body: "Pull back when the arena gets busy.", controls: [["ZOOM", "5%–132%"], ["PHONE", "Landscape"]], tip: "Performance mode trims effects." },
-            { glyph: "◆", title: "PATCH.", body: "Clear a wave, buy a patch and go again.", controls: [["UPGRADES", "Damage · speed · shield"], ["ARCHIVE", "Scores · secrets"]], tip: "Open this guide from the menu." }
+            { glyph: "⌕", title: "ZOOM.", body: "Pull back when it gets busy.", controls: [["ZOOM", "5%–132%"], ["PHONE", "Landscape"]], tip: "Performance mode trims effects." },
+            { glyph: "◆", title: "PATCH.", body: "Clear a wave. Buy a patch. Repeat.", controls: [["UPGRADES", "Damage · speed · shield"], ["ARCHIVE", "Scores · secrets"]], tip: "Open this guide from the menu." }
           ]
         },
         fa: {
           menuEyebrow: "بازی غیررسمی // رابین‌هود چین ۴۶۶۳",
-          menuDescription: "یک بازی نئونی کوتاه با الهام از Robinhood Chain. از قفل‌ها فرار کن، ارزش جمع کن و رکورد بزن.",
+          menuDescription: "جا خالی بده، شلیک کن، تا موج ۲۰ برو.",
           chipRun: "یک ران · موج‌های زیاد",
           chipLore: "چین ۴۶۶۳",
           chipNoWallet: "بدون کیف پول · بدون معامله",
-          noRecord: "هنوز رکوردی نیست // اولین شلیک را بزن",
-          fineprint: "داستان هواداری. بدون کیف پول، فروش توکن یا توصیه مالی.",
-          briefingBody: "دکمه قدیمی برگشته. چین ۴۶۶۳ فقط فضای بازی است؛ این یک آرکید کاملاً خیالی است.",
-          briefingQuote: "«سریع حرکت کن. جواب بده.»",
+          noRecord: "هنوز رکوردی نیست",
+          fineprint: "داستان هواداری؛ بدون کیف پول یا معامله.",
+          briefingBody: "دکمه قدیمی برگشته. این ران را زنده بمان.",
+          briefingQuote: "«سریع برو. محکم بزن.»",
           briefingOperator: "— یادداشت میدان",
-          mobileHint: "دسکتاپ: WASD برای حرکت؛ Space یا ماوس را نگه دار برای شلیک. موبایل: افقی بگیر؛ چپ حرکت، PRESS را نگه دار برای شلیک.",
-          shopBody: "بین موج‌ها سکه‌ها را خرج کن. یک ارتقا بردار و ادامه بده.",
+          mobileHint: "دسکتاپ: WASD + SPACE. موبایل: کشیدن چپ + PRESS // FIRE.",
+          shopBody: "سکه خرج کن، ارتقا بگیر، ادامه بده.",
           weaponLab: "آزمایشگاه سلاح",
-          shopFoot: "ارتقاها جمع می‌شوند. هر وقت آماده‌ای BUY را بزن.",
+          shopFoot: "ارتقاها جمع می‌شوند.",
           continueWave: "BUY // موج بعد",
           levelBody: "یک ارتقا انتخاب کن.",
-          easterBody: "هفت راز کوچک در بازی پنهان است. همه را پیدا کن.",
-          easterFoot: "داستان هواداری. این بازی به کیف پول یا توکن وصل نیست.",
-          pauseBody: "همه‌چیز متوقف است. تنظیمات را عوض کن و برگرد.",
+          easterBody: "هفت راز در بازی پنهان است.",
+          easterFoot: "داستان هواداری؛ بدون اتصال به کیف پول.",
+          pauseBody: "مکث شد. تنظیمات را عوض کن یا برگرد.",
           cameraZoomHint: "برای دید بازتر، زوم را کم کن.",
           languageHint: "روی همین دستگاه ذخیره می‌شود.",
-          musicHint: "فقط صدای مبارزه.",
-          settingsNote: "تنظیمات همین‌جا ذخیره می‌شود. Space را برای شلیک نگه دار؛ +/− زوم.",
-          gameoverBody: "خوب بود. دکمه دوباره آماده است.",
+          musicHint: "صدای مبارزه.",
+          settingsNote: "همین‌جا ذخیره می‌شود. SPACE شلیک؛ +/− زوم.",
+          gameoverBody: "خوب بود. دوباره آماده‌ایم.",
           tutorialSteps: [
             { glyph: "BUY", title: "خوش آمدی.", body: "حرکت کن، هدف بگیر و زنده بمان.", controls: [["هدف", "هر موج را رد کن"], ["چرخه", "حرکت · شلیک · ارتقا"]], tip: "بهترین رکوردت ذخیره می‌شود." },
             { glyph: "←", title: "حرکت.", body: "در موبایل نیمه چپ را بکش؛ در دسکتاپ WASD.", controls: [["موبایل", "کشیدن چپ"], ["دسکتاپ", "WASD / جهت‌ها"]], tip: "یک انگشت را برای هدف آزاد بگذار." },
-            { glyph: "✦", title: "هدف + شلیک.", body: "در سمت راست هدف بگیر. در موبایل PRESS را نگه دار؛ در PC، Space یا دکمهٔ ماوس را نگه دار تا شلیک کنی.", controls: [["موبایل", "PRESS را نگه دار"], ["دسکتاپ", "SPACE را نگه دار"]], tip: "با قفل هدف، هدف بعدی را بگیر." },
+            { glyph: "✦", title: "هدف + شلیک.", body: "سمت راست هدف بگیر. PRESS یا Space را نگه دار.", controls: [["موبایل", "PRESS را نگه دار"], ["دسکتاپ", "SPACE را نگه دار"]], tip: "قفل هدف، هدف بعدی را می‌گیرد." },
             { glyph: "⇥", title: "DASH.", body: "برای رد شدن از خطر، DASH را بزن.", controls: [["موبایل", "انگشت دوم"], ["دسکتاپ", "E"]], tip: "با حرکت، انرژی برمی‌گردد." },
             { glyph: "⌕", title: "زوم.", body: "وقتی شلوغ شد، زوم را کم کن.", controls: [["زوم", "۵٪ تا ۱۳۲٪"], ["گوشی", "حالت افقی"]], tip: "حالت عملکرد جلوه‌ها را کم می‌کند." },
-            { glyph: "◆", title: "ارتقا.", body: "موج را رد کن، ارتقا بخر و دوباره برو.", controls: [["ارتقا", "آسیب · سرعت · سپر"], ["آرشیو", "رکورد · رازها"]], tip: "راهنما از منوی اصلی باز می‌شود." }
+            { glyph: "◆", title: "ارتقا.", body: "موج را رد کن، ارتقا بخر، تکرار کن.", controls: [["ارتقا", "آسیب · سرعت · سپر"], ["آرشیو", "رکورد · رازها"]], tip: "راهنما از منوی اصلی باز می‌شود." }
           ]
         }
       };
@@ -3462,8 +3462,18 @@ function startWave(next) {
         playerFx.weaponIndex = player.weapon;
         const pelletCount = Math.min(w.pellets, MAX_PLAYER_BULLETS);
         while (bullets.length + pelletCount > MAX_PLAYER_BULLETS) bullets.shift();
+        // A level-one weapon is a true single shot. Never feed it through
+        // the spread sampler: even a tiny random offset is visible when the
+        // player lines up a target by eye. Higher-level multi-shot weapons
+        // use a stable, symmetric fan so every shot remains predictable.
+        const spreadStep = pelletCount > 1
+          ? (Math.max(0, Number(w.spread) || 0) * 2) / (pelletCount - 1)
+          : 0;
         for (let i = 0; i < pelletCount; i++) {
-          const angle = base + rand(-w.spread, w.spread);
+          const spreadOffset = pelletCount > 1
+            ? (i - (pelletCount - 1) / 2) * spreadStep
+            : 0;
+          const angle = base + spreadOffset;
           const range = clamp(player.range * w.range / visibleZoom, 420, projectileRangeLimit());
           const maxLife = Math.min(2.8, range / Math.max(1, projectileSpeed));
           const travelLife = w.returning
@@ -9097,18 +9107,18 @@ const menuArt = document.querySelector(".menu-art");
       const BB_CUSTOMIZATION_KEY = "buy_button_operator_studio_v1";
       const BB_CUSTOMIZATION_VERSION = 1;
       const BB_OPERATOR_CATALOG = Object.freeze([
-        { id: "signal-runner", name: "SIGNAL RUNNER", fa: "دوندهٔ سیگنال", title: "Balanced core", faTitle: "هستهٔ متعادل", description: "The clean green pulse.", faDescription: "پالس سبز و خالص.", glyph: "B", shape: "ring", palette: "acid", trail: "spark" },
-        { id: "arc-broker", name: "ARC BROKER", fa: "کارگزار قوسی", title: "Electric analyst", faTitle: "تحلیل‌گر الکتریکی", description: "A cyan route through the order book.", faDescription: "مسیر فیروزه‌ای در دفتر سفارش.", glyph: "A", shape: "hex", palette: "cyan", trail: "arc" },
-        { id: "hood-phantom", name: "HOOD PHANTOM", fa: "شبح هود", title: "Quiet escape artist", faTitle: "فراریِ خاموش", description: "Leaves a violet afterimage behind.", faDescription: "ردی بنفش پشت سر باقی می‌گذارد.", glyph: "H", shape: "diamond", palette: "violet", trail: "ghost" },
-        { id: "cold-vault", name: "COLD VAULT", fa: "خزانهٔ سرد", title: "Reserve keeper", faTitle: "نگهبان ذخیره", description: "A hard shell with an ice-blue wake.", faDescription: "پوسته‌ای سخت با رد آبی یخی.", glyph: "K", shape: "square", palette: "ice", trail: "shield" },
-        { id: "nova-clerk", name: "NOVA CLERK", fa: "کارمند نُوا", title: "Burst specialist", faTitle: "متخصص انفجار", description: "Amber signals spread across the frontier.", faDescription: "سیگنال‌های کهربایی در مرز پخش می‌شوند.", glyph: "N", shape: "star", palette: "amber", trail: "comet" },
-        { id: "chain-walker", name: "CHAIN WALKER", fa: "رهرو زنجیره", title: "Linked operator", faTitle: "اپراتور پیوندی", description: "Every step leaves a connected mark.", faDescription: "هر قدم یک نشان پیوسته باقی می‌گذارد.", glyph: "46", shape: "hex", palette: "mint", trail: "arc" },
-        { id: "margin-miner", name: "MARGIN MINER", fa: "معدن‌چی مارجین", title: "Deep-field worker", faTitle: "کارگر میدان عمیق", description: "Orange heat without the noise.", faDescription: "گرمای نارنجی بدون شلوغی.", glyph: "M", shape: "triangle", palette: "orange", trail: "ember" },
-        { id: "oracle-lime", name: "ORACLE LIME", fa: "اوراکل لایم", title: "Pattern reader", faTitle: "خوانندهٔ الگو", description: "Sees the clean line through volatility.", faDescription: "خط صاف را میان نوسان می‌بیند.", glyph: "O", shape: "ring", palette: "lime", trail: "grid" },
-        { id: "pulse-rider", name: "PULSE RIDER", fa: "سوار پالس", title: "Fast-lane courier", faTitle: "پیک خط سریع", description: "A hot pink signal with a comet tail.", faDescription: "سیگنال صورتیِ داغ با دنبالهٔ ستاره‌ای.", glyph: "P", shape: "diamond", palette: "rose", trail: "comet" },
-        { id: "night-ledger", name: "NIGHT LEDGER", fa: "دفتر شب", title: "Low-light navigator", faTitle: "ناوبرِ نور کم", description: "A monochrome core for focused runs.", faDescription: "هسته‌ای تک‌رنگ برای ران‌های متمرکز.", glyph: "L", shape: "square", palette: "mono", trail: "ghost" },
-        { id: "green-warden", name: "GREEN WARDEN", fa: "نگهبان سبز", title: "Frontier guardian", faTitle: "نگهبان مرز", description: "A dense emerald aura built for long runs.", faDescription: "هالهٔ زمردیِ متراکم برای ران‌های طولانی.", glyph: "G", shape: "triangle", palette: "emerald", trail: "shield" },
-        { id: "eclipse-scout", name: "ECLIPSE SCOUT", fa: "پیشاهنگ کسوف", title: "Silent mapper", faTitle: "نقشه‌بردار خاموش", description: "Black-gold geometry for precision pilots.", faDescription: "هندسهٔ سیاه و طلایی برای خلبان دقیق.", glyph: "E", shape: "star", palette: "gold", trail: "grid" }
+        { id: "signal-runner", name: "SIGNAL RUNNER", fa: "دوندهٔ سیگنال", title: "Balanced core", faTitle: "هستهٔ متعادل", description: "Clean green pulse.", faDescription: "پالس سبز تمیز.", glyph: "B", shape: "ring", palette: "acid", trail: "spark" },
+        { id: "arc-broker", name: "ARC BROKER", fa: "کارگزار قوسی", title: "Electric analyst", faTitle: "تحلیل‌گر الکتریکی", description: "Cyan route.", faDescription: "مسیر فیروزه‌ای.", glyph: "A", shape: "hex", palette: "cyan", trail: "arc" },
+        { id: "hood-phantom", name: "HOOD PHANTOM", fa: "شبح هود", title: "Quiet escape artist", faTitle: "فراریِ خاموش", description: "Violet afterimage.", faDescription: "رد بنفش.", glyph: "H", shape: "diamond", palette: "violet", trail: "ghost" },
+        { id: "cold-vault", name: "COLD VAULT", fa: "خزانهٔ سرد", title: "Reserve keeper", faTitle: "نگهبان ذخیره", description: "Ice-blue shell.", faDescription: "پوستهٔ آبی یخی.", glyph: "K", shape: "square", palette: "ice", trail: "shield" },
+        { id: "nova-clerk", name: "NOVA CLERK", fa: "کارمند نُوا", title: "Burst specialist", faTitle: "متخصص انفجار", description: "Amber burst.", faDescription: "انفجار کهربایی.", glyph: "N", shape: "star", palette: "amber", trail: "comet" },
+        { id: "chain-walker", name: "CHAIN WALKER", fa: "رهرو زنجیره", title: "Linked operator", faTitle: "اپراتور پیوندی", description: "Linked steps.", faDescription: "قدم‌های پیوندی.", glyph: "46", shape: "hex", palette: "mint", trail: "arc" },
+        { id: "margin-miner", name: "MARGIN MINER", fa: "معدن‌چی مارجین", title: "Deep-field worker", faTitle: "کارگر میدان عمیق", description: "Orange heat.", faDescription: "گرمای نارنجی.", glyph: "M", shape: "triangle", palette: "orange", trail: "ember" },
+        { id: "oracle-lime", name: "ORACLE LIME", fa: "اوراکل لایم", title: "Pattern reader", faTitle: "خوانندهٔ الگو", description: "Clean line.", faDescription: "خط صاف.", glyph: "O", shape: "ring", palette: "lime", trail: "grid" },
+        { id: "pulse-rider", name: "PULSE RIDER", fa: "سوار پالس", title: "Fast-lane courier", faTitle: "پیک خط سریع", description: "Pink comet.", faDescription: "دنبالهٔ صورتی.", glyph: "P", shape: "diamond", palette: "rose", trail: "comet" },
+        { id: "night-ledger", name: "NIGHT LEDGER", fa: "دفتر شب", title: "Low-light navigator", faTitle: "ناوبرِ نور کم", description: "Monochrome core.", faDescription: "هستهٔ تک‌رنگ.", glyph: "L", shape: "square", palette: "mono", trail: "ghost" },
+        { id: "green-warden", name: "GREEN WARDEN", fa: "نگهبان سبز", title: "Frontier guardian", faTitle: "نگهبان مرز", description: "Emerald aura.", faDescription: "هالهٔ زمردی.", glyph: "G", shape: "triangle", palette: "emerald", trail: "shield" },
+        { id: "eclipse-scout", name: "ECLIPSE SCOUT", fa: "پیشاهنگ کسوف", title: "Silent mapper", faTitle: "نقشه‌بردار خاموش", description: "Black-gold geometry.", faDescription: "هندسهٔ سیاه و طلایی.", glyph: "E", shape: "star", palette: "gold", trail: "grid" }
       ]);
       const BB_PALETTE_CATALOG = Object.freeze([
         { id: "acid", name: "ACID", fa: "سبز اسیدی", primary: "#ccff00", bright: "#f4ff77", dim: "#6e9217", rgb: "204, 255, 0" },
@@ -9134,20 +9144,20 @@ const menuArt = document.querySelector(".menu-art");
         { id: "grid", name: "GRID", fa: "گرید", description: "Clean tactical markers.", faDescription: "نشانگرهای تاکتیکی تمیز." }
       ]);
       const BB_AIM_MODE_CATALOG = Object.freeze([
-        { id: "smart", name: "SMART", fa: "هوشمند", description: "Uses the original balanced target logic.", faDescription: "از منطق متعادل اصلی بازی استفاده می‌کند." },
-        { id: "nearest", name: "NEAREST", fa: "نزدیک‌ترین", description: "Always prioritizes the closest threat.", faDescription: "همیشه نزدیک‌ترین تهدید را اولویت می‌دهد." },
-        { id: "weakest", name: "WEAKEST", fa: "ضعیف‌ترین", description: "Finishes the lowest integrity target.", faDescription: "هدف با کمترین سلامت را تمام می‌کند." },
-        { id: "boss", name: "BOSS FIRST", fa: "اول باس", description: "Locks elite and boss targets first.", faDescription: "ابتدا روی الیت و باس قفل می‌کند." },
-        { id: "cursor", name: "CURSOR", fa: "نشانگر ماوس", description: "Favors the enemy nearest your cursor.", faDescription: "دشمن نزدیک نشانگر ماوس را ترجیح می‌دهد." },
-        { id: "manual", name: "MANUAL", fa: "دستی", description: "Only fires where you point or lock.", faDescription: "فقط به جهتی که نشانه می‌گیری یا قفل می‌کنی شلیک می‌کند." }
+        { id: "smart", name: "SMART", fa: "هوشمند", description: "Balanced target.", faDescription: "هدف متعادل." },
+        { id: "nearest", name: "NEAREST", fa: "نزدیک‌ترین", description: "Closest first.", faDescription: "نزدیک‌ترین اول." },
+        { id: "weakest", name: "WEAKEST", fa: "ضعیف‌ترین", description: "Finish the weak.", faDescription: "ضعیف‌تر را تمام کن." },
+        { id: "boss", name: "BOSS FIRST", fa: "اول باس", description: "Bosses first.", faDescription: "اول باس." },
+        { id: "cursor", name: "CURSOR", fa: "نشانگر ماوس", description: "Near the cursor.", faDescription: "نزدیک نشانگر." },
+        { id: "manual", name: "MANUAL", fa: "دستی", description: "Point and fire.", faDescription: "نشانه بگیر و شلیک کن." }
       ]);
       const BB_SHOT_MODE_CATALOG = Object.freeze([
-        { id: "native", name: "NATIVE", fa: "اصلی", description: "The weapon’s intended firing pattern.", faDescription: "الگوی شلیک طراحی‌شدهٔ خود سلاح." },
-        { id: "twin", name: "TWIN LINK", fa: "دوقلو", description: "A mirrored companion shot.", faDescription: "یک شلیک هم‌زمان قرینه." },
-        { id: "fan", name: "FAN SPREAD", fa: "بادبزنی", description: "Wide coverage with lighter echoes.", faDescription: "پوشش وسیع با گلوله‌های سبک‌تر." },
-        { id: "pierce", name: "PIERCE ROUTE", fa: "نفوذی", description: "Adds extra pass-through to each shot.", faDescription: "عبور اضافی به هر شلیک می‌دهد." },
-        { id: "orbit", name: "ORBITAL", fa: "مداری", description: "Shots bend into a gentle arc.", faDescription: "گلوله‌ها در یک قوس ملایم خم می‌شوند." },
-        { id: "burst", name: "BURST ECHO", fa: "انفجار اکو", description: "A slower secondary echo follows each shot.", faDescription: "یک اکو ثانویه و کندتر هر شلیک را دنبال می‌کند." }
+        { id: "native", name: "NATIVE", fa: "اصلی", description: "Weapon default.", faDescription: "الگوی اصلی." },
+        { id: "twin", name: "TWIN LINK", fa: "دوقلو", description: "Mirrored shot.", faDescription: "شلیک قرینه." },
+        { id: "fan", name: "FAN SPREAD", fa: "بادبزنی", description: "Wide fan.", faDescription: "پوشش بادبزنی." },
+        { id: "pierce", name: "PIERCE ROUTE", fa: "نفوذی", description: "More pierce.", faDescription: "نفوذ بیشتر." },
+        { id: "orbit", name: "ORBITAL", fa: "مداری", description: "Gentle arc.", faDescription: "قوس ملایم." },
+        { id: "burst", name: "BURST ECHO", fa: "انفجار اکو", description: "Slow echo.", faDescription: "اکوی کند." }
       ]);
       const BB_CROSSHAIR_CATALOG = Object.freeze([
         { id: "bracket", name: "BRACKET", fa: "براکت" },
@@ -9403,7 +9413,7 @@ const menuArt = document.querySelector(".menu-art");
         operatorSection.append(
           bbElement("div", "bb-section-kicker", bbTitle("01 // OPERATOR", "۰۱ // اپراتور")),
           bbElement("h3", "", bbTitle("CHOOSE A CORE", "هسته را انتخاب کن.")),
-          bbElement("p", "", bbTitle("Characters are visual identities, so each choice stays fair in every run.", "کاراکترها هویت ظاهری هستند؛ بنابراین انتخاب‌ها در هر ران منصفانه می‌مانند."))
+          bbElement("p", "", bbTitle("Pick a look. Every run stays fair.", "ظاهر را انتخاب کن؛ بازی منصفانه می‌ماند."))
         );
         const operators = bbElement("div", "bb-operator-grid");
         operators.id = "bbOperatorChoices";
@@ -9456,7 +9466,7 @@ const menuArt = document.querySelector(".menu-art");
         combatSection.append(
           bbElement("div", "bb-section-kicker", bbTitle("03 // CONTROL ASSIST", "۰۳ // دستیار کنترل")),
           bbElement("h3", "", bbTitle("AIM, FIRE & AUTO-SELECT", "نشانه‌گیری، شلیک و انتخاب خودکار")),
-          bbElement("p", "", bbTitle("Auto-fire only starts when you explicitly turn it on. Manual mouse aim always remains available.", "شلیک خودکار فقط وقتی فعال می‌شود که خودت روشنش کنی. نشانه‌گیری دستی با ماوس همیشه در دسترس است."))
+          bbElement("p", "", bbTitle("Turn Auto on when you want the game to aim and fire.", "اگر خواستی بازی خودش هدف بگیرد و شلیک کند، Auto را روشن کن."))
         );
         const toggles = bbElement("div", "bb-toggle-grid");
         const controlMode = bbElement("button", "bb-switch bb-control-mode-setting");

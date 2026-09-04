@@ -3006,6 +3006,28 @@ body.bb-customized .record-badge {
   box-shadow: 0 0 20px rgba(255, 179, 95, .24);
 }
 
+.bb-card-copy span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.bb-studio-section > p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.upgrade-card p,
+.level-choice > span {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
