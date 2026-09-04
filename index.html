@@ -12,6 +12,7 @@
   <link rel="icon" type="image/png" sizes="1024x1024" href="./buy-button-hero.png" />
   <link rel="apple-touch-icon" href="./buy-button-hero.png" />
   <title>BUY BUTTON // SIGNAL RUN</title>
+  <script defer src="https://telegram.org/js/telegram-web-app.js?63"></script>
   <link rel="stylesheet" href="./assets/game.css" />
 </head>
 <body>
@@ -110,17 +111,17 @@
         <div class="leaderboard-table" id="leaderboardTable"></div>
       </div>
       <div class="leaderboard-profile">
-        <h3 data-i18n="leaderboardProfileTitle">PLAYER ID // PRIVATE GMAIL</h3>
+        <h3 data-i18n="leaderboardProfileTitle">PLAYER ID // TELEGRAM VERIFIED</h3>
         <div class="leaderboard-profile-grid">
           <label><span data-i18n="leaderboardAliasLabel">PUBLIC ALIAS</span><input id="leaderboardAlias" maxlength="24" autocomplete="nickname" data-i18n-placeholder="leaderboardAliasPlaceholder" placeholder="Legendary Operator" /></label>
-          <label><span data-i18n="leaderboardEmailLabel">GMAIL FOR RECORD CLAIM</span><input id="leaderboardEmail" type="email" maxlength="160" autocomplete="email" data-i18n-placeholder="leaderboardEmailPlaceholder" placeholder="you@gmail.com" /></label>
+          <div class="leaderboard-identity" id="leaderboardTelegramIdentity" role="status" aria-live="polite">GUEST // THIS DEVICE</div>
         </div>
         <div class="leaderboard-profile-actions">
           <button class="main-btn" id="saveLeaderboardProfileBtn" type="button" data-i18n="leaderboardSaveProfile">SAVE PLAYER ID</button>
           <button class="ghost-btn" id="clearLeaderboardProfileBtn" type="button" data-i18n="leaderboardClearProfile">CLEAR LOCAL ID</button>
         </div>
         <div class="leaderboard-profile-status" id="leaderboardProfileStatus" role="status" aria-live="polite"></div>
-        <div class="leaderboard-privacy" data-i18n="leaderboardPrivacy">Your email is stored locally for claim verification and is never rendered in the board. A production server should verify Gmail ownership before accepting global submissions.</div>
+        <div class="leaderboard-privacy" data-i18n="leaderboardPrivacy">Telegram verifies your account in the Mini App. Only your public alias appears on the board; guest mode stays local to this device.</div>
       </div>
     </div>
   </section>
@@ -284,6 +285,12 @@
         <div class="wave-num"><span data-i18n="wave">WAVE</span> <span id="waveText">1</span></div>
         <div class="wave-name" id="waveName">BOOT SECTOR</div>
         <div class="run-mutator" id="runMutatorText"></div>
+        <div class="hardcore-readout" id="hardcoreReadout">HARDCORE // TIER 1 // WAVE 1/20</div>
+        <div class="hardcore-threat" aria-label="Hardcore threat level">
+          <span id="hardcoreThreatText">THREAT // 0%</span>
+          <i><b id="hardcoreThreatFill"></b></i>
+        </div>
+        <div class="hardcore-dash" id="hardcoreDashText">DASH // READY — BREAK BREACHERS</div>
       </div>
       <div class="hud-box hud-right">
         <div class="hud-label" data-i18n="recoveredValue">RECOVERED VALUE</div>

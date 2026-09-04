@@ -129,6 +129,28 @@
         try { if (typeof ctx.setLineDash === "function") ctx.setLineDash(segments); } catch (_) {}
       };
       const $ = (id) => document.getElementById(id);
+      // Offline persistence remains independent from networking. This tiny
+      // event bridge lets the optional Telegram account layer mirror durable
+      // sections without coupling the combat loop to fetch calls.
+      const bbEmitCloudChange = (kind, value, updatedAt = Date.now(), extra = {}) => {
+        try {
+          const detail = {
+            version: 1,
+            kind: String(kind || ""),
+            value,
+            updatedAt: Number(updatedAt) || Date.now(),
+            ...extra
+          };
+          let event = null;
+          if (typeof window.CustomEvent === "function") {
+            event = new window.CustomEvent("bb:cloud-change", { detail });
+          } else if (document.createEvent) {
+            event = document.createEvent("CustomEvent");
+            event.initCustomEvent("bb:cloud-change", false, false, detail);
+          }
+          if (event) window.dispatchEvent(event);
+        } catch (_) {}
+      };
       const menu = $("menu"), briefing = $("briefing"), shop = $("shop"), pause = $("pause"), gameover = $("gameover"), levelup = $("levelup"), ui = $("ui"), leaderboard = $("leaderboard");
       const orientationPrompt = $("orientationPrompt"), orientationBtn = $("orientationBtn");
       const easterEggLayer = $("easterEggs");
@@ -791,11 +813,11 @@ const LOCALES = {
         leaderboardBody: ["Push your run higher, earn a level, and leave a masked signal behind. Public boards show aliases only; your Gmail stays private.", "رکوردت را بالاتر ببر، سطح بگیر و یک سیگنال ماسک‌شده جا بگذار. در جدول عمومی فقط نام مستعار دیده می‌شود؛ جیمیل خصوصی می‌ماند.", "Sube tu partida, gana nivel y deja una señal oculta. La tabla pública muestra solo alias; tu Gmail permanece privado.", "ارفع جولتك، اكسب مستوى واترك إشارة مقنّعة. تعرض اللوحة الاسم المستعار فقط؛ يبقى Gmail خاصاً.", "Faites monter votre run, gagnez des niveaux et laissez un signal masqué. Le classement public n’affiche que les alias; votre Gmail reste privé.", "Bringe deinen Run nach oben, verdiene Level und hinterlasse ein maskiertes Signal. Öffentlich erscheinen nur Aliase; dein Gmail bleibt privat.", "Leve sua corrida, ganhe níveis e deixe um sinal mascarado. O quadro público mostra apenas aliases; seu Gmail fica privado.", "Koşunu yükselt, seviye kazan ve maskeli bir sinyal bırak. Herkese açık tabloda yalnızca takma ad görünür; Gmail’in gizli kalır.", "ランを伸ばしてレベルを獲得し、マスクされたシグナルを残そう。公開ボードにはエイリアスだけ表示され、Gmailは非公開です。", "冲高你的对局，提升等级并留下掩码信号。公开榜只显示昵称；Gmail 保持私密。", "अपना रन ऊपर ले जाएँ, लेवल पाएँ और मास्क किया सिग्नल छोड़ें। सार्वजनिक बोर्ड पर केवल उपनाम दिखेगा; Gmail निजी रहेगा।"],
         leaderboardRefresh: ["REFRESH BOARD", "تازه‌سازی جدول", "ACTUALIZAR TABLA", "تحديث اللوحة", "ACTUALISER", "BOARD AKTUALISIEREN", "ATUALIZAR QUADRO", "TABLOYU YENİLE", "ボードを更新", "刷新排行榜", "बोर्ड रीफ़्रेश करें"],
         leaderboardNotify: ["ENABLE RECORD ALERTS", "فعال‌سازی اعلان رکورد", "ACTIVAR AVISOS DE RÉCORD", "تفعيل تنبيهات الأرقام القياسية", "ACTIVER LES ALERTES DE RECORD", "REKORD-ALARM AKTIVIEREN", "ATIVAR ALERTAS DE RECORDE", "REKOR UYARILARINI AÇ", "記録通知を有効化", "开启新纪录提醒", "रिकॉर्ड अलर्ट चालू करें"],
-        leaderboardProfileTitle: ["PLAYER ID // PRIVATE GMAIL", "شناسه بازیکن // جیمیل خصوصی", "ID DEL JUGADOR // GMAIL PRIVADO", "معرّف اللاعب // Gmail خاص", "ID JOUEUR // GMAIL PRIVÉ", "SPIELER-ID // PRIVATES GMAIL", "ID DO JOGADOR // GMAIL PRIVADO", "OYUNCU KİMLİĞİ // ÖZEL GMAIL", "プレイヤーID // 非公開Gmail", "玩家 ID // 私密 Gmail", "प्लेयर आईडी // निजी Gmail"],
+        leaderboardProfileTitle: ["PLAYER ID // TELEGRAM VERIFIED", "شناسه بازیکن // تلگرام تأییدشده", "ID DEL JUGADOR // TELEGRAM VERIFICADO", "معرّف اللاعب // TELEGRAM موثّق", "ID JOUEUR // TELEGRAM VÉRIFIÉ", "SPIELER-ID // TELEGRAM BESTÄTIGT", "ID DO JOGADOR // TELEGRAM VERIFICADO", "OYUNCU KİMLİĞİ // TELEGRAM DOĞRULANDI", "プレイヤーID // Telegram認証済み", "玩家 ID // Telegram 已验证", "प्लेयर आईडी // TELEGRAM सत्यापित"],
         leaderboardAliasLabel: ["PUBLIC ALIAS", "نام مستعار عمومی", "ALIAS PÚBLICO", "الاسم المستعار العام", "ALIAS PUBLIC", "ÖFFENTLICHER ALIAS", "ALIAS PÚBLICO", "GENEL TAKMA AD", "公開エイリアス", "公开昵称", "सार्वजनिक उपनाम"],
-        leaderboardEmailLabel: ["GMAIL FOR RECORD CLAIM", "جیمیل برای ثبت رکورد", "GMAIL PARA RECLAMAR EL RÉCORD", "GMAIL للمطالبة بالرقم", "GMAIL POUR REVENDIQUER LE RECORD", "GMAIL FÜR REKORDANSPRUCH", "GMAIL PARA VALIDAR O RECORDE", "REKOR SAHİPLİĞİ İÇİN GMAIL", "記録申請用Gmail", "用于认领纪录的 Gmail", "रिकॉर्ड क्लेम के लिए Gmail"],
+        leaderboardEmailLabel: ["TELEGRAM ACCOUNT", "حساب تلگرام", "CUENTA DE TELEGRAM", "حساب TELEGRAM", "COMPTE TELEGRAM", "TELEGRAM-KONTO", "CONTA DO TELEGRAM", "TELEGRAM HESABI", "Telegramアカウント", "TELEGRAM 账户", "TELEGRAM खाता"],
         leaderboardAliasPlaceholder: ["Legendary Operator", "اپراتور افسانه‌ای", "Operador legendario", "المشغّل الأسطوري", "Opérateur légendaire", "Legendärer Operator", "Operador lendário", "Efsane Operatör", "伝説のオペレーター", "传奇操作员", "लेजेंडरी ऑपरेटर"],
-        leaderboardEmailPlaceholder: ["you@gmail.com", "you@gmail.com", "tu@gmail.com", "you@gmail.com", "vous@gmail.com", "du@gmail.com", "voce@gmail.com", "sen@gmail.com", "you@gmail.com", "you@gmail.com", "you@gmail.com"],
+        leaderboardEmailPlaceholder: ["VERIFIED IN TELEGRAM", "تأییدشده در تلگرام", "VERIFICADA EN TELEGRAM", "موثّق عبر TELEGRAM", "VÉRIFIÉ DANS TELEGRAM", "IN TELEGRAM BESTÄTIGT", "VERIFICADA NO TELEGRAM", "TELEGRAM'DA DOĞRULANDI", "Telegramで認証済み", "已在 TELEGRAM 中验证", "TELEGRAM में सत्यापित"],
         leaderboardSaveProfile: ["SAVE PLAYER ID", "ذخیره شناسه بازیکن", "GUARDAR ID", "حفظ معرّف اللاعب", "ENREGISTRER L’ID", "SPIELER-ID SPEICHERN", "SALVAR ID", "OYUNCU KİMLİĞİNİ KAYDET", "プレイヤーIDを保存", "保存玩家 ID", "प्लेयर आईडी सेव करें"],
         leaderboardClearProfile: ["CLEAR LOCAL ID", "پاک‌کردن شناسه محلی", "BORRAR ID LOCAL", "مسح المعرّف المحلي", "EFFACER L’ID LOCAL", "LOKALE ID LÖSCHEN", "LIMPAR ID LOCAL", "YEREL KİMLİĞİ TEMİZLE", "ローカルIDを消去", "清除本地 ID", "लोकल आईडी साफ़ करें"],
         leaderboardPrivacy: ["Your email is stored locally for claim verification and is never rendered in the board. A production server should verify Gmail ownership before accepting global submissions.", "ایمیل فقط برای تأیید مالکیت محلی ذخیره می‌شود و هرگز در جدول نمایش داده نمی‌شود. سرور واقعی باید مالکیت جیمیل را پیش از ثبت جهانی تأیید کند.", "Tu email se guarda localmente para verificar la reclamación y nunca aparece en la tabla. Un servidor de producción debe verificar la propiedad de Gmail.", "يُحفظ بريدك محلياً للتحقق ولا يُعرض في اللوحة. يجب على الخادم الإنتاجي التحقق من ملكية Gmail قبل قبول الإرسال.", "Votre email est conservé localement pour vérification et n’est jamais affiché. Un serveur de production doit vérifier la propriété du Gmail.", "Deine E-Mail wird lokal zur Prüfung gespeichert und nie im Board angezeigt. Ein Produktionsserver muss die Gmail-Inhaberschaft prüfen.", "Seu email fica local para validação e nunca aparece no quadro. Um servidor de produção deve verificar a posse do Gmail.", "E-postan doğrulama için yerel tutulur ve tabloda gösterilmez. Üretim sunucusu küresel gönderimden önce Gmail sahipliğini doğrulamalı.", "メールは申請確認のため端末内に保存され、ボードには表示されません。本番サーバーはGmail所有権を確認してください。", "邮箱仅本地保存用于认领验证，榜单不会显示。生产服务器应先验证 Gmail 所有权。", "दावा सत्यापन के लिए ईमेल स्थानीय रूप से रखा जाता है और बोर्ड पर नहीं दिखता। प्रोडक्शन सर्वर को Gmail स्वामित्व सत्यापित करना चाहिए।"],
@@ -827,6 +849,53 @@ const LOCALES = {
         for (const code of LOCALE_CODES) {
           const slot = LOCALE_CODES.indexOf(code);
           LOCALES[code][key] = row[slot] || row[0];
+        }
+      }
+      // Telegram is the only online identity provider. Keep the legacy
+      // translation keys for saved builds, but replace their Gmail wording
+      // before the live UI is rendered.
+      const telegramLeaderboardCopy = {
+        en: {
+          leaderboardBody: "Push your run higher, earn a level, and leave a masked signal behind. Public boards show aliases only; your Telegram account stays private.",
+          leaderboardProfileTitle: "PLAYER ID // TELEGRAM VERIFIED",
+          leaderboardEmailLabel: "TELEGRAM ACCOUNT",
+          leaderboardEmailPlaceholder: "Verified in Telegram",
+          leaderboardPrivacy: "Telegram verifies your account inside the Mini App. Only your public alias appears on the board; guest mode stays local to this device.",
+          leaderboardEmpty: "No claimed runs yet. Finish a run and become the first Telegram legend.",
+          leaderboardNeedProfile: "SAVE A PLAYER ALIAS BEFORE CLAIMING A RECORD.",
+          leaderboardInvalidEmail: "USE THE TELEGRAM MINI APP OR A VALID PLAYER ALIAS."
+        },
+        fa: {
+          leaderboardBody: "رکوردت را بالاتر ببر و یک سیگنال ماسک‌شده جا بگذار. در جدول عمومی فقط نام مستعار دیده می‌شود؛ حساب تلگرام خصوصی می‌ماند.",
+          leaderboardProfileTitle: "شناسه بازیکن // تلگرام تأییدشده",
+          leaderboardEmailLabel: "حساب تلگرام",
+          leaderboardEmailPlaceholder: "تأییدشده در تلگرام",
+          leaderboardPrivacy: "تلگرام هویتت را داخل Mini App تأیید می‌کند. در جدول فقط نام مستعار عمومی دیده می‌شود؛ حالت مهمان روی همین دستگاه می‌ماند.",
+          leaderboardEmpty: "هنوز رکوردی ثبت نشده. یک ران را تمام کن و اولین افسانهٔ تلگرامی باش.",
+          leaderboardNeedProfile: "پیش از ثبت رکورد، یک نام مستعار بازیکن ذخیره کن.",
+          leaderboardInvalidEmail: "از Mini App تلگرام یا یک نام مستعار معتبر استفاده کن."
+        }
+      };
+      for (const code of LOCALE_CODES) {
+        Object.assign(LOCALES[code], telegramLeaderboardCopy[code] || {
+          leaderboardBody: telegramLeaderboardCopy.en.leaderboardBody,
+          leaderboardProfileTitle: telegramLeaderboardCopy.en.leaderboardProfileTitle,
+          leaderboardEmailLabel: telegramLeaderboardCopy.en.leaderboardEmailLabel,
+          leaderboardEmailPlaceholder: telegramLeaderboardCopy.en.leaderboardEmailPlaceholder,
+          leaderboardPrivacy: telegramLeaderboardCopy.en.leaderboardPrivacy,
+          leaderboardEmpty: telegramLeaderboardCopy.en.leaderboardEmpty,
+          leaderboardNeedProfile: telegramLeaderboardCopy.en.leaderboardNeedProfile,
+          leaderboardInvalidEmail: telegramLeaderboardCopy.en.leaderboardInvalidEmail
+        });
+        const keys = ["leaderboardBody", "leaderboardProfileTitle", "leaderboardEmailLabel", "leaderboardEmailPlaceholder", "leaderboardPrivacy", "leaderboardEmpty", "leaderboardNeedProfile", "leaderboardInvalidEmail"];
+        for (const key of keys) {
+          if (typeof LOCALES[code][key] === "string") {
+            LOCALES[code][key] = LOCALES[code][key]
+              .replace(/Gmail/gi, "Telegram")
+              .replace(/\bemail\b/gi, "Telegram account")
+              .replace(/\be-mail\b/gi, "Telegram account")
+              .replace(/you@telegram\.com/gi, "Telegram account");
+          }
         }
       }
       let currentLocale = initialLocale;
@@ -1661,6 +1730,7 @@ const DASH_ENERGY_COST = 10;
       let storyTimer = 0, flash = 0, arenaPulse = 0, bossAlive = false, audioCtx = null, explosionSoundCooldown = 0;
       const SETTINGS_COOKIE = "buy_button_signal_settings_v1";
       const LEGACY_SETTINGS_KEYS = ["buy-button-settings-v4"];
+      let settingsHadLocalRecord = false;
       const defaultSettings = {
         zoom: compactDevice ? MOBILE_ZOOM_DEFAULT : 1,
         masterVolume: .7,
@@ -2314,32 +2384,35 @@ const DASH_ENERGY_COST = 10;
       const upgradeLevels = fromEntries(upgrades.map((u) => [u.key, 0]));
       const weapons = [
         { key: "handshake", name: "HANDSHAKE", short: "RAPID", cooldown: .12, damage: 8, speed: 860, spread: .035, pellets: 1, color: ACID, range: 1, pierce: 0, explosive: 0 },
-        { key: "spreadsheet", name: "SPREADSHEET", short: "SPREAD", cooldown: .62, damage: 8, speed: 700, spread: .34, pellets: 7, color: CYAN, range: .82, pierce: 0, explosive: 0 },
+        { key: "spreadsheet", name: "SPREADSHEET", short: "SPREAD", cooldown: .62, damage: 8, speed: 700, spread: .34, pellets: 1, color: CYAN, range: .82, pierce: 0, explosive: 0 },
         { key: "lance", name: "RAGE LANCE", short: "PIERCE", cooldown: 1.0, damage: 46, speed: 1180, spread: .012, pellets: 1, color: VIOLET, range: 1.34, pierce: 4, explosive: 0 },
         { key: "short", name: "SHORT SELL", short: "BOMB", cooldown: .9, damage: 28, speed: 480, spread: .02, pellets: 1, color: HOT, range: .78, pierce: 0, explosive: 74 },
-        { key: "nova", name: "NOVA ARRAY", short: "NOVA", cooldown: 1.05, damage: 17, speed: 620, spread: .48, pellets: 5, color: "#ffb35f", range: .92, pierce: 0, explosive: 34, size: 8 },
+        { key: "nova", name: "NOVA ARRAY", short: "NOVA", cooldown: 1.05, damage: 17, speed: 620, spread: .48, pellets: 1, color: "#ffb35f", range: .92, pierce: 0, explosive: 34, size: 8 },
         { key: "chain", name: "CHAIN LINK", short: "CHAIN", cooldown: .48, damage: 21, speed: 780, spread: .018, pellets: 1, color: "#78e8ff", range: 1.08, pierce: 0, explosive: 0, chain: 2, chainRange: 178, chainFalloff: .62, size: 7 },
         { key: "scythe", name: "PHASE SCYTHE", short: "RETURN", cooldown: 1.15, damage: 58, speed: 760, spread: .012, pellets: 1, color: "#ff72d2", range: 1.5, pierce: 2, explosive: 0, returning: true, returnDistance: 300, size: 11 }
       ];
       const weaponUpgradeLevels = fromEntries(weapons.map((weapon) => [weapon.key, 0]));
       const weaponUpgradeDefs = {
-        handshake: { title: "HANDSHAKE TUNING", tag: "RAPID", color: ACID, base: 82, max: 6, desc: "Tighter cycling and hotter contact damage." },
-        spreadsheet: { title: "SPREADSHEET PATTERN", tag: "SPREAD", color: CYAN, base: 98, max: 6, desc: "Add pellets and compress the cone." },
-        lance: { title: "LANCE CALIBRATION", tag: "PIERCE", color: VIOLET, base: 120, max: 6, desc: "Sharper penetration and heavier impact." },
-        short: { title: "SHORT SELL PAYLOAD", tag: "BLAST", color: HOT, base: 112, max: 6, desc: "Wider, denser detonations with less downtime." },
-        nova: { title: "NOVA ARRAY CELLS", tag: "NOVA", color: "#ffb35f", base: 126, max: 6, desc: "More stars and a larger burst radius." },
-        chain: { title: "CHAIN LINK ROUTING", tag: "CHAIN", color: "#78e8ff", base: 136, max: 6, desc: "Extra jumps and longer signal reach." },
-        scythe: { title: "SCYTHE PHASING", tag: "RETURN", color: "#ff72d2", base: 148, max: 6, desc: "The returning edge cuts deeper and travels farther." }
+        handshake: { title: "HANDSHAKE TUNING", tag: "RAPID", color: ACID, base: 82, max: 8, desc: "Eight levels of cycling, impact control and support fire." },
+        spreadsheet: { title: "SPREADSHEET PATTERN", tag: "SPREAD", color: CYAN, base: 98, max: 8, desc: "Add pellets, compress the cone and unlock a piercing route." },
+        lance: { title: "LANCE CALIBRATION", tag: "PIERCE", color: VIOLET, base: 120, max: 8, desc: "Sharper penetration, heavier impact and a reinforced final stage." },
+        short: { title: "SHORT SELL PAYLOAD", tag: "BLAST", color: HOT, base: 112, max: 8, desc: "Wider, denser detonations and a charged payload chassis." },
+        nova: { title: "NOVA ARRAY CELLS", tag: "NOVA", color: "#ffb35f", base: 126, max: 8, desc: "More stars, larger bursts and a high-tier echo core." },
+        chain: { title: "CHAIN LINK ROUTING", tag: "CHAIN", color: "#78e8ff", base: 136, max: 8, desc: "Extra jumps, longer signal reach and a reinforced relay." },
+        scythe: { title: "SCYTHE PHASING", tag: "RETURN", color: "#ff72d2", base: 148, max: 8, desc: "A deeper returning edge with more reach, impact and echo passes." }
       };
       function weaponProfile(index = player.weapon) {
         const base = weapons[index] || weapons[0];
-        const level = weaponUpgradeLevels[base.key] || 0;
+        const level = Math.max(0, Math.min(8, Math.floor(Number(weaponUpgradeLevels[base.key]) || 0)));
         const profile = { ...base, level };
         if (base.key === "handshake") {
           profile.cooldown *= Math.pow(.93, level);
           profile.damage *= 1 + level * .075;
         } else if (base.key === "spreadsheet") {
           profile.damage *= 1 + level * .06;
+          // Level 1 is a true baseline for every weapon.  Extra projectiles
+          // are earned only after upgrading, so spread/bomb loadouts do not
+          // start with hidden multi-shot power.
           profile.pellets += Math.floor(level / 2);
           profile.spread *= Math.max(.64, 1 - level * .055);
         } else if (base.key === "lance") {
@@ -2351,7 +2424,7 @@ const DASH_ENERGY_COST = 10;
           profile.damage *= 1 + level * .06;
           profile.explosive += level * 10;
         } else if (base.key === "nova") {
-          profile.pellets += Math.floor((level + 1) / 2);
+          profile.pellets += Math.floor(level / 2);
           profile.damage *= 1 + level * .055;
           profile.explosive += level * 7;
           profile.spread *= Math.max(.7, 1 - level * .04);
@@ -2366,7 +2439,47 @@ const DASH_ENERGY_COST = 10;
           profile.returnDistance += level * 52;
           profile.speed *= 1 + level * .035;
         }
+        // Every weapon begins as a single-projectile loadout. Additional
+        // pellets are an earned upgrade and never appear at level 1.
+        if (level <= 1) profile.pellets = 1;
+        // Every weapon now shares a clear eight-step chassis progression.
+        // Weapon-specific tuning above keeps the loadouts distinct; these
+        // milestones make each level visibly and mechanically meaningful.
+        profile.damage *= 1 + level * .043;
+        profile.speed *= 1 + level * .014;
+        const fallbackSize = base.key === "lance" ? 9 : base.key === "short" ? 12 : 5;
+        profile.projectileSize = Math.max(3, Math.min(24, (Number(base.size) || fallbackSize) + level * .42));
+        profile.impact = Math.max(12, Math.min(178, 28 + level * 13 + (base.key === "lance" || base.key === "scythe" ? 22 : 0)));
+        profile.critBonus = Math.min(.12, level * .012);
+        if (level >= 3) profile.pierce += 1;
+        if (level >= 5) {
+          profile.chain = Math.max(Number(profile.chain) || 0, 1);
+          profile.chainRange = Math.max(Number(profile.chainRange) || 0, 128 + level * 12);
+          profile.chainFalloff = Math.max(Number(profile.chainFalloff) || 0, .52);
+        }
+        if (level >= 7) profile.explosive = Math.max(0, Number(profile.explosive) || 0) + 14 + (level - 7) * 8;
+        profile.echo = level >= 8;
         return profile;
+      }
+      function weaponUpgradeMilestone(level = 0) {
+        const safeLevel = Math.max(0, Math.min(8, Math.floor(Number(level) || 0)));
+        if (safeLevel < 3) return { at: 3, title: "PIERCE RELAY", detail: "+1 pass-through" };
+        if (safeLevel < 5) return { at: 5, title: "CHAIN ROUTE", detail: "first chain jump" };
+        if (safeLevel < 7) return { at: 7, title: "MICRO BLAST", detail: "impact detonation" };
+        if (safeLevel < 8) return { at: 8, title: "ECHO CORE", detail: "secondary echo shot" };
+        return { at: 8, title: "SIGNAL PEAK", detail: "all weapon systems online" };
+      }
+      function weaponProfileStatLine(index = player.weapon) {
+        const profile = weaponProfile(index);
+        const parts = [
+          `${Math.round(profile.damage)} DMG`,
+          `${Math.max(1, Number(profile.pellets) || 1)} SHOT`,
+          `${Math.round(Number(profile.impact) || 0)} IMP`
+        ];
+        if (profile.pierce > 0) parts.push(`${profile.pierce} PIERCE`);
+        if (profile.chain > 0) parts.push(`${profile.chain} CHAIN`);
+        if (profile.echo) parts.push("ECHO");
+        return parts.join(" // ");
       }
       const enemyTypes = {
         drone: { name: "DRONE", color: HOT, hp: 23, speed: 58, r: 13, touch: 18, value: 5 },
@@ -2438,11 +2551,37 @@ function resize() {
         const damping = .32 + (1 - progress) * .68;
         return Math.min(limit, value + nominalGain * damping);
       }
-      // Enemy routes use a bounded tactical ring.  This is deliberately
-      // separate from the camera edge calculation: a very wide zoom should
-      // reveal more of the arena, not throw the next target into a distant
-      // coordinate that takes several seconds to reach.
+      // Every relocation uses the actual rectangular camera bounds, rather
+      // than a rough circular "near player" radius.  That keeps a rescue or
+      // new spawn outside the visible frame at every zoom level, including
+      // the deep mobile camera.
+      function enemyViewportPadding(enemy = null, extraPixels = 0) {
+        const spriteRadius = Math.max(0, Number(enemy?.r) || 0);
+        const requested = Math.max(0, Number(extraPixels) || 0);
+        return clamp(58 + spriteRadius * .72 + requested, 58, 190);
+      }
+      function enemyIsVisibleInViewport(enemy, paddingPixels = 0) {
+        if (!enemy || !Number.isFinite(Number(enemy.x)) || !Number.isFinite(Number(enemy.y))) return false;
+        const point = worldToScreen(Number(enemy.x), Number(enemy.y));
+        if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) return false;
+        const padding = enemyViewportPadding(enemy, paddingPixels);
+        return point.x >= -padding && point.x <= W + padding && point.y >= -padding && point.y <= H + padding;
+      }
+      function enemyViewportShellRadius(angle = 0, enemy = null, extra = 0) {
+        const zoom = Math.max(MOBILE_ZOOM_MIN, Number(viewportZoom()) || 1);
+        const safeAngle = Number.isFinite(Number(angle)) ? Number(angle) : Math.random() * Math.PI * 2;
+        const cos = Math.max(.0001, Math.abs(Math.cos(safeAngle)));
+        const sin = Math.max(.0001, Math.abs(Math.sin(safeAngle)));
+        const padding = enemyViewportPadding(enemy, compactDevice ? 20 : 34);
+        const horizontalEdge = (Math.max(1, W) / 2 + padding) / zoom / cos;
+        const verticalEdge = (Math.max(1, H) / 2 + padding) / zoom / sin;
+        const separation = Math.max(0, Number(extra) || 0) + rand(10, compactDevice ? 26 : 44) / zoom;
+        return Math.max(1, Math.min(horizontalEdge, verticalEdge) + separation);
+      }
       function enemyNearRadius(extra = 0) {
+        // Kept as a compatibility helper for older extensions. It is not used
+        // for relocation anymore because a radial value can be inside a wide
+        // rectangular viewport.
         const zoom = Math.max(MOBILE_ZOOM_MIN, Number(viewportZoom()) || 1);
         const shortReach = Math.min(W, H) / (2 * zoom);
         const floor = compactDevice ? 280 : 360;
@@ -2452,15 +2591,17 @@ function resize() {
         return clamp(shortReach * fraction + padding, floor, cap);
       }
       function enemyBoundaryRadius(enemy = null) {
-        const size = Math.max(0, Number(enemy?.r) || 0);
-        const allowance = enemy?.boss ? 520 : enemy?.elite ? 400 : 320;
-        return enemyNearRadius(size * .8) + allowance;
+        const zoom = Math.max(MOBILE_ZOOM_MIN, Number(viewportZoom()) || 1);
+        const padding = enemyViewportPadding(enemy, 26);
+        const visibleCorner = Math.hypot((Math.max(1, W) / 2 + padding) / zoom, (Math.max(1, H) / 2 + padding) / zoom);
+        const leash = enemy?.boss ? 920 : enemy?.elite ? 680 : 450;
+        // At an intentionally wide mobile zoom, use a proportionally longer
+        // physical leash so an enemy has time to leave the frame naturally.
+        const zoomLeash = compactDevice ? clamp(MOBILE_ZOOM_REFERENCE / zoom, 1, 5.5) : 1;
+        return visibleCorner + leash * zoomLeash;
       }
       function enemyRespawnRadius(enemy = null) {
-        const size = Math.max(0, Number(enemy?.r) || 0);
-        const floor = compactDevice ? 270 : 330;
-        const cap = compactDevice ? 820 : 1180;
-        return clamp(enemyNearRadius(size * 1.5), floor, cap);
+        return enemyViewportShellRadius(0, enemy, compactDevice ? 28 : 42);
       }
       function respawnEnemyNearPlayer(enemy, reason = "boundary") {
         if (!enemy || !player
@@ -2468,19 +2609,31 @@ function resize() {
           || !Number.isFinite(Number(player.y))) return false;
         const x = Number(enemy.x);
         const y = Number(enemy.y);
-        const dx = x - player.x;
-        const dy = y - player.y;
+        const hasPosition = Number.isFinite(x) && Number.isFinite(y);
+        // Never move a rendered enemy. A pending rescue is held until the
+        // enemy is outside the camera, so the player cannot observe a
+        // teleport from a bomb, knockback or recovery pass.
+        if (hasPosition && enemyIsVisibleInViewport(enemy, 8) && reason !== "invalid") {
+          enemy.bbRespawnPending = true;
+          enemy.bbRespawnReason = reason;
+          return false;
+        }
+        const dx = hasPosition ? x - player.x : 0;
+        const dy = hasPosition ? y - player.y : 0;
         let angle = Math.atan2(dy, dx);
         if (!Number.isFinite(angle)) angle = Math.random() * Math.PI * 2;
-        const radius = enemyRespawnRadius(enemy);
+        const radius = enemyViewportShellRadius(angle, enemy, compactDevice ? 28 : 42);
         enemy.x = player.x + Math.cos(angle) * radius;
         enemy.y = player.y + Math.sin(angle) * radius;
         // A rescued target starts cleanly; otherwise the old impulse could
         // immediately fling it back outside the leash on the next frame.
         enemy.knockX = 0;
         enemy.knockY = 0;
-        enemy.stun = Math.min(Math.max(0, Number(enemy.stun) || 0), .2);
+        enemy.stun = Math.min(Math.max(0, Number(enemy.stun) || 0), .16);
         enemy.catchup = 0;
+        enemy.bbEntryRush = true;
+        enemy.bbEntryGrace = Math.max(Number(enemy.bbEntryGrace) || 0, enemy.boss ? .62 : .4);
+        enemy.bbRespawnPending = false;
         enemy.bbRespawnReason = reason;
         try {
           if (typeof bbRuntimeSafety !== "undefined" && bbRuntimeSafety) {
@@ -2497,49 +2650,46 @@ function resize() {
           const dx = Number(enemy.x) - Number(player.x);
           const dy = Number(enemy.y) - Number(player.y);
           const distance = Math.hypot(dx, dy);
-          if (!Number.isFinite(distance) || distance > enemyBoundaryRadius(enemy)) {
-            if (respawnEnemyNearPlayer(enemy, Number.isFinite(distance) ? "far" : "invalid")) rescued++;
+          const invalid = !Number.isFinite(distance);
+          const pending = !!enemy.bbRespawnPending;
+          if (invalid || pending || distance > enemyBoundaryRadius(enemy)) {
+            const reason = invalid ? "invalid" : pending ? (enemy.bbRespawnReason || "pending") : "far";
+            if (respawnEnemyNearPlayer(enemy, reason)) rescued++;
           }
         }
         return rescued;
       }
       function enemyEntryRadius(extra = 0, angle = 0) {
-        // Keep hostiles in a tactical arrival ring. The old edge-only formula
-        // became enormous at the mobile 5% camera (thousands of world units),
-        // so a phone could spend several seconds waiting for the first target
-        // to cross the arena. Prefer a near ring while retaining an angle-aware
-        // edge calculation as the upper bound.
-        const zoom = Math.max(MOBILE_ZOOM_MIN, viewportZoom());
-        const deepZoom = clamp((.32 - zoom) / (.32 - MOBILE_ZOOM_MIN), 0, 1);
-        const cos = Math.max(.0001, Math.abs(Math.cos(angle)));
-        const sin = Math.max(.0001, Math.abs(Math.sin(angle)));
-        const edgeDistance = Math.min(W / 2 / cos, H / 2 / sin) / zoom;
-        const margin = (compactDevice ? 22 + deepZoom * 12 : 70) / zoom;
-        const edgeTarget = edgeDistance + margin + extra + rand(0, 34) / zoom;
-        const shortReach = Math.min(W, H) / (2 * zoom);
-        // At normal zoom this sits just outside the short edge. As the camera
-        // opens, the preferred ring grows only gently instead of tracking the
-        // full visible world, keeping enemies close and immediately readable.
-        const nearFraction = compactDevice ? .60 - deepZoom * .24 : .72;
-        const nearFloor = compactDevice ? 280 : 360;
-        const nearCap = compactDevice ? 900 : 1350;
-        const tacticalTarget = clamp(shortReach * nearFraction, nearFloor, nearCap);
-        const entryTarget = Math.min(edgeTarget, tacticalTarget);
-        const entryCap = compactDevice ? 980 : 1600;
-        return clamp(entryTarget, 300, entryCap);
+        return enemyViewportShellRadius(angle, null, extra);
       }
       function enemyCatchupMultiplier(enemy, distance) {
-        // Long routes should resolve quickly, but close/ranged enemies still
-        // need room to telegraph their patterns.  The ramp is based on the
-        // visible world reach so it remains consistent at every zoom level.
-        const zoom = viewportZoom();
+        // Long routes resolve quickly, but only as a physical approach from
+        // outside the camera. The entry boost is cleared as soon as the
+        // enemy crosses into view; no one is teleported into combat.
+        const zoom = Math.max(MOBILE_ZOOM_MIN, Number(viewportZoom()) || 1);
         const visibleReach = Math.max(W, H) / (2 * zoom);
         const start = Math.max(240, visibleReach * .58);
         const span = Math.max(220, visibleReach * .64);
         const progress = clamp((distance - start) / span, 0, 1);
         const roleBoost = enemy?.boss ? .5 : enemy?.ranged ? .78 : enemy?.elite ? .98 : 1.18;
+        let entryBoost = 1;
+        if (enemy?.bbEntryRush) {
+          if (enemyIsVisibleInViewport(enemy, 0)) {
+            enemy.bbEntryRush = false;
+          } else {
+            const point = worldToScreen(enemy.x, enemy.y);
+            const overflow = Math.max(
+              0,
+              -point.x,
+              point.x - W,
+              -point.y,
+              point.y - H
+            );
+            entryBoost = 2.05 + clamp(overflow / Math.max(1, Math.max(W, H)), 0, 1) * 1.2;
+          }
+        }
         if (enemy) enemy.catchup = progress;
-        return 1 + progress * progress * roleBoost;
+        return (1 + progress * progress * roleBoost) * entryBoost;
       }
       function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
       function segmentDistance(px, py, x1, y1, x2, y2) {
@@ -2822,6 +2972,7 @@ function resize() {
             storedSettings = row ? parseSettingsPayload(row.slice(prefix.length), true) : null;
           } catch (_) {}
         }
+        settingsHadLocalRecord = !!storedSettings;
         normalizeSettings(storedSettings || defaultSettings);
         // Migrate an untouched desktop-sized profile the first time it is
         // opened on a phone.  Once the player changes the zoom slider, the
@@ -2853,6 +3004,7 @@ function resize() {
             window.localStorage.setItem(SETTINGS_COOKIE, serialized);
           }
         } catch (_) {}
+        bbEmitCloudChange("settings", { ...gameSettings }, gameSettings.updatedAt);
       }
 
       function readSettingsControls() {
@@ -3195,6 +3347,26 @@ function startWave(next) {
         haptic(12);
       }
       function aimAngle() {
+        // Automatic control owns the firing vector.  A moving/held mouse is
+        // still allowed to provide input for manual mode, but no pointer or
+        // controller aim input may override the selected AI target while
+        // auto-fire is enabled.
+        if (typeof aimAssist !== "undefined" && aimAssist) {
+          const automaticTarget = typeof bbResolveAutomaticTarget === "function"
+            ? bbResolveAutomaticTarget()
+            : lockTarget && lockTarget.alive
+              ? lockTarget
+              : (Array.isArray(enemies)
+                ? enemies.filter((enemy) => enemy?.alive)
+                  .sort((left, right) => dist(left, player) - dist(right, player))[0]
+                : null);
+          if (automaticTarget?.alive) {
+            return Math.atan2(automaticTarget.y - player.y, automaticTarget.x - player.x);
+          }
+          // No AI target means no meaningful automatic firing direction. Do
+          // not fall through to the mouse position in this mode.
+          return -Math.PI / 2;
+        }
         if (gamepadInput.aimActive) return gamepadAimAngle;
         // A held mouse / right-side touch must aim where the player points.
         // Smart targeting remains the relaxed default whenever no manual
@@ -3269,7 +3441,13 @@ function startWave(next) {
       }
       function fire() {
         if (state !== "playing" || player.cooldown > 0) return;
-        const target = lockTarget && lockTarget.alive ? lockTarget : nearestEnemy();
+        const automaticControl = typeof aimAssist !== "undefined" && !!aimAssist;
+        const target = automaticControl && typeof bbResolveAutomaticTarget === "function"
+          ? bbResolveAutomaticTarget()
+          : lockTarget && lockTarget.alive
+            ? lockTarget
+            : nearestEnemy();
+        if (!target && automaticControl) return;
         if (!target && !pointer.down && !keys.Space && !mobileFireHeld && !gamepadInput.fire) return;
         const w = weaponProfile(player.weapon);
         const tempo = zoomTempoScale();
@@ -3291,6 +3469,7 @@ function startWave(next) {
           const travelLife = w.returning
             ? Math.min(3.8, maxLife + returnDistance / Math.max(1, projectileSpeed) * 1.35)
             : maxLife;
+          const projectileSize = w.projectileSize || (w.key === "lance" ? 9 : w.key === "short" ? 12 : 5);
           bullets.push({
             x: player.x + Math.cos(angle) * 22,
             y: player.y + Math.sin(angle) * 22,
@@ -3303,7 +3482,7 @@ function startWave(next) {
             life: travelLife,
             maxTravel: range,
             traveled: 0,
-            size: w.size || (w.key === "lance" ? 9 : w.key === "short" ? 12 : 5),
+            size: projectileSize,
             damage: w.damage * player.damage * (w.pellets > 1 ? .78 : 1),
             color: w.color,
             pierce: w.pierce,
@@ -3315,6 +3494,10 @@ function startWave(next) {
             returning: !!w.returning,
             returnDistance,
             returningNow: false,
+            weaponLevel: w.level || 0,
+            bbWeaponImpact: w.impact || 0,
+            bbWeaponCrit: w.critBonus || 0,
+            bbWeaponEcho: false,
             hit: []
           });
         }
@@ -3390,7 +3573,10 @@ function startWave(next) {
         const speed = player.speed * zoomTempoScale() * (player.dash > 0 ? DASH_SPEED_MULTIPLIER : 1);
         player.x += mx * speed * dt; player.y += my * speed * dt;
         if (player.dash > 0) player.dash -= dt; if (player.invuln > 0) player.invuln -= dt;
-        if (pointer.down || keys.Space || gamepadInput.fire || mobileFireHeld) fire();
+        // Auto-fire is self-contained. Mouse/touch/keyboard trigger state
+        // must not add a second firing path or make Auto behave like manual.
+        if (!(typeof aimAssist !== "undefined" && aimAssist)
+          && (pointer.down || keys.Space || gamepadInput.fire || mobileFireHeld)) fire();
         if (spawnTimer > 0) spawnTimer -= dt;
         if (waveRemaining > 0 && spawnTimer <= 0 && aliveCount(enemies) < mobileBaseSpawnCap()) {
           spawnEnemy();
@@ -3457,7 +3643,8 @@ function startWave(next) {
            }
            if (e.stun > 0) move *= .12;
            e.x += dx / d * move * dt; e.y += dy / d * move * dt; e.phase += dt * 2.4; e.hit = Math.max(0, e.hit - dt);
-          if (e.ranged) {
+          e.bbEntryGrace = Math.max(0, (Number(e.bbEntryGrace) || 0) - dt);
+          if (e.ranged && e.bbEntryGrace <= 0) {
             e.shotTimer -= dt;
             if (e.shotTimer <= 0) {
               e.shotTimer = Math.max(.62, 1.9 - wave * .045) + Math.random() * .8;
@@ -3465,7 +3652,7 @@ function startWave(next) {
               const bulletColor = enemyTypes[e.type]?.color || HOT;
               const projectileSpeed = 260 * mobileProjectileScale();
               const tunedProjectileSpeed = projectileSpeed * zoomTempoScale();
-              pushEnemyBullet({ x: e.x, y: e.y, vx: Math.cos(a) * tunedProjectileSpeed, vy: Math.sin(a) * tunedProjectileSpeed, r: e.type === "warden" ? 8 : 6, life: 4, damage: e.type === "hunter" ? 12 : e.type === "warden" ? 15 : 8, color: bulletColor, kind: e.type });
+              pushEnemyBullet({ x: e.x, y: e.y, vx: Math.cos(a) * tunedProjectileSpeed, vy: Math.sin(a) * tunedProjectileSpeed, r: e.type === "warden" ? 8 : 6, life: 4, damage: (e.type === "hunter" ? 12 : e.type === "warden" ? 15 : 8) * Math.max(.1, Number(e.bbHardcoreDamageScale) || 1), color: bulletColor, kind: e.type, bbHardcoreDamageApplied: true });
             }
           }
           const contactDistance = segmentDistance(player.x, player.y, previousX, previousY, e.x, e.y);
@@ -3896,6 +4083,46 @@ function startWave(next) {
         } else {
           ctx.fillRect(0, -3, 21, 6);
           ctx.beginPath(); ctx.arc(22, 0, 4, 0, Math.PI * 2); ctx.fill();
+        }
+        // Upgrade hardware is intentionally visible on every weapon, not
+        // only in its damage number. More bands, relay lines and the final
+        // echo core appear as the player invests in the loadout.
+        if (weaponLevel > 0) {
+          const modules = Math.min(4, Math.ceil(weaponLevel / 2));
+          ctx.save();
+          ctx.globalAlpha = .32 + Math.min(.48, weaponLevel * .055);
+          ctx.strokeStyle = "#fff7c2";
+          ctx.shadowBlur = weaponFlash ? 18 : 8;
+          ctx.shadowColor = weaponColor;
+          ctx.lineWidth = 1.25;
+          for (let moduleIndex = 0; moduleIndex < modules; moduleIndex++) {
+            const moduleX = 5 + moduleIndex * 5.2;
+            ctx.beginPath();
+            ctx.moveTo(moduleX, -7 - (weaponLevel >= 5 ? 1.5 : 0));
+            ctx.lineTo(moduleX, 7 + (weaponLevel >= 5 ? 1.5 : 0));
+            ctx.stroke();
+          }
+          if (weaponLevel >= 5) {
+            ctx.globalAlpha = .42;
+            ctx.beginPath();
+            ctx.arc(15, 0, 15 + weaponLevel * .55, -Math.PI * .68, Math.PI * .68);
+            ctx.stroke();
+          }
+          if (weaponLevel >= 7) {
+            ctx.globalAlpha = .72;
+            ctx.fillStyle = HOT;
+            ctx.beginPath();
+            ctx.arc(27, 0, 3.5 + (weaponLevel - 7) * 1.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          if (weaponLevel >= 8) {
+            ctx.globalAlpha = .88;
+            ctx.fillStyle = "#fff7c2";
+            ctx.beginPath();
+            ctx.arc(9, 0, 3.4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
         }
         ctx.restore();
           ctx.fillStyle = "#050607"; ctx.font = "800 17px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("BUY", 0, 1);
@@ -4548,12 +4775,12 @@ const menuArt = document.querySelector(".menu-art");
           pointer.id = e.pointerId;
           pointer.x = e.clientX;
           pointer.y = e.clientY;
-          hardLockTarget ||= nearestEnemy();
-          if (!touchLike) {
-            desktopFireHeld = true;
-            desktopFirePointerId = e.pointerId;
-            syncPointerFire();
-            fire();
+           if (!(typeof aimAssist !== "undefined" && aimAssist)) hardLockTarget ||= nearestEnemy();
+           if (!touchLike) {
+             desktopFireHeld = true;
+             desktopFirePointerId = e.pointerId;
+             syncPointerFire();
+             if (!(typeof aimAssist !== "undefined" && aimAssist)) fire();
           } else {
             // Touch on the arena is aim-only. The trigger is the explicit
             // PRESS // FIRE button so movement and aiming fingers stay safe.
@@ -4608,11 +4835,11 @@ const menuArt = document.querySelector(".menu-art");
           pointer.id = "mouse";
           pointer.x = e.clientX;
           pointer.y = e.clientY;
-          desktopFireHeld = true;
-          desktopFirePointerId = "mouse";
-          syncPointerFire();
-          hardLockTarget ||= nearestEnemy();
-          fire();
+           desktopFireHeld = true;
+           desktopFirePointerId = "mouse";
+           syncPointerFire();
+           if (!(typeof aimAssist !== "undefined" && aimAssist)) hardLockTarget ||= nearestEnemy();
+           if (!(typeof aimAssist !== "undefined" && aimAssist)) fire();
         });
         window.addEventListener("mouseup", () => endPointer({ pointerId: "mouse" }));
         canvas.addEventListener("touchstart", (e) => {
@@ -4631,7 +4858,7 @@ const menuArt = document.querySelector(".menu-art");
               legacyTouchRoles.set(id, "aim");
               aimPointerIds.add(id);
               pointer.id = id; pointer.x = touch.clientX; pointer.y = touch.clientY;
-              hardLockTarget ||= nearestEnemy();
+               if (!(typeof aimAssist !== "undefined" && aimAssist)) hardLockTarget ||= nearestEnemy();
               syncPointerFire();
             }
           }
@@ -5161,13 +5388,17 @@ const menuArt = document.querySelector(".menu-art");
           const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
           if (d < blastRadius + e.r) {
             const falloff = 1 - Math.min(1, d / (blastRadius + e.r)) * .48;
-            const impulseX = (e.knockX || 0) + dx / d * (ENEMY_KNOCKBACK_SPEED * falloff);
-            const impulseY = (e.knockY || 0) + dy / d * (ENEMY_KNOCKBACK_SPEED * falloff);
+            // Bosses absorb almost all blast displacement. The damage still
+            // lands, but a Margin Call cannot punt a boss across the map and
+            // trigger a visible rescue/respawn.
+            const knockbackResistance = e.boss ? .055 : e.elite ? .46 : 1;
+            const impulseX = (e.knockX || 0) + dx / d * (ENEMY_KNOCKBACK_SPEED * falloff * knockbackResistance);
+            const impulseY = (e.knockY || 0) + dy / d * (ENEMY_KNOCKBACK_SPEED * falloff * knockbackResistance);
             const impulseMagnitude = Math.hypot(impulseX, impulseY) || 1;
             const impulseScale = Math.min(1, ENEMY_KNOCKBACK_CAP / impulseMagnitude);
             e.knockX = impulseX * impulseScale;
             e.knockY = impulseY * impulseScale;
-            e.stun = Math.max(e.stun || 0, .75 + falloff * .9);
+            e.stun = Math.max(e.stun || 0, (.75 + falloff * .9) * (e.boss ? .09 : e.elite ? .45 : 1));
             // Route blast damage through the same wrapper as bullets. This
             // keeps critical hits, boss armor/phase windows, XP, combo and
             // reward accounting consistent for every source of damage.
@@ -5443,12 +5674,15 @@ const menuArt = document.querySelector(".menu-art");
         if (e.scammerGlitchTimer <= 0 && e.scammerTeleportCooldown <= 0) {
           const previousX = e.x, previousY = e.y;
           const angle = Math.atan2(e.y - player.y, e.x - player.x) + Math.PI + rand(-.62, .62);
-          const radius = clamp(330 + wave * 13 + rand(-34, 54), 300, 620);
+          const radius = enemyViewportShellRadius(angle, e, compactDevice ? 28 : 42);
           e.x = player.x + Math.cos(angle) * radius;
           e.y = player.y + Math.sin(angle) * radius;
+          e.bbEntryRush = true;
+          e.bbEntryGrace = Math.max(Number(e.bbEntryGrace) || 0, .62);
           e.scammerShieldTimer = phase === 2 ? .96 : .78;
           e.scammerGlitchTimer = phase === 2 ? 2.75 : 4.25;
           e.scammerTeleportCooldown = phase === 2 ? 1.55 : 2.15;
+          e.scammerPatternTimer = Math.max(e.scammerPatternTimer, .55);
           const decoyCount = phase === 2 ? 3 : 2;
           for (let i = 0; i < decoyCount; i++) {
             spawnScammerDecoy(previousX + rand(-52, 52), previousY + rand(-52, 52), 2.45 + i * .35);
@@ -5536,9 +5770,12 @@ const menuArt = document.querySelector(".menu-art");
         } else if (affix.key === "phaseShift") {
           const previousX = e.x, previousY = e.y;
           const angle = Math.atan2(e.y - player.y, e.x - player.x) + Math.PI + rand(-.9, .9);
-          const radius = clamp(300 + wave * 9 + rand(-45, 65), 280, 560);
+          const radius = enemyViewportShellRadius(angle, e, compactDevice ? 28 : 42);
           e.x = player.x + Math.cos(angle) * radius;
           e.y = player.y + Math.sin(angle) * radius;
+          e.bbEntryRush = true;
+          e.bbEntryGrace = Math.max(Number(e.bbEntryGrace) || 0, .58);
+          e.bossTimer = Math.max(Number(e.bossTimer) || 0, .48);
           e.shiftFlash = .72;
           e.affixTimer = phase === 2 ? 2.9 : 4.1;
           v3BlastRings.push({ x: previousX, y: previousY, r: 10, max: 78, life: .48, color: CYAN });
@@ -5555,6 +5792,9 @@ const menuArt = document.querySelector(".menu-art");
 
       function v3BossPattern(e, dt) {
         if (!e || !e.alive || !e.boss) return;
+        // A boss phase shift is routed through the off-screen entry shell.
+        // Do not let it fire from that hidden transit position.
+        if (e.bbEntryGrace > 0) return;
         const profile = v3BossProfiles[e.bossKind];
         e.bossTimer -= dt;
         e.bossAngle += dt * (e.bossPattern === "orbit" ? 1.2 : .55);
@@ -5941,6 +6181,7 @@ const menuArt = document.querySelector(".menu-art");
             window.localStorage.setItem(SAVE_COOKIE, serialized);
           }
         } catch (_) {}
+        bbEmitCloudChange("archive", { ...archive }, archive.updatedAt);
       }
       function refreshArchiveUi() {
         const bestScore = Math.floor(archive.bestScore || 0);
@@ -5956,27 +6197,44 @@ const menuArt = document.querySelector(".menu-art");
         }
       }
 
-      // LEGENDS BOARD // LOCAL-FIRST COMPETITIVE IDENTITY
-      // A standalone HTML file cannot prove Gmail ownership or broadcast to
-      // players on unrelated devices by itself. The local board therefore
-      // remains fully playable offline (and syncs across same-origin tabs),
-      // while an optional API/SSE bridge can be enabled by assigning
-      // `window.BUY_BUTTON_LEADERBOARD_API` before this file loads. The
-      // server contract is intentionally small:
-      //   GET  /leaderboard?limit=50       -> { entries: [...] }
-      //   POST /leaderboard                <- alias, emailHash, score, wave,
-      //                                      coins, level, clientNonce
-      //   SSE  /leaderboard/stream         -> one entry per `message` event
-      // A production server must verify Gmail ownership itself; the
-      // client-side hash is an identifier, not an authentication mechanism.
+      // LEGENDS BOARD // LOCAL-FIRST + TELEGRAM IDENTITY
+      // The local board remains playable in guest mode and synchronizes across
+      // same-origin tabs. Inside Telegram, the verified session is the record
+      // identity and the same-origin API persists the best run globally.
+      // `emailHash` is retained only as a private legacy field name so old
+      // local records can still be read; no email is requested or transmitted.
       const LEADERBOARD_STORAGE_KEY = "buy_button_legends_board_v1";
       const LEADERBOARD_PROFILE_KEY = "buy_button_legends_profile_v1";
+      const LEADERBOARD_GUEST_ID_KEY = "buy_button_legends_guest_id_v1";
       const LEADERBOARD_CHANNEL_NAME = "buy_button_legends_channel_v1";
       const LEADERBOARD_LIMIT = 50;
-      const LEADERBOARD_API = String(window.BUY_BUTTON_LEADERBOARD_API || "").trim().replace(/\/+$/, "");
+      const leaderboardTelegramCandidate = window.Telegram?.WebApp || null;
+      const leaderboardTelegramContext = !!(
+        leaderboardTelegramCandidate
+        && (
+          String(leaderboardTelegramCandidate.initData || "").trim()
+          || leaderboardTelegramCandidate.initDataUnsafe?.user
+          || window.TelegramWebviewProxy
+          || /Telegram/i.test(String(window.navigator?.userAgent || ""))
+        )
+      );
+      const LEADERBOARD_API = (() => {
+        const configured = String(
+          window.BUY_BUTTON_LEADERBOARD_API
+            || (leaderboardTelegramContext ? "/api" : "")
+        ).trim();
+        if (!configured) return "";
+        try {
+          const url = new URL(configured, window.location.href);
+          if (url.origin !== window.location.origin) return "";
+          return url.pathname.replace(/\/+$/, "");
+        } catch (_) {
+          return "";
+        }
+      })();
       const leaderboardClientId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
       let leaderboardEntries = [];
-      let leaderboardProfile = { alias: "", email: "" };
+      let leaderboardProfile = { alias: "" };
       let leaderboardChannel = null;
       let leaderboardEventSource = null;
       let leaderboardTransportReady = false;
@@ -5999,27 +6257,84 @@ const menuArt = document.querySelector(".menu-art");
       function normalizeLeaderboardAlias(value) {
         return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, 24);
       }
-      function normalizeLeaderboardEmail(value) {
-        return String(value ?? "").trim().toLowerCase();
+      function leaderboardTelegramPlayer() {
+        const account = window.__BUY_BUTTON_ACCOUNT__;
+        const player = account?.authenticated ? account.player : null;
+        return player && (player.id || player.telegramId) ? player : null;
       }
-      function validLeaderboardGmail(value) {
-        return /^[^\s@]+@(?:gmail\.com|googlemail\.com)$/i.test(normalizeLeaderboardEmail(value));
+      function leaderboardGuestId() {
+        let value = "";
+        try { value = String(window.localStorage?.getItem(LEADERBOARD_GUEST_ID_KEY) || ""); } catch (_) {}
+        if (!value) {
+          try {
+            value = typeof window.crypto?.randomUUID === "function"
+              ? window.crypto.randomUUID()
+              : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+            window.localStorage?.setItem(LEADERBOARD_GUEST_ID_KEY, value);
+          } catch (_) {
+            value = `guest-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+          }
+        }
+        return value.slice(0, 96);
       }
-      function maskLeaderboardEmail(value) {
-        const email = normalizeLeaderboardEmail(value);
-        if (!validLeaderboardGmail(email)) return "GMAIL •••••";
-        const [local, domain] = email.split("@");
-        if (local.length <= 2) return `${local.slice(0, 1)}•••@${domain}`;
-        return `${local.slice(0, 1)}•••${local.slice(-1)}@${domain}`;
+      function leaderboardIdentity() {
+        const player = leaderboardTelegramPlayer();
+        if (player) {
+          const value = String(player.id || player.telegramId);
+          return {
+            type: "telegram",
+            value,
+            hash: value.replace(/[^a-z0-9_-]/gi, "").slice(0, 80),
+            label: player.username ? `TELEGRAM // @${player.username}` : "TELEGRAM ACCOUNT"
+          };
+        }
+        const value = leaderboardGuestId();
+        return {
+          type: "guest",
+          value,
+          hash: leaderboardHash(`guest:${value}`),
+          label: "GUEST // THIS DEVICE"
+        };
+      }
+      function leaderboardIdentityLabel() {
+        const identity = leaderboardIdentity();
+        return currentLocale === "fa"
+          ? identity.type === "telegram" ? "تلگرام // حساب تأییدشده" : "مهمان // همین دستگاه"
+          : identity.label;
       }
       function leaderboardProfileHash(profile = leaderboardProfile) {
-        const email = normalizeLeaderboardEmail(profile?.email);
-        return validLeaderboardGmail(email) ? leaderboardHash(`buy-button-v4:${email}`) : "";
+        return leaderboardIdentity().hash;
+      }
+      function leaderboardEffectiveAlias() {
+        return normalizeLeaderboardAlias(
+          leaderboardProfile.alias
+            || leaderboardTelegramPlayer()?.publicAlias
+            || [leaderboardTelegramPlayer()?.firstName, leaderboardTelegramPlayer()?.lastName].filter(Boolean).join(" ")
+        );
+      }
+      function localizeLeaderboardRemoteEntry(raw) {
+        const player = leaderboardTelegramPlayer();
+        if (!player || !raw || typeof raw !== "object") return raw;
+        const serverPlayerId = String(player.id || "").trim();
+        const remoteId = String(raw.id || raw.playerHash || "").trim();
+        if (!serverPlayerId || !remoteId || remoteId !== serverPlayerId) return raw;
+        const localHash = leaderboardIdentity().hash;
+        if (!localHash) return raw;
+        // The API intentionally returns an opaque database UUID. Keep one
+        // stable local key for the verified Telegram account so a remote
+        // refresh never creates a duplicate "me" row beside the local row.
+        return { ...raw, id: localHash, emailHash: localHash, playerHash: localHash };
       }
       function leaderboardLevelFor(scoreValue, waveValue) {
         const scorePart = Math.max(0, Number(scoreValue) || 0) / 1200;
         const wavePart = Math.max(0, Number(waveValue) || 0) * .55;
         return clamp(1 + Math.floor(scorePart + wavePart), 1, 99);
+      }
+      function leaderboardTimestamp(value, fallback = Date.now()) {
+        const numeric = Number(value);
+        if (Number.isFinite(numeric) && numeric > 0) return Math.floor(numeric);
+        const parsed = Date.parse(String(value || ""));
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
       }
       function normalizeLeaderboardEntry(raw) {
         if (!raw || typeof raw !== "object") return null;
@@ -6028,7 +6343,7 @@ const menuArt = document.querySelector(".menu-art");
         const scoreValue = clamp(Math.floor(Number(raw.score) || 0), 0, 1000000000000);
         const waveValue = clamp(Math.floor(Number(raw.wave) || 0), 0, 100000);
         const coinsValue = clamp(Math.floor(Number(raw.coins ?? raw.value) || 0), 0, 1000000000000);
-        const createdAt = Math.max(0, Math.floor(Number(raw.createdAt) || Date.now()));
+        const createdAt = leaderboardTimestamp(raw.createdAt);
         const levelValue = leaderboardLevelFor(scoreValue, waveValue);
         return {
           id: String(raw.id || emailHash).slice(0, 90),
@@ -6039,13 +6354,14 @@ const menuArt = document.querySelector(".menu-art");
           coins: coinsValue,
           level: levelValue,
           createdAt,
-          updatedAt: Math.max(createdAt, Math.floor(Number(raw.updatedAt) || createdAt))
+          updatedAt: Math.max(createdAt, leaderboardTimestamp(raw.updatedAt, createdAt))
         };
       }
       function compareLeaderboardEntries(a, b) {
         return (Number(b.score) || 0) - (Number(a.score) || 0)
           || (Number(b.wave) || 0) - (Number(a.wave) || 0)
           || (Number(b.level) || 0) - (Number(a.level) || 0)
+          || (Number(b.coins) || 0) - (Number(a.coins) || 0)
           || (Number(a.createdAt) || 0) - (Number(b.createdAt) || 0)
           || String(a.emailHash || "").localeCompare(String(b.emailHash || ""));
       }
@@ -6066,15 +6382,13 @@ const menuArt = document.querySelector(".menu-art");
         const source = candidates.find((entry) => parseLeaderboardPayload(entry.raw))?.raw;
         const parsed = parseLeaderboardPayload(source);
         const alias = normalizeLeaderboardAlias(parsed?.alias);
-        const email = normalizeLeaderboardEmail(parsed?.email);
-        leaderboardProfile = { alias, email };
+        leaderboardProfile = { alias };
         return leaderboardProfile;
       }
       function persistLeaderboardProfile() {
         const payload = JSON.stringify({
           version: 1,
           alias: normalizeLeaderboardAlias(leaderboardProfile.alias),
-          email: normalizeLeaderboardEmail(leaderboardProfile.email),
           updatedAt: Date.now()
         });
         let stored = false;
@@ -6186,9 +6500,9 @@ const menuArt = document.querySelector(".menu-art");
       }
       syncLeaderboardProfileFields = function() {
         const aliasField = $("leaderboardAlias");
-        const emailField = $("leaderboardEmail");
         if (aliasField && document.activeElement !== aliasField) aliasField.value = leaderboardProfile.alias || "";
-        if (emailField && document.activeElement !== emailField) emailField.value = leaderboardProfile.email || "";
+        const identityNode = $("leaderboardTelegramIdentity");
+        if (identityNode) identityNode.textContent = leaderboardIdentityLabel();
         const notifyButton = $("notifyLeaderboardBtn");
         if (notifyButton && typeof window.Notification === "function" && Notification.permission === "granted") {
           notifyButton.textContent = `${translate("leaderboardNotify")} ✓`;
@@ -6258,7 +6572,7 @@ const menuArt = document.querySelector(".menu-art");
         const timeout = window.setTimeout(() => controller?.abort(), 4800);
         try {
           const response = await window.fetch(url, {
-            credentials: "omit",
+            credentials: "same-origin",
             cache: "no-store",
             ...options,
             signal: controller?.signal
@@ -6296,7 +6610,7 @@ const menuArt = document.querySelector(".menu-art");
         try { leaderboardChannel?.postMessage(packet); } catch (_) {}
       }
       function acceptIncomingLeaderboardRecord(raw, external = true) {
-        const result = upsertLeaderboardEntry(raw);
+        const result = upsertLeaderboardEntry(localizeLeaderboardRemoteEntry(raw));
         if (!result.changed) return result;
         persistLeaderboardEntries();
         if (leaderboard && !leaderboard.classList.contains("hidden")) renderLeaderboard();
@@ -6320,7 +6634,7 @@ const menuArt = document.querySelector(".menu-art");
           let changed = false;
           if (Array.isArray(rows)) {
             for (const row of rows) {
-              const result = upsertLeaderboardEntry(row);
+              const result = upsertLeaderboardEntry(localizeLeaderboardRemoteEntry(row));
               changed ||= result.changed;
             }
           }
@@ -6341,17 +6655,16 @@ const menuArt = document.querySelector(".menu-art");
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               alias: entry.alias,
-              emailHash: entry.emailHash,
+              playerHash: entry.emailHash,
               score: entry.score,
               wave: entry.wave,
               coins: entry.coins,
-              level: entry.level,
-              clientNonce: leaderboardClientId
+              level: entry.level
             })
-          });
-          const remoteEntry = payload?.entry || (payload?.emailHash ? payload : null);
+           });
+          const remoteEntry = payload?.entry || (payload?.playerHash ? payload : null);
           if (remoteEntry) {
-            const result = upsertLeaderboardEntry(remoteEntry);
+            const result = upsertLeaderboardEntry(localizeLeaderboardRemoteEntry(remoteEntry));
             if (result.changed) persistLeaderboardEntries();
           }
           setLeaderboardBoardStatus("leaderboardOnline");
@@ -6390,7 +6703,19 @@ const menuArt = document.querySelector(".menu-art");
             if (leaderboard && !leaderboard.classList.contains("hidden")) renderLeaderboard();
           }
         });
-        if (LEADERBOARD_API && typeof window.EventSource === "function") {
+        window.addEventListener("bb:telegram-account", () => {
+          const player = leaderboardTelegramPlayer();
+          if (player && !leaderboardProfile.alias) {
+            const alias = normalizeLeaderboardAlias(player.publicAlias || [player.firstName, player.lastName].filter(Boolean).join(" "));
+            if (alias) {
+              leaderboardProfile = { alias };
+              persistLeaderboardProfile();
+            }
+          }
+          syncLeaderboardProfileFields();
+          if (leaderboard && !leaderboard.classList.contains("hidden")) renderLeaderboard();
+        });
+        if (window.BUY_BUTTON_LEADERBOARD_STREAM && typeof window.EventSource === "function") {
           try {
             leaderboardEventSource = new EventSource(`${leaderboardApiUrl("/leaderboard/stream")}?client=${encodeURIComponent(leaderboardClientId)}`);
             leaderboardEventSource.onmessage = (event) => {
@@ -6414,29 +6739,27 @@ const menuArt = document.querySelector(".menu-art");
       }
       function saveLeaderboardProfile() {
         const alias = normalizeLeaderboardAlias($("leaderboardAlias")?.value);
-        const email = normalizeLeaderboardEmail($("leaderboardEmail")?.value);
-        if (!validLeaderboardGmail(email)) {
-          setLeaderboardProfileStatus(translate("leaderboardInvalidEmail"));
-          $("leaderboardEmail")?.focus();
-          return false;
-        }
-        if (!alias) {
+        const effectiveAlias = alias || leaderboardEffectiveAlias();
+        if (!effectiveAlias) {
           setLeaderboardProfileStatus(translate("leaderboardNeedProfile"));
           $("leaderboardAlias")?.focus();
           return false;
         }
-        leaderboardProfile = { alias, email };
+        leaderboardProfile = { alias: effectiveAlias };
         persistLeaderboardProfile();
         syncLeaderboardProfileFields();
-        setLeaderboardProfileStatus(`${translate("leaderboardProfileSaved")} // ${maskLeaderboardEmail(email)}`, 4200);
+        setLeaderboardProfileStatus(`${translate("leaderboardProfileSaved")} // ${leaderboardIdentityLabel()}`, 4200);
         renderLeaderboard();
         buttonTone(620, .1, "triangle", .025);
         return true;
       }
       function clearLeaderboardProfile() {
-        leaderboardProfile = { alias: "", email: "" };
+        leaderboardProfile = { alias: "" };
         try { window.localStorage?.removeItem(LEADERBOARD_PROFILE_KEY); } catch (_) {}
         try { window.sessionStorage?.removeItem(LEADERBOARD_PROFILE_KEY); } catch (_) {}
+        if (!leaderboardTelegramPlayer()) {
+          try { window.localStorage?.removeItem(LEADERBOARD_GUEST_ID_KEY); } catch (_) {}
+        }
         syncLeaderboardProfileFields();
         setLeaderboardProfileStatus(translate("leaderboardProfileCleared"), 2600);
         renderLeaderboard();
@@ -6481,15 +6804,21 @@ const menuArt = document.querySelector(".menu-art");
       saveLeaderboardProfilePanel = saveLeaderboardProfile;
       clearLeaderboardProfilePanel = clearLeaderboardProfile;
       async function claimLeaderboardRecord(run) {
-        const emailHash = leaderboardProfileHash();
-        if (!emailHash || !normalizeLeaderboardAlias(leaderboardProfile.alias)) {
+        const playerHash = leaderboardProfileHash();
+        const alias = leaderboardEffectiveAlias();
+        if (!playerHash || !alias) {
           if ($("recordClaimStatus")) $("recordClaimStatus").textContent = translate("leaderboardNeedProfile");
           return { claimed: false, reason: "profile" };
         }
+        if (!leaderboardProfile.alias) {
+          leaderboardProfile = { alias };
+          persistLeaderboardProfile();
+          syncLeaderboardProfileFields();
+        }
         const candidate = normalizeLeaderboardEntry({
-          id: emailHash,
-          alias: leaderboardProfile.alias,
-          emailHash,
+          id: playerHash,
+          alias,
+          emailHash: playerHash,
           score: run?.score,
           wave: run?.wave,
           coins: run?.coins,
@@ -6498,7 +6827,7 @@ const menuArt = document.querySelector(".menu-art");
         });
         const result = upsertLeaderboardEntry(candidate);
         if (result.changed) persistLeaderboardEntries();
-        const rank = result.rank || leaderboardRankFor(emailHash) || 0;
+        const rank = result.rank || leaderboardRankFor(playerHash) || 0;
         if ($("recordClaimStatus")) $("recordClaimStatus").textContent = translate("leaderboardSaved", { rank, level: result.entry?.level || candidate.level });
         if (leaderboard && !leaderboard.classList.contains("hidden")) renderLeaderboard();
         if (result.metricImproved) {
@@ -6508,8 +6837,8 @@ const menuArt = document.querySelector(".menu-art");
           } else {
             toast(translate("leaderboardNewRecord", { alias: result.entry.alias, level: result.entry.level }), 3000);
           }
-          await submitLeaderboardRecord(result.entry);
         }
+        if (result.changed) await submitLeaderboardRecord(result.entry);
         return { claimed: true, ...result };
       }
       loadLeaderboardProfile();
@@ -6699,7 +7028,10 @@ const menuArt = document.querySelector(".menu-art");
 
       function weaponUpgradeCost(key, level = weaponUpgradeLevels[key] || 0) {
         const def = weaponUpgradeDefs[key];
-        return def ? Math.round(def.base * Math.pow(1.52, level)) : Infinity;
+        // Eight levels need to be reachable before the Wave 20 wall. The
+        // price still rises every stage, but no longer turns the final two
+        // hardware milestones into a purely theoretical purchase.
+        return def ? Math.round(def.base * Math.pow(1.38, level)) : Infinity;
       }
 
       function buyWeaponUpgrade(key) {
@@ -6767,6 +7099,9 @@ const menuArt = document.querySelector(".menu-art");
             const weaponDesc = localizedWeaponUpgradeField(weapon.key, def, "desc", def.desc);
             const weaponName = localizedWeaponName(index, weapon.name);
             const equippedLabel = equipped ? `${runtimeText("ui.equipped", "EQUIPPED")} // ` : "";
+            const profile = weaponProfile(index);
+            const milestone = weaponUpgradeMilestone(level);
+            const statLine = weaponProfileStatLine(index);
             card.innerHTML = `
                <div class="upgrade-topline">
                 <div style="font-size:11px;letter-spacing:.12em;color:${def.color}">${pad2(index + 1)} // ${weaponTag}</div>
@@ -6774,7 +7109,7 @@ const menuArt = document.querySelector(".menu-art");
               </div>
               <div class="upgrade-meter"><i style="width:${meter}%;background:${def.color}"></i></div>
               <h3>${weaponTitle}</h3>
-              <p>${weaponDesc}<br /><span style="color:${def.color}">${equippedLabel}${weaponName}</span></p>
+              <p>${weaponDesc}<br /><span style="color:${def.color}">${equippedLabel}${weaponName}</span><br /><span style="color:#e9f6d4;font-size:9px">${statLine}</span><br /><span style="color:${def.color};font-size:9px">NEXT ${milestone.at} // ${milestone.title} — ${milestone.detail}</span></p>
               <button class="upgrade-btn" type="button" ${level >= def.max || coins < cost ? "disabled" : ""}>${translate("patch")} // ${level >= def.max ? translate("max") : `${cost} ◈`}</button>`;
             card.querySelector("button").addEventListener("click", () => buyWeaponUpgrade(weapon.key));
             weaponGrid.appendChild(card);
@@ -7090,6 +7425,7 @@ const menuArt = document.querySelector(".menu-art");
         runSaveNextAt = 0;
         runSaveEntityIdCounter = 1;
         renderRunSaveUi();
+        bbEmitCloudChange("checkpoint", null, Date.now(), { cleared: true });
       }
       const runSaveWrite = (serialized) => {
         let primary = false;
@@ -7209,6 +7545,7 @@ const menuArt = document.querySelector(".menu-art");
             runSaveLastAt = stamp;
             runSaveNextAt = stamp + RUN_SAVE_INTERVAL;
             renderRunSaveUi();
+            bbEmitCloudChange("checkpoint", serialized, payload.savedAt, { cleared: false });
           }
           return stored;
         } catch (error) {
@@ -7692,7 +8029,7 @@ const menuArt = document.querySelector(".menu-art");
           setMobileFireHeld(true, event?.pointerId ?? null);
           // Fire immediately on press; the fixed-step update loop continues
           // firing while the button remains held.
-          fire();
+          if (!(typeof aimAssist !== "undefined" && aimAssist)) fire();
         };
         const releaseMobileFire = (event) => {
           const pointerId = event?.pointerId;
@@ -7742,7 +8079,7 @@ const menuArt = document.querySelector(".menu-art");
             event.preventDefault();
             event.stopPropagation();
             unlockAudio();
-            fire();
+            if (!(typeof aimAssist !== "undefined" && aimAssist)) fire();
           }
         }, true);
       }
@@ -7752,6 +8089,540 @@ const menuArt = document.querySelector(".menu-art");
           setWeapon(Number(button.dataset.weapon));
         }, true);
       });
+
+/* ===== 75-hardcore-combat.js ===== */
+      // HARDCORE FRONTIER // Wave 20 combat layer.
+      // This component sits after progression and before the runtime guard so
+      // its extra AI, HUD and projectile hooks receive the same fault-tolerant
+      // frame wrapper as the rest of the game.
+      const bbHardcoreTelegraphs = [];
+      let bbHardcoreActiveProfile = null;
+      let bbHardcoreThreat = 0;
+      let bbHardcoreDashBreaks = 0;
+
+      function bbHardcoreProfile(inputWave = wave) {
+        const requested = Math.max(1, Math.floor(Number(inputWave) || 1));
+        const capped = Math.min(20, requested);
+        const progress = (capped - 1) / 19;
+        const overrun = Math.max(0, requested - 20);
+        const tier = Math.min(5, Math.floor((capped - 1) / 4) + 1);
+        return {
+          wave: requested,
+          cappedWave: capped,
+          tier,
+          hp: 1 + progress * .7 + overrun * .03,
+          bossHp: 1 + progress * .52 + overrun * .025,
+          speed: 1 + progress * .28 + overrun * .01,
+          damage: 1 + progress * .34 + overrun * .012,
+          spawnExtra: Math.min(10, Math.floor((capped - 1) / 3) + (capped >= 12 ? 1 : 0)),
+          spawnCadence: Math.max(.68, 1 - progress * .24),
+          chargerChance: capped < 4 ? 0 : .08 + progress * .13,
+          sniperChance: capped < 6 ? 0 : .055 + progress * .115,
+          threat: Math.round(18 + progress * 72),
+          label: requested <= 20 ? `TIER ${tier} // WAVE ${capped}/20` : `ENDLESS // WAVE ${requested}`
+        };
+      }
+
+      function bbHardcoreSafeProfile() {
+        bbHardcoreActiveProfile = bbHardcoreProfile(wave || 1);
+        return bbHardcoreActiveProfile;
+      }
+
+      function bbHardcoreEnemyVisible(enemy, padding = 0) {
+        try {
+          return enemyIsVisibleInViewport(enemy, padding);
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function bbHardcoreApplyEnemy(enemy) {
+        if (!enemy || !enemy.alive || enemy.bbHardcoreApplied) return;
+        const profile = bbHardcoreSafeProfile();
+        enemy.bbHardcoreApplied = true;
+        enemy.bbHardcoreDamageScale = profile.damage;
+        enemy.bbEntryGrace = Math.max(Number(enemy.bbEntryGrace) || 0, enemy.boss ? .64 : .3);
+        if (!bbHardcoreEnemyVisible(enemy, 0)) enemy.bbEntryRush = true;
+
+        // Decoys are a visual boss mechanic. They stay fragile so the player
+        // can still distinguish a real survival encounter from a fake target.
+        if (enemy.scammerDecoy) return;
+
+        const healthScale = enemy.boss ? profile.bossHp : profile.hp;
+        enemy.hp = Math.max(1, Number(enemy.hp) || 1) * healthScale;
+        enemy.maxHp = Math.max(1, Number(enemy.maxHp) || Number(enemy.hp) || 1) * healthScale;
+        enemy.speed = Math.max(1, Number(enemy.speed) || 1) * profile.speed;
+        enemy.touch = Math.max(1, Number(enemy.touch) || 1) * profile.damage;
+        enemy.bbHardcoreBaseSpeed = enemy.speed;
+
+        if (enemy.type === "charger") {
+          enemy.bbChargeState = "stalk";
+          enemy.bbChargeTimer = 0;
+          enemy.bbChargeCooldown = rand(1.15, 2.25);
+          enemy.bbChargeDirection = 0;
+        } else if (enemy.type === "sniper") {
+          enemy.bbSniperState = "cooldown";
+          enemy.bbSniperTimer = rand(1.1, 2.05);
+          enemy.bbSniperAim = 0;
+        }
+      }
+
+      Object.assign(enemyTypes, {
+        charger: {
+          name: "BREACHER",
+          color: "#ff7a47",
+          hp: 106,
+          speed: 92,
+          r: 18,
+          touch: 34,
+          value: 27,
+          lore: "The orange lane is a dash check, not an invitation."
+        },
+        sniper: {
+          name: "WATCHER",
+          color: "#75b8ff",
+          hp: 68,
+          speed: 56,
+          r: 15,
+          touch: 19,
+          value: 29,
+          lore: "Its reticle is your warning. Move before the quote lands."
+        }
+      });
+
+      const bbHardcoreBaseResetRun = resetRun;
+      const bbHardcoreBaseStartWave = startWave;
+      const bbHardcoreBaseChooseType = chooseType;
+      const bbHardcoreBaseSpawnEnemy = spawnEnemy;
+      const bbHardcoreBaseFire = fire;
+      const bbHardcoreBaseHitEnemy = hitEnemy;
+      const bbHardcoreBaseKillEnemy = killEnemy;
+      const bbHardcoreBaseUpdate = update;
+      const bbHardcoreBaseDrawWorld = drawWorld;
+      const bbHardcoreBaseSyncHud = syncHud;
+      const bbHardcoreBasePushEnemyBullet = pushEnemyBullet;
+
+      resetRun = function bbHardcoreResetRun() {
+        const result = bbHardcoreBaseResetRun.apply(this, arguments);
+        bbHardcoreTelegraphs.length = 0;
+        bbHardcoreActiveProfile = bbHardcoreProfile(1);
+        bbHardcoreThreat = 0;
+        bbHardcoreDashBreaks = 0;
+        return result;
+      };
+
+      startWave = function bbHardcoreStartWave(next) {
+        const result = bbHardcoreBaseStartWave.apply(this, arguments);
+        const profile = bbHardcoreSafeProfile();
+        // Preserve the boss as the final arrival while increasing total
+        // pressure. The active-entity budget is still enforced by spawnEnemy.
+        const maxWaveTotal = compactDevice ? 56 : 66;
+        waveRemaining = Math.max(1, Math.min(maxWaveTotal, Math.round(waveRemaining + profile.spawnExtra)));
+        spawnTimer = Math.max(.1, (Number(spawnTimer) || .2) * profile.spawnCadence);
+        bbHardcoreTelegraphs.length = 0;
+        bbHardcoreThreat = profile.threat;
+        try {
+          $("hardcoreReadout").textContent = `HARDCORE // ${profile.label}`;
+          $("hardcoreThreatFill").style.width = `${profile.threat}%`;
+        } catch (_) {}
+        try { syncHud(true); } catch (_) {}
+        return result;
+      };
+
+      chooseType = function bbHardcoreChooseType() {
+        const profile = bbHardcoreSafeProfile();
+        const roll = Math.random();
+        if (wave >= 4 && roll < profile.chargerChance) return "charger";
+        if (wave >= 6 && roll < profile.chargerChance + profile.sniperChance) return "sniper";
+        return bbHardcoreBaseChooseType.apply(this, arguments);
+      };
+
+      spawnEnemy = function bbHardcoreSpawnEnemy() {
+        const before = enemies.length;
+        const result = bbHardcoreBaseSpawnEnemy.apply(this, arguments);
+        for (let index = before; index < enemies.length; index += 1) {
+          bbHardcoreApplyEnemy(enemies[index]);
+        }
+        return result;
+      };
+
+      pushEnemyBullet = function bbHardcorePushEnemyBullet(spec) {
+        const next = spec && typeof spec === "object" ? spec : {};
+        if (!next.bbHardcoreDamageApplied) {
+          const profile = bbHardcoreSafeProfile();
+          next.damage = Math.max(.25, Number(next.damage) || 1) * profile.damage;
+          next.bbHardcoreDamageApplied = true;
+        }
+        return bbHardcoreBasePushEnemyBullet(next);
+      };
+
+      function bbHardcoreApplyImpact(enemy, bullet) {
+        const impact = Math.max(0, Math.min(220, Number(bullet?.bbWeaponImpact) || 0));
+        if (!enemy?.alive || impact <= 0) return;
+        const velocityX = Number(bullet?.vx) || 0;
+        const velocityY = Number(bullet?.vy) || 0;
+        const magnitude = Math.hypot(velocityX, velocityY) || 1;
+        // Bosses intentionally receive only a trace of the impact. Combined
+        // with the bomb resistance in the combat layer, this keeps them
+        // planted without making weapon hits feel ignored.
+        const resistance = enemy.boss ? .055 : enemy.elite ? .42 : 1;
+        const nextX = (Number(enemy.knockX) || 0) + velocityX / magnitude * impact * resistance;
+        const nextY = (Number(enemy.knockY) || 0) + velocityY / magnitude * impact * resistance;
+        const nextMagnitude = Math.hypot(nextX, nextY) || 1;
+        const scale = Math.min(1, ENEMY_KNOCKBACK_CAP / nextMagnitude);
+        enemy.knockX = nextX * scale;
+        enemy.knockY = nextY * scale;
+      }
+
+      hitEnemy = function bbHardcoreHitEnemy(enemy, damage, bullet = null) {
+        if (!enemy?.alive) return;
+        let finalDamage = Math.max(0, Number(damage) || 0);
+        const weaponCrit = Math.max(0, Math.min(.12, Number(bullet?.bbWeaponCrit) || 0));
+        if (weaponCrit > 0 && Math.random() < weaponCrit) {
+          finalDamage *= 1.34;
+          try { particle(enemy.x, enemy.y, "#fff7c2", 5, 160); } catch (_) {}
+        }
+        bbHardcoreApplyImpact(enemy, bullet);
+        return bbHardcoreBaseHitEnemy(enemy, finalDamage, bullet || { color: ACID });
+      };
+
+      fire = function bbHardcoreFire() {
+        const existing = new Set(bullets);
+        const result = bbHardcoreBaseFire.apply(this, arguments);
+        const profile = weaponProfile(player.weapon);
+        if (!profile.echo) return result;
+        const fresh = bullets.filter((bullet) => !existing.has(bullet) && bullet && !bullet.bbWeaponEcho);
+        for (const bullet of fresh) {
+          if (bullets.length >= MAX_PLAYER_BULLETS) break;
+          const speed = Math.max(1, Number(bullet.speed) || Math.hypot(Number(bullet.vx) || 0, Number(bullet.vy) || 0));
+          const angle = (Number(bullet.angle) || Math.atan2(Number(bullet.vy) || 0, Number(bullet.vx) || 1)) + (Math.random() < .5 ? -.075 : .075);
+          bullets.push({
+            ...bullet,
+            x: Number(bullet.x) || player.x,
+            y: Number(bullet.y) || player.y,
+            angle,
+            speed: speed * .84,
+            vx: Math.cos(angle) * speed * .84,
+            vy: Math.sin(angle) * speed * .84,
+            damage: Math.max(.25, (Number(bullet.damage) || 1) * .46),
+            life: Math.max(.1, (Number(bullet.life) || .5) * .78),
+            maxTravel: Math.max(80, (Number(bullet.maxTravel) || 180) * .78),
+            traveled: 0,
+            size: Math.max(3, (Number(bullet.size) || 5) * .82),
+            hit: [],
+            bbWeaponEcho: true,
+            // Cosmetic firing styles should not clone an echo into another
+            // branch; the level-eight core is already its own secondary shot.
+            bbCustomizationShot: true
+          });
+        }
+        return result;
+      };
+
+      killEnemy = function bbHardcoreKillEnemy(enemy) {
+        const wasAlive = !!enemy?.alive;
+        const type = enemy?.type;
+        const result = bbHardcoreBaseKillEnemy.apply(this, arguments);
+        if (wasAlive && !enemy?.alive && type === "charger") {
+          bbHardcoreDashBreaks = Math.min(1000000, bbHardcoreDashBreaks + 1);
+          player.energy = Math.min(player.maxEnergy, player.energy + 7);
+        }
+        return result;
+      };
+
+      function bbHardcoreRefreshTelegraphs() {
+        bbHardcoreTelegraphs.length = 0;
+        for (const enemy of enemies) {
+          if (!enemy?.alive || !bbHardcoreEnemyVisible(enemy, 96)) continue;
+          if (enemy.bbChargeState === "tell" || enemy.bbChargeState === "charge") {
+            bbHardcoreTelegraphs.push({
+              enemy,
+              kind: "charge",
+              timer: Math.max(0, Number(enemy.bbChargeTimer) || 0),
+              max: enemy.bbChargeState === "tell" ? .58 : .46
+            });
+          } else if (enemy.bbSniperState === "tell") {
+            bbHardcoreTelegraphs.push({
+              enemy,
+              kind: "sniper",
+              timer: Math.max(0, Number(enemy.bbSniperTimer) || 0),
+              max: .72
+            });
+          }
+        }
+      }
+
+      function bbHardcorePrepareCharger(enemy, dt) {
+        const baseSpeed = Math.max(1, Number(enemy.bbHardcoreBaseSpeed) || Number(enemy.speed) || 1);
+        const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+        let state = enemy.bbChargeState || "stalk";
+        let timer = Number(enemy.bbChargeTimer) || 0;
+        let cooldown = Math.max(0, Number(enemy.bbChargeCooldown) || 0);
+        const canReadAttack = bbHardcoreEnemyVisible(enemy, 16) && enemy.bbEntryGrace <= 0;
+        if (state === "stalk") {
+          cooldown = Math.max(0, cooldown - dt);
+          enemy.speed = baseSpeed;
+          const minDistance = 150 / Math.max(.05, viewportZoom());
+          const maxDistance = 520 / Math.max(.05, viewportZoom());
+          if (canReadAttack && cooldown <= 0 && distance >= minDistance && distance <= maxDistance) {
+            state = "tell";
+            timer = .58;
+            enemy.bbChargeDirection = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+            enemy.speed = baseSpeed * .08;
+          }
+        } else if (state === "tell") {
+          timer -= dt;
+          enemy.speed = baseSpeed * .08;
+          if (timer <= 0) {
+            state = "charge";
+            timer = .46;
+            enemy.bbChargeDirection = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+            enemy.speed = baseSpeed * 5.15;
+          }
+        } else if (state === "charge") {
+          timer -= dt;
+          enemy.speed = baseSpeed * 5.15;
+          if (timer <= 0) {
+            state = "recover";
+            timer = .58;
+            cooldown = rand(1.55, 2.65);
+            enemy.speed = baseSpeed * .3;
+          }
+        } else {
+          timer -= dt;
+          enemy.speed = baseSpeed * .3;
+          if (timer <= 0) {
+            state = "stalk";
+            enemy.speed = baseSpeed;
+          }
+        }
+        enemy.bbChargeState = state;
+        enemy.bbChargeTimer = timer;
+        enemy.bbChargeCooldown = cooldown;
+      }
+
+      function bbHardcorePrepareSniper(enemy, dt) {
+        const baseSpeed = Math.max(1, Number(enemy.bbHardcoreBaseSpeed) || Number(enemy.speed) || 1);
+        let state = enemy.bbSniperState || "cooldown";
+        let timer = Number(enemy.bbSniperTimer) || 0;
+        const visible = bbHardcoreEnemyVisible(enemy, 20) && enemy.bbEntryGrace <= 0;
+        if (state === "cooldown") {
+          enemy.speed = baseSpeed * .78;
+          if (visible) timer -= dt;
+          if (timer <= 0) {
+            state = "tell";
+            timer = .72;
+            enemy.bbSniperAim = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+            enemy.speed = baseSpeed * .12;
+          }
+        } else {
+          enemy.speed = baseSpeed * .12;
+          timer -= dt;
+        }
+        enemy.bbSniperState = state;
+        enemy.bbSniperTimer = timer;
+      }
+
+      function bbHardcorePrepareFrame(dt) {
+        if (state !== "playing") return;
+        for (const enemy of enemies) {
+          bbHardcoreApplyEnemy(enemy);
+          if (!enemy?.alive || enemy.boss || enemy.scammerDecoy) continue;
+          if (enemy.type === "charger") bbHardcorePrepareCharger(enemy, dt);
+          if (enemy.type === "sniper") bbHardcorePrepareSniper(enemy, dt);
+        }
+        bbHardcoreRefreshTelegraphs();
+      }
+
+      function bbHardcoreResolveCharger(enemy) {
+        if (!enemy?.alive || enemy.bbChargeState !== "charge" || player.dash <= 0) return;
+        const distance = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+        if (distance > enemy.r + player.r + 26) return;
+        enemy.bbChargeState = "recover";
+        enemy.bbChargeTimer = .82;
+        enemy.bbChargeCooldown = rand(1.9, 3.1);
+        enemy.stun = Math.max(Number(enemy.stun) || 0, 1.15);
+        enemy.knockX = (Number(enemy.knockX) || 0) - Math.cos(playerFx.dashAngle || 0) * 54;
+        enemy.knockY = (Number(enemy.knockY) || 0) - Math.sin(playerFx.dashAngle || 0) * 54;
+        hitEnemy(enemy, Math.max(12, (Number(enemy.maxHp) || 100) * .1), { color: CYAN, bbWeaponImpact: 46 });
+        bbHardcoreDashBreaks = Math.min(1000000, bbHardcoreDashBreaks + 1);
+        try {
+          combatFlash("DASH BREAK // BREACHER STAGGERED", 740);
+          particle(enemy.x, enemy.y, CYAN, 18, 290);
+        } catch (_) {}
+      }
+
+      function bbHardcoreResolveSniper(enemy) {
+        if (!enemy?.alive || enemy.bbSniperState !== "tell" || enemy.bbSniperTimer > 0) return;
+        const visible = bbHardcoreEnemyVisible(enemy, 20) && enemy.bbEntryGrace <= 0;
+        enemy.bbSniperState = "cooldown";
+        enemy.bbSniperTimer = rand(1.45, 2.45);
+        if (!visible) return;
+        const profile = bbHardcoreSafeProfile();
+        const angle = Number.isFinite(Number(enemy.bbSniperAim))
+          ? Number(enemy.bbSniperAim)
+          : Math.atan2(player.y - enemy.y, player.x - enemy.x);
+        const speed = (520 + profile.cappedWave * 7) * mobileProjectileScale() * zoomTempoScale();
+        const damage = (12 + profile.cappedWave * .58) * profile.damage;
+        pushEnemyBullet({
+          x: enemy.x,
+          y: enemy.y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          r: 7,
+          life: 3.6,
+          damage,
+          color: enemyTypes.sniper.color,
+          kind: "sniper",
+          bbHardcoreDamageApplied: true
+        });
+        try {
+          particle(enemy.x, enemy.y, enemyTypes.sniper.color, 10, 210);
+          combatFlash("WATCHER // LINE FIRED", 520);
+        } catch (_) {}
+      }
+
+      function bbHardcoreResolveFrame() {
+        if (state !== "playing") return;
+        let specialCount = 0;
+        for (const enemy of enemies) {
+          if (!enemy?.alive) continue;
+          if (enemy.type === "charger") {
+            bbHardcoreResolveCharger(enemy);
+            specialCount += 1;
+          } else if (enemy.type === "sniper") {
+            bbHardcoreResolveSniper(enemy);
+            specialCount += 1;
+          }
+        }
+        const profile = bbHardcoreSafeProfile();
+        const activeEnemies = aliveCount(enemies);
+        bbHardcoreThreat = Math.max(0, Math.min(100, Math.round(profile.threat + activeEnemies * .65 + specialCount * 3 + (v3Boss?.alive ? 9 : 0))));
+        bbHardcoreRefreshTelegraphs();
+      }
+
+      update = function bbHardcoreUpdate(dt) {
+        const safeDt = Math.max(0, Math.min(.05, Number(dt) || 0));
+        bbHardcorePrepareFrame(safeDt);
+        const result = bbHardcoreBaseUpdate.apply(this, arguments);
+        bbHardcoreResolveFrame();
+        return result;
+      };
+
+      function bbHardcoreDrawTelegraphs(time) {
+        if (state !== "playing" || !bbHardcoreTelegraphs.length) return;
+        ctx.save();
+        for (const telegraph of bbHardcoreTelegraphs) {
+          const enemy = telegraph?.enemy;
+          if (!enemy?.alive) continue;
+          const point = worldToScreen(enemy.x, enemy.y);
+          if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
+          const scale = enemyRenderScale();
+          const pulse = .68 + Math.sin(time * 18 + (enemy.phase || 0)) * .22;
+          if (telegraph.kind === "charge") {
+            const angle = Number(enemy.bbChargeDirection) || Math.atan2(player.y - enemy.y, player.x - enemy.x);
+            const charging = enemy.bbChargeState === "charge";
+            ctx.save();
+            ctx.translate(point.x, point.y);
+            ctx.scale(scale, scale);
+            ctx.rotate(angle);
+            ctx.globalAlpha = charging ? .8 : .46 + pulse * .24;
+            ctx.strokeStyle = "#ff7a47";
+            ctx.fillStyle = "#ff7a47";
+            ctx.shadowBlur = gameSettings.performance ? 0 : 18;
+            ctx.shadowColor = "#ff7a47";
+            ctx.lineWidth = charging ? 3 : 2;
+            setDash([charging ? 4 : 8, 5]);
+            ctx.beginPath();
+            ctx.moveTo(enemy.r + 6, 0);
+            ctx.lineTo(enemy.r + 66, 0);
+            ctx.stroke();
+            setDash([]);
+            ctx.beginPath();
+            ctx.moveTo(enemy.r + 70, 0);
+            ctx.lineTo(enemy.r + 54, -8);
+            ctx.lineTo(enemy.r + 54, 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          } else if (telegraph.kind === "sniper") {
+            const angle = Number(enemy.bbSniperAim) || Math.atan2(player.y - enemy.y, player.x - enemy.x);
+            ctx.save();
+            ctx.translate(point.x, point.y);
+            ctx.scale(scale, scale);
+            ctx.rotate(angle);
+            ctx.globalAlpha = .44 + pulse * .3;
+            ctx.strokeStyle = enemyTypes.sniper.color;
+            ctx.shadowBlur = gameSettings.performance ? 0 : 18;
+            ctx.shadowColor = enemyTypes.sniper.color;
+            ctx.lineWidth = 2;
+            setDash([3, 5]);
+            ctx.beginPath();
+            ctx.moveTo(enemy.r + 4, 0);
+            ctx.lineTo(enemy.r + 142, 0);
+            ctx.stroke();
+            setDash([]);
+            ctx.beginPath();
+            ctx.arc(0, 0, enemy.r + 10 + pulse * 4, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+        ctx.restore();
+      }
+
+      drawWorld = function bbHardcoreDrawWorld(time) {
+        const result = bbHardcoreBaseDrawWorld.apply(this, arguments);
+        try { bbHardcoreDrawTelegraphs(Number(time) || 0); } catch (_) {}
+        return result;
+      };
+
+      syncHud = function bbHardcoreSyncHud() {
+        const result = bbHardcoreBaseSyncHud.apply(this, arguments);
+        try {
+          const profile = bbHardcoreSafeProfile();
+          const readout = $("hardcoreReadout");
+          const threatText = $("hardcoreThreatText");
+          const threatFill = $("hardcoreThreatFill");
+          const dashText = $("hardcoreDashText");
+          if (readout) readout.textContent = `HARDCORE // ${profile.label}`;
+          if (threatText) threatText.textContent = `THREAT // ${bbHardcoreThreat}%`;
+          if (threatFill) threatFill.style.width = `${bbHardcoreThreat}%`;
+          if (dashText) {
+            const ready = player.ability?.dash <= 0 && player.energy >= dashEnergyCost();
+            dashText.textContent = ready
+              ? "DASH // READY — BREAK BREACHERS"
+              : `DASH // ${Math.ceil(Math.max(0, dashEnergyCost() - player.energy))} ENERGY`;
+          }
+        } catch (_) {}
+        return result;
+      };
+
+      try {
+        window.__BUY_BUTTON_HARDCORE__ = Object.freeze({
+          version: "wave-20-hardcore",
+          getProfile: (inputWave = 20) => Object.freeze({ ...bbHardcoreProfile(inputWave) }),
+          getStatus: () => Object.freeze({
+            wave: Math.max(0, Number(wave) || 0),
+            threat: bbHardcoreThreat,
+            dashBreaks: bbHardcoreDashBreaks,
+            telegraphs: bbHardcoreTelegraphs.length
+          }),
+          getSpawnShell: (inputAngle = 0) => {
+            const angle = Number.isFinite(Number(inputAngle)) ? Number(inputAngle) : 0;
+            const radius = enemyViewportShellRadius(angle, null, 0);
+            const worldX = player.x + Math.cos(angle) * radius;
+            const worldY = player.y + Math.sin(angle) * radius;
+            const screen = worldToScreen(worldX, worldY);
+            return Object.freeze({
+              radius,
+              x: screen.x,
+              y: screen.y,
+              outsideViewport: screen.x < 0 || screen.x > W || screen.y < 0 || screen.y > H
+            });
+          }
+        });
+      } catch (_) {}
 
 /* ===== 80-runtime-safety.js ===== */
 // RUNTIME GUARD // one bad value must not kill the animation loop.
@@ -7903,6 +8774,12 @@ const menuArt = document.querySelector(".menu-art");
             item.knockX = bbRuntimeClamp(item.knockX, -50000, 50000, 0);
             item.knockY = bbRuntimeClamp(item.knockY, -50000, 50000, 0);
             item.shotTimer = bbRuntimeClamp(item.shotTimer, -60, 60, 0);
+            item.bbEntryGrace = bbRuntimeClamp(item.bbEntryGrace, 0, 12, 0);
+            item.bbChargeTimer = bbRuntimeClamp(item.bbChargeTimer, -60, 60, 0);
+            item.bbChargeCooldown = bbRuntimeClamp(item.bbChargeCooldown, 0, 60, 0);
+            item.bbSniperTimer = bbRuntimeClamp(item.bbSniperTimer, -60, 60, 0);
+            item.bbHardcoreDamageScale = bbRuntimeClamp(item.bbHardcoreDamageScale, .1, 20, 1);
+            if (typeof item.bbRespawnPending !== "boolean") item.bbRespawnPending = false;
           } else if (kind === "bullet") {
             item.vx = bbRuntimeClamp(item.vx, -50000, 50000, 0);
             item.vy = bbRuntimeClamp(item.vy, -50000, 50000, 0);
@@ -7961,6 +8838,12 @@ const menuArt = document.querySelector(".menu-art");
           player.xpToNext = bbRuntimeClamp(player.xpToNext, 1, 10000000, 100);
           player.kills = bbRuntimeInt(player.kills, 0, 100000000, 0);
           player.weapon = bbRuntimeInt(player.weapon, 0, Math.max(0, weapons.length - 1), 0);
+          if (typeof weaponUpgradeLevels === "object" && weaponUpgradeLevels) {
+            for (const weapon of weapons) {
+              if (!weapon?.key) continue;
+              weaponUpgradeLevels[weapon.key] = bbRuntimeInt(weaponUpgradeLevels[weapon.key], 0, 8, 0);
+            }
+          }
           if (!player.ability || typeof player.ability !== "object") {
             player.ability = { surge: 0, dash: 0, bomb: 0 };
           }
@@ -7985,6 +8868,8 @@ const menuArt = document.querySelector(".menu-art");
           if (typeof v3DashMax !== "undefined") v3DashMax = bbRuntimeInt(v3DashMax, 0, 1000, 10);
           if (typeof v3DashRecharge !== "undefined") v3DashRecharge = bbRuntimeClamp(v3DashRecharge, -60, 60, 0);
           if (typeof v3ReadoutTimer !== "undefined") v3ReadoutTimer = bbRuntimeClamp(v3ReadoutTimer, -60, 60, 0);
+          if (typeof bbHardcoreThreat !== "undefined") bbHardcoreThreat = bbRuntimeClamp(bbHardcoreThreat, 0, 100, 0);
+          if (typeof bbHardcoreDashBreaks !== "undefined") bbHardcoreDashBreaks = bbRuntimeInt(bbHardcoreDashBreaks, 0, 1000000, 0);
           bbRuntimeSanitizeList(enemies, MAX_ENEMIES, "enemy");
           bbRuntimeSanitizeList(bullets, MAX_PLAYER_BULLETS, "bullet");
           bbRuntimeSanitizeList(enemyBullets, MAX_ENEMY_BULLETS, "bullet");
@@ -8018,7 +8903,8 @@ const menuArt = document.querySelector(".menu-art");
             enemyBullets.length = 0;
             particles.length = 0;
             chainArcs.length = 0;
-            if (typeof v3BlastRings !== "undefined") v3BlastRings.length = 0;
+          if (typeof v3BlastRings !== "undefined") v3BlastRings.length = 0;
+            if (typeof bbHardcoreTelegraphs !== "undefined") bbHardcoreTelegraphs.length = 0;
             bbRuntimeResetCanvas();
           }
           if (stamp - bbRuntimeSafety.lastWarningAt > 3000) {
@@ -8291,6 +9177,7 @@ const menuArt = document.querySelector(".menu-art");
         auraStrength: 72,
         updatedAt: 0
       });
+      let bbCustomizationHadLocalRecord = false;
       const bbCustomizationCatalogById = (catalog, id, fallbackId) =>
         catalog.find((item) => item.id === id)
         || catalog.find((item) => item.id === fallbackId)
@@ -8337,6 +9224,7 @@ const menuArt = document.querySelector(".menu-art");
           const freshness = (Number(right.value.updatedAt) || 0) - (Number(left.value.updatedAt) || 0);
           return freshness || (left.source === "localStorage" ? -1 : 1);
         });
+        bbCustomizationHadLocalRecord = candidates.length > 0;
         return bbSanitizeCustomization(candidates[0]?.value || BB_CUSTOMIZATION_DEFAULT);
       };
       let bbCustomization = bbReadCustomization();
@@ -8364,6 +9252,7 @@ const menuArt = document.querySelector(".menu-art");
         if (!persisted) {
           try { window.sessionStorage?.setItem(BB_CUSTOMIZATION_KEY, serialized); } catch (_) {}
         }
+        bbEmitCloudChange("customization", { ...bbCustomization }, bbCustomization.updatedAt);
       };
       const bbApplyCustomizationTheme = () => {
         const palette = bbPaletteFor();
@@ -8570,6 +9459,10 @@ const menuArt = document.querySelector(".menu-art");
           bbElement("p", "", bbTitle("Auto-fire only starts when you explicitly turn it on. Manual mouse aim always remains available.", "شلیک خودکار فقط وقتی فعال می‌شود که خودت روشنش کنی. نشانه‌گیری دستی با ماوس همیشه در دسترس است."))
         );
         const toggles = bbElement("div", "bb-toggle-grid");
+        const controlMode = bbElement("button", "bb-switch bb-control-mode-setting");
+        controlMode.type = "button";
+        controlMode.id = "bbCombatModeSetting";
+        controlMode.dataset.bbAction = "combatMode";
         const autoFire = bbElement("button", "bb-switch");
         autoFire.type = "button";
         autoFire.id = "bbAutoFireSetting";
@@ -8578,7 +9471,7 @@ const menuArt = document.querySelector(".menu-art");
         aimLine.type = "button";
         aimLine.id = "bbAimLineSetting";
         aimLine.dataset.bbAction = "aimLine";
-        toggles.append(autoFire, aimLine);
+        toggles.append(controlMode, autoFire, aimLine);
         combatSection.appendChild(toggles);
         const aimBlock = bbElement("div", "bb-choice-block");
         aimBlock.append(bbElement("b", "", bbTitle("TARGET MODE", "حالت هدف‌گیری")));
@@ -8606,7 +9499,7 @@ const menuArt = document.querySelector(".menu-art");
         scales.id = "bbUiScaleChoices";
         interfaceSection.appendChild(scales);
         const controls = bbElement("div", "bb-controls-note");
-        controls.innerHTML = `<b>${bbTitle("QUICK CONTROLS", "کنترل‌های سریع")}</b><span>${bbTitle("C: studio · G: auto-select target · F: auto-fire · 1–7: weapon · Tab: lock target", "C: استودیو · G: انتخاب خودکار هدف · F: شلیک خودکار · ۱ تا ۷: سلاح · Tab: قفل هدف")}</span>`;
+        controls.innerHTML = `<b>${bbTitle("QUICK CONTROLS", "کنترل‌های سریع")}</b><span>${bbTitle("C: studio · M: manual/auto control · G: auto-select target · F: auto-fire · 1–7: weapon · Tab: lock target", "C: استودیو · M: کنترل دستی/خودکار · G: انتخاب خودکار هدف · F: شلیک خودکار · ۱ تا ۷: سلاح · Tab: قفل هدف")}</span>`;
         interfaceSection.appendChild(controls);
 
         const footer = bbElement("footer", "bb-studio-footer");
@@ -8645,14 +9538,19 @@ const menuArt = document.querySelector(".menu-art");
         bbRenderCompactChoices($("bbAimChoices"), "aimModeId", BB_AIM_MODE_CATALOG, bbCustomization.aimModeId, "bb-aim-choice");
         bbRenderCompactChoices($("bbShotChoices"), "shotModeId", BB_SHOT_MODE_CATALOG, bbCustomization.shotModeId, "bb-shot-choice");
         bbRenderCompactChoices($("bbUiScaleChoices"), "uiScaleId", BB_UI_SCALE_CATALOG, bbCustomization.uiScaleId, "bb-scale-choice");
+        const controlMode = $("bbCombatModeSetting");
         const autoFire = $("bbAutoFireSetting");
         const aimLine = $("bbAimLineSetting");
         const aura = $("bbAuraRange");
         const auraValue = $("bbAuraValue");
-        bbSetButtonLabel(autoFire, `${bbTitle("AUTO-FIRE", "شلیک خودکار")}: ${bbCustomization.autoFire ? bbTitle("ON", "روشن") : bbTitle("OFF", "خاموش")}`);
+        const autoControl = !!bbCustomization.autoFire;
+        bbSetButtonLabel(controlMode, autoControl ? bbTitle("CONTROL // AUTO", "کنترل // خودکار") : bbTitle("CONTROL // MANUAL", "کنترل // دستی"));
+        bbSetButtonLabel(autoFire, autoControl ? bbTitle("FIRE // AUTO", "شلیک // خودکار") : bbTitle("FIRE // MANUAL", "شلیک // دستی"));
         bbSetButtonLabel(aimLine, `${bbTitle("AIM LINE", "خط نشانه‌گیری")}: ${bbCustomization.aimLine ? bbTitle("ON", "روشن") : bbTitle("OFF", "خاموش")}`);
+        controlMode?.classList.toggle("on", autoControl);
         autoFire?.classList.toggle("on", bbCustomization.autoFire);
         aimLine?.classList.toggle("on", bbCustomization.aimLine);
+        controlMode?.setAttribute("aria-pressed", String(autoControl));
         autoFire?.setAttribute("aria-pressed", String(bbCustomization.autoFire));
         aimLine?.setAttribute("aria-pressed", String(bbCustomization.aimLine));
         if (aura) aura.value = String(bbCustomization.auraStrength);
@@ -8667,17 +9565,30 @@ const menuArt = document.querySelector(".menu-art");
       }
       function bbRefreshCustomizationUi() {
         bbRenderCustomizationPanel();
+        const hudControl = $("bbCombatModeBtn");
         const hudTarget = $("bbTargetModeBtn");
         const hudAutoFire = $("bbAutoFireHudBtn");
         const targetTitle = bbAimModeFor();
+        if (hudControl) {
+          const enabled = !!bbCustomization.autoFire;
+          hudControl.textContent = enabled
+            ? bbTitle("CONTROL // AUTO", "کنترل // خودکار")
+            : bbTitle("CONTROL // MANUAL", "کنترل // دستی");
+          hudControl.classList.toggle("on", enabled);
+          hudControl.setAttribute("aria-pressed", String(enabled));
+          hudControl.setAttribute("aria-keyshortcuts", "M");
+          hudControl.title = bbTitle("Toggle complete manual/automatic control. M is the shortcut.", "کنترل کامل دستی/خودکار را تغییر بده. میانبر M است.");
+        }
         if (hudTarget) {
-          hudTarget.textContent = `AI: ${bbCustomizationLabel(targetTitle)}`;
+          hudTarget.textContent = `AIM // ${bbCustomizationLabel(targetTitle)}`;
           hudTarget.classList.toggle("on", bbCustomization.aimModeId !== "manual");
           hudTarget.title = bbTitle("Click: choose target now. Shift-click: cycle target mode.", "کلیک: انتخاب هدف. شیفت+کلیک: تغییر حالت هدف‌گیری.");
         }
         if (hudAutoFire) {
           const enabled = !!bbCustomization.autoFire;
-          hudAutoFire.textContent = `${bbTitle("AUTO-FIRE", "شلیک خودکار")}: ${enabled ? bbTitle("ON", "روشن") : bbTitle("OFF", "خاموش")}`;
+          hudAutoFire.textContent = enabled
+            ? bbTitle("FIRE // AUTO", "شلیک // خودکار")
+            : bbTitle("FIRE // MANUAL", "شلیک // دستی");
           hudAutoFire.classList.toggle("on", enabled);
           hudAutoFire.setAttribute("aria-pressed", String(enabled));
           hudAutoFire.setAttribute("aria-keyshortcuts", "F");
@@ -8722,7 +9633,8 @@ const menuArt = document.querySelector(".menu-art");
         }
         const action = target.closest("[data-bb-action]")?.dataset.bbAction;
         if (action === "close") bbCloseCustomizationPanel();
-        if (action === "autoFire") bbCommitCustomization({ autoFire: !bbCustomization.autoFire }, true);
+        if (action === "combatMode") bbToggleCombatControlMode(true);
+        if (action === "autoFire") bbToggleAutoFire(true);
         if (action === "aimLine") bbCommitCustomization({ aimLine: !bbCustomization.aimLine }, false);
         if (action === "selectTarget") bbAutoSelectTarget(true);
         if (action === "resetVisuals") {
@@ -8772,6 +9684,13 @@ const menuArt = document.querySelector(".menu-art");
             });
             assistControls.appendChild(targetButton);
           }
+          if (!$("bbCombatModeBtn")) {
+            const controlButton = bbElement("button", "hud-toggle bb-combat-control-mode");
+            controlButton.id = "bbCombatModeBtn";
+            controlButton.type = "button";
+            controlButton.addEventListener("click", () => bbToggleCombatControlMode(true));
+            assistControls.appendChild(controlButton);
+          }
           if (!$("bbAutoFireHudBtn")) {
             const autoFireButton = bbElement("button", "hud-toggle bb-auto-fire-mode");
             autoFireButton.id = "bbAutoFireHudBtn";
@@ -8791,35 +9710,59 @@ const menuArt = document.querySelector(".menu-art");
       function bbDistanceToPlayer(enemy) {
         return enemy ? Math.hypot((enemy.x || 0) - player.x, (enemy.y || 0) - player.y) : Infinity;
       }
+      const bbAutomaticControlEnabled = () =>
+        typeof aimAssist !== "undefined" && !!aimAssist && !!bbCustomization?.autoFire;
       function bbAutomaticTarget(mode = bbCustomization.aimModeId) {
         const targets = bbAliveTargets();
         if (!targets.length) return null;
+        const requestedMode = String(mode || bbCustomization.aimModeId || "smart");
+        // Cursor/manual modes remain selectable in the studio, but once auto
+        // fire is on they resolve to a world-space AI choice. This makes the
+        // mouse purely cosmetic while the automatic controller is active.
+        const effectiveMode = bbAutomaticControlEnabled()
+          && (requestedMode === "cursor" || requestedMode === "manual")
+          ? "smart"
+          : requestedMode;
         // A deliberate lock is authoritative for the balanced/manual modes,
         // but explicit assist modes must be allowed to recalculate. Without
         // this boundary, switching from NEAREST to WEAKEST/BOSS could appear
         // to do nothing until the old lock died.
-        if (hardLockTarget?.alive && (mode === "smart" || mode === "manual")) return hardLockTarget;
+        if (hardLockTarget?.alive && (effectiveMode === "smart" || effectiveMode === "manual")) return hardLockTarget;
         const closest = () => targets.reduce((best, candidate) => bbDistanceToPlayer(candidate) < bbDistanceToPlayer(best) ? candidate : best, targets[0]);
-        if (mode === "manual") return null;
-        if (mode === "nearest") return closest();
-        if (mode === "weakest") {
+        if (effectiveMode === "smart") return closest();
+        if (effectiveMode === "manual") return null;
+        if (effectiveMode === "nearest") return closest();
+        if (effectiveMode === "weakest") {
           return targets.reduce((best, candidate) => {
             const candidateRatio = (candidate.hp || 0) / Math.max(1, candidate.maxHp || candidate.hp || 1);
             const bestRatio = (best.hp || 0) / Math.max(1, best.maxHp || best.hp || 1);
             return candidateRatio < bestRatio || (candidateRatio === bestRatio && bbDistanceToPlayer(candidate) < bbDistanceToPlayer(best)) ? candidate : best;
           }, targets[0]);
         }
-        if (mode === "boss") {
+        if (effectiveMode === "boss") {
           const priority = targets.filter((enemy) => enemy.boss || enemy.elite || enemy.legendary);
           return priority.length ? priority.reduce((best, candidate) => bbDistanceToPlayer(candidate) < bbDistanceToPlayer(best) ? candidate : best, priority[0]) : closest();
         }
-        if (mode === "cursor" && pointer.id !== null && Number.isFinite(pointer.x) && Number.isFinite(pointer.y)) {
+        if (effectiveMode === "cursor" && pointer.id !== null && Number.isFinite(pointer.x) && Number.isFinite(pointer.y)) {
           const cursor = screenToWorld(pointer.x, pointer.y);
           return targets.reduce((best, candidate) => {
             const candidateDistance = Math.hypot((candidate.x || 0) - cursor.x, (candidate.y || 0) - cursor.y);
             const bestDistance = Math.hypot((best.x || 0) - cursor.x, (best.y || 0) - cursor.y);
             return candidateDistance < bestDistance ? candidate : best;
           }, targets[0]);
+        }
+        return null;
+      }
+      function bbResolveAutomaticTarget() {
+        if (!bbAutomaticControlEnabled()) return null;
+        let target = null;
+        try {
+          target = bbAutomaticTarget(bbCustomization.aimModeId);
+          if (!target?.alive) target = bbAutomaticTarget("smart");
+        } catch (_) {}
+        if (target?.alive) {
+          lockTarget = target;
+          return target;
         }
         return null;
       }
@@ -8835,7 +9778,8 @@ const menuArt = document.querySelector(".menu-art");
       function bbAutoSelectTarget(announce = false) {
         let target = null;
         try {
-          target = bbAutomaticTarget(bbCustomization.aimModeId === "manual" ? "smart" : bbCustomization.aimModeId) || bbCustomizationBaseNearestEnemy?.();
+          target = bbAutomaticTarget(bbCustomization.aimModeId === "manual" ? "smart" : bbCustomization.aimModeId)
+            || bbCustomizationBaseNearestEnemy?.();
         } catch (_) {}
         if (!target?.alive) {
           if (announce) {
@@ -8871,6 +9815,13 @@ const menuArt = document.querySelector(".menu-art");
       const bbCustomizationBaseNearestEnemy = nearestEnemy;
       nearestEnemy = function bbCustomizedNearestEnemy() {
         try {
+          if (bbAutomaticControlEnabled()) {
+            const automaticTarget = bbResolveAutomaticTarget();
+            if (automaticTarget?.alive) {
+              lockTarget = automaticTarget;
+              return automaticTarget;
+            }
+          }
           const mode = bbCustomization.aimModeId;
           if (mode === "smart") return bbCustomizationBaseNearestEnemy();
           const target = bbAutomaticTarget(mode);
@@ -8910,6 +9861,11 @@ const menuArt = document.querySelector(".menu-art");
       const bbStyleNewShots = (freshShots) => {
         const mode = bbCustomization.shotModeId;
         if (mode === "native" || !freshShots.length) return;
+        const weapon = weaponProfile(player.weapon);
+        const weaponLevel = Math.max(0, Math.floor(Number(weapon?.level) || 0));
+        // Every loadout starts as a true single-shot weapon. Cosmetic firing
+        // styles that clone bullets unlock only after the first upgrade.
+        if (weaponLevel <= 1 && ["twin", "fan", "orbit", "burst"].includes(mode)) return;
         for (let index = 0; index < freshShots.length; index += 1) {
           const shot = freshShots[index];
           if (!shot || shot.bbCustomizationShot) continue;
@@ -9121,7 +10077,12 @@ const menuArt = document.querySelector(".menu-art");
       const bbDrawCrosshair = (time) => {
         if (bbCustomization.crosshairId === "off" || state !== "playing") return;
         let point = null;
-        if (pointer.id !== null && Number.isFinite(pointer.x) && Number.isFinite(pointer.y)) point = { x: pointer.x, y: pointer.y };
+        if (bbAutomaticControlEnabled()) {
+          const automaticTarget = bbResolveAutomaticTarget();
+          if (automaticTarget?.alive) point = worldToScreen(automaticTarget.x, automaticTarget.y);
+        } else if (pointer.id !== null && Number.isFinite(pointer.x) && Number.isFinite(pointer.y)) {
+          point = { x: pointer.x, y: pointer.y };
+        }
         else if (lockTarget?.alive) point = worldToScreen(lockTarget.x, lockTarget.y);
         if (!point || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
         const palette = bbPaletteFor();
@@ -9212,8 +10173,52 @@ const menuArt = document.querySelector(".menu-art");
         }
         return result;
       };
+      const bbToggleCombatControlMode = (announce = true) => {
+        const enableAuto = !bbCustomization.autoFire;
+        const patch = enableAuto
+          ? {
+              autoFire: true,
+              aimModeId: bbCustomization.aimModeId === "manual" ? "smart" : bbCustomization.aimModeId
+            }
+          : {
+              autoFire: false,
+              aimModeId: "manual"
+            };
+        bbCommitCustomization(patch, false);
+        if (enableAuto) {
+          // Drop any pointer-created lock before selecting the first AI target.
+          hardLockTarget = null;
+          lockTarget = null;
+          bbAutoSelectTarget(false);
+        }
+        if (announce) {
+          try {
+            toast(enableAuto
+              ? bbTitle("CONTROL // AUTO TARGET + AUTO FIRE", "کنترل // هدف‌گیری و شلیک خودکار")
+              : bbTitle("CONTROL // MANUAL MOUSE AIM", "کنترل // نشانه‌گیری دستی با ماوس"), 1400);
+          } catch (_) {}
+        }
+      };
       const bbToggleAutoFire = (announce = true) => {
-        bbCommitCustomization({ autoFire: !bbCustomization.autoFire }, announce);
+        const enableAuto = !bbCustomization.autoFire;
+        const patch = { autoFire: enableAuto };
+        // The F shortcut must remain useful even after the player previously
+        // chose manual control. Turn on a smart target at the same time so
+        // auto-fire cannot silently have nothing to shoot at.
+        if (enableAuto && bbCustomization.aimModeId === "manual") patch.aimModeId = "smart";
+        bbCommitCustomization(patch, false);
+        if (enableAuto) {
+          hardLockTarget = null;
+          lockTarget = null;
+          bbAutoSelectTarget(false);
+        }
+        if (announce) {
+          try {
+            toast(enableAuto
+              ? bbTitle("FIRE // AUTO", "شلیک // خودکار")
+              : bbTitle("FIRE // MANUAL", "شلیک // دستی"), 1100);
+          } catch (_) {}
+        }
       };
       window.addEventListener("keydown", (event) => {
         const code = getKeyCode(event);
@@ -9233,6 +10238,10 @@ const menuArt = document.querySelector(".menu-art");
           event.preventDefault();
           bbAutoSelectTarget(true);
         }
+        if (code === "KeyM" && !event.repeat) {
+          event.preventDefault();
+          bbToggleCombatControlMode(true);
+        }
         if (code === "KeyF" && !event.repeat) {
           event.preventDefault();
           bbToggleAutoFire(true);
@@ -9240,6 +10249,494 @@ const menuArt = document.querySelector(".menu-art");
       });
       bbMountCustomizationControls();
       bbRefreshCustomizationUi();
+
+/* ===== 93-telegram-mini-app.js ===== */
+      // TELEGRAM MINI APP // secure account bridge
+      //
+      // The game remains fully playable as a standalone guest build. When it
+      // is launched from Telegram, this layer authenticates with the server
+      // using the raw initData supplied by Telegram, hydrates cloud state,
+      // renders the verified profile, and mirrors local-first state changes.
+      // No bot token or raw initData is ever exposed after the auth request.
+      const bbTelegramCandidate = window.Telegram?.WebApp || null;
+      const bbTelegramContext = !!(
+        bbTelegramCandidate
+        && (
+          String(bbTelegramCandidate.initData || "").trim()
+          || bbTelegramCandidate.initDataUnsafe?.user
+          || window.TelegramWebviewProxy
+          || /Telegram/i.test(String(window.navigator?.userAgent || ""))
+        )
+      );
+      const bbTelegramWebApp = bbTelegramContext ? bbTelegramCandidate : null;
+      const bbTelegramApiBase = (() => {
+        const configured = String(window.BUY_BUTTON_API_BASE || "").trim().replace(/\/+$/, "");
+        if (!configured) return "";
+        try {
+          const url = new URL(configured, window.location.href);
+          if (url.origin !== window.location.origin) return "";
+          const pathname = url.pathname.replace(/\/+$/, "");
+          return pathname === "/api" ? "" : pathname;
+        } catch (_) {
+          return "";
+        }
+      })();
+      const bbTelegramState = {
+        available: !!bbTelegramWebApp,
+        authenticated: false,
+        status: bbTelegramWebApp ? "connecting" : "guest",
+        player: null,
+        lastError: "",
+        lastSyncAt: 0
+      };
+      let bbTelegramHydrated = false;
+      let bbTelegramHydrating = false;
+      let bbTelegramAuthInFlight = null;
+      let bbTelegramAuthAttempts = 0;
+      let bbTelegramCloudQueue = new Map();
+      let bbTelegramCloudFlushTimer = 0;
+      let bbTelegramCloudRetryTimer = 0;
+      let bbTelegramCloudFlushInFlight = false;
+      let bbTelegramCloudRetryCount = 0;
+      let bbTelegramProfileCard = null;
+      let bbTelegramProfileAvatar = null;
+      let bbTelegramProfileName = null;
+      let bbTelegramProfileHandle = null;
+      let bbTelegramProfileStatus = null;
+
+      const bbTelegramApiUrl = (path) => `${bbTelegramApiBase}${String(path || "").startsWith("/") ? path : `/${path}`}`;
+      const bbTelegramClone = (value, fallback = null) => {
+        try { return JSON.parse(JSON.stringify(value)); } catch (_) { return fallback; }
+      };
+      const bbTelegramInitials = (player) => {
+        const parts = [player?.firstName, player?.lastName].filter(Boolean).join(" ").trim().split(/\s+/).filter(Boolean);
+        return (parts.slice(0, 2).map((part) => part[0]).join("") || "BB").toUpperCase();
+      };
+      const bbTelegramText = (english, persian) => currentLocale === "fa" ? persian : english;
+      const bbTelegramSetStatus = (status, error = "") => {
+        bbTelegramState.status = String(status || "");
+        bbTelegramState.lastError = String(error || "");
+        if (bbTelegramProfileStatus) {
+          const labels = {
+            connecting: bbTelegramText("TELEGRAM // CONNECTING", "تلگرام // در حال اتصال"),
+            online: bbTelegramText("TELEGRAM // ONLINE", "تلگرام // متصل"),
+            syncing: bbTelegramText("TELEGRAM // SYNCING", "تلگرام // همگام‌سازی"),
+            synced: bbTelegramText("TELEGRAM // CLOUD SYNCED", "تلگرام // ذخیرهٔ ابری"),
+            guest: bbTelegramText("GUEST MODE // LOCAL SAVE", "حالت مهمان // ذخیرهٔ محلی"),
+            offline: bbTelegramText("TELEGRAM // OFFLINE RETRY", "تلگرام // تلاش دوباره"),
+            unconfigured: bbTelegramText("TELEGRAM // SERVER SETUP REQUIRED", "تلگرام // تنظیم سرور لازم است"),
+            expired: bbTelegramText("TELEGRAM // REOPEN APP", "تلگرام // برنامه را دوباره باز کن")
+          };
+          bbTelegramProfileStatus.textContent = labels[bbTelegramState.status] || bbTelegramState.status;
+          bbTelegramProfileStatus.dataset.state = bbTelegramState.status;
+        }
+      };
+
+      function bbEnsureTelegramProfileCard() {
+        if (!bbTelegramWebApp || bbTelegramProfileCard) return;
+        const copy = document.querySelector("#menu .menu-copy");
+        const start = $("startBtn");
+        if (!copy || !start) return;
+        const card = document.createElement("div");
+        card.id = "bbTelegramProfile";
+        card.className = "bb-telegram-profile";
+        card.setAttribute("aria-live", "polite");
+        const avatar = document.createElement("div");
+        avatar.className = "bb-telegram-avatar";
+        avatar.setAttribute("aria-hidden", "true");
+        const image = document.createElement("img");
+        image.alt = "";
+        image.decoding = "async";
+        image.loading = "eager";
+        image.referrerPolicy = "no-referrer";
+        avatar.appendChild(image);
+        const content = document.createElement("div");
+        content.className = "bb-telegram-profile-copy";
+        const eyebrow = document.createElement("span");
+        eyebrow.className = "bb-telegram-profile-eyebrow";
+        eyebrow.textContent = bbTelegramText("TELEGRAM PLAYER ID", "شناسهٔ بازیکن تلگرام");
+        const name = document.createElement("b");
+        name.className = "bb-telegram-profile-name";
+        name.textContent = bbTelegramText("CONNECTING…", "در حال اتصال…");
+        const handle = document.createElement("small");
+        handle.className = "bb-telegram-profile-handle";
+        handle.textContent = "";
+        const status = document.createElement("span");
+        status.className = "bb-telegram-profile-status";
+        content.append(eyebrow, name, handle, status);
+        card.append(avatar, content);
+        copy.insertBefore(card, start);
+        bbTelegramProfileCard = card;
+        bbTelegramProfileAvatar = image;
+        bbTelegramProfileName = name;
+        bbTelegramProfileHandle = handle;
+        bbTelegramProfileStatus = status;
+      }
+
+      function bbRenderTelegramProfile() {
+        if (!bbTelegramWebApp) return;
+        bbEnsureTelegramProfileCard();
+        const player = bbTelegramState.player;
+        if (bbTelegramProfileCard) bbTelegramProfileCard.classList.toggle("is-online", !!player);
+        if (bbTelegramProfileName) {
+          bbTelegramProfileName.textContent = player?.publicAlias
+            || [player?.firstName, player?.lastName].filter(Boolean).join(" ")
+            || bbTelegramText("Telegram Operator", "اپراتور تلگرام");
+        }
+        if (bbTelegramProfileHandle) {
+          bbTelegramProfileHandle.textContent = player?.username ? `@${player.username}` : bbTelegramText("Telegram account", "حساب تلگرام");
+        }
+        if (bbTelegramProfileAvatar) {
+          bbTelegramProfileAvatar.alt = player?.publicAlias || "";
+          bbTelegramProfileAvatar.src = player?.photoUrl || "";
+          if (bbTelegramProfileAvatar.parentElement) bbTelegramProfileAvatar.parentElement.dataset.initials = bbTelegramInitials(player || {});
+          bbTelegramProfileAvatar.classList.toggle("has-photo", !!player?.photoUrl);
+          bbTelegramProfileAvatar.onerror = () => {
+            bbTelegramProfileAvatar.removeAttribute("src");
+            bbTelegramProfileAvatar.classList.remove("has-photo");
+          };
+        }
+        bbTelegramSetStatus(bbTelegramState.status);
+      }
+
+      function bbTelegramApplyShell() {
+        if (!bbTelegramWebApp) return;
+        try { bbTelegramWebApp.ready?.(); } catch (_) {}
+        try { bbTelegramWebApp.expand?.(); } catch (_) {}
+        try {
+          const palette = typeof bbPaletteFor === "function" ? bbPaletteFor() : null;
+          if (palette?.primary) bbTelegramWebApp.setHeaderColor?.(palette.primary);
+          bbTelegramWebApp.setBackgroundColor?.("#050607");
+        } catch (_) {}
+        document.documentElement.dataset.telegramMiniApp = "true";
+        document.body.classList.add("bb-telegram-mini-app");
+      }
+
+      async function bbTelegramFetch(path, options = {}) {
+        if (typeof window.fetch !== "function") throw new Error("fetch-unavailable");
+        const controller = typeof window.AbortController === "function" ? new AbortController() : null;
+        const timeout = window.setTimeout(() => controller?.abort(), 9000);
+        try {
+          const response = await window.fetch(bbTelegramApiUrl(path), {
+            credentials: "same-origin",
+            cache: "no-store",
+            headers: { Accept: "application/json", ...(options.headers || {}) },
+            ...options,
+            signal: controller?.signal
+          });
+          let payload = null;
+          try { payload = await response.json(); } catch (_) {}
+          if (!response.ok) {
+            const error = new Error(payload?.error?.message || `http-${response.status}`);
+            error.status = response.status;
+            error.payload = payload;
+            throw error;
+          }
+          return payload || {};
+        } finally {
+          window.clearTimeout(timeout);
+        }
+      }
+
+      const bbTelegramLocalCheckpoint = () => {
+        const candidates = [];
+        try {
+          for (const raw of runSaveStorageRead(RUN_SAVE_KEY)) {
+            const parsed = runSaveParse(raw);
+            if (parsed) candidates.push({ raw, savedAt: Number(parsed.savedAt) || 0 });
+          }
+          for (const raw of runSaveStorageRead(RUN_SAVE_BACKUP_KEY)) {
+            const parsed = runSaveParse(raw);
+            if (parsed) candidates.push({ raw, savedAt: Number(parsed.savedAt) || 0 });
+          }
+        } catch (_) {}
+        candidates.sort((left, right) => right.savedAt - left.savedAt);
+        return candidates[0] || { raw: null, savedAt: 0 };
+      };
+
+      const bbTelegramCloudStamp = (kind, value, fallback = 0) => {
+        if (kind === "checkpoint") {
+          try {
+            const parsed = typeof value === "string" ? JSON.parse(value) : null;
+            const payload = parsed?.body ? JSON.parse(parsed.body) : null;
+            return Math.max(0, Number(payload?.savedAt) || fallback || 0);
+          } catch (_) {
+            return Math.max(0, Number(fallback) || 0);
+          }
+        }
+        return Math.max(0, Number(value?.updatedAt) || Number(fallback) || 0);
+      };
+
+      function bbTelegramQueueChange(kind, value, updatedAt, extra = {}) {
+        if (!bbTelegramState.authenticated || !bbTelegramHydrated || bbTelegramHydrating) return;
+        const safeKind = String(kind || "");
+        if (!["settings", "customization", "archive", "checkpoint"].includes(safeKind)) return;
+        const stamp = bbTelegramCloudStamp(safeKind, value, updatedAt);
+        const previous = bbTelegramCloudQueue.get(safeKind);
+        if (previous && Number(previous.updatedAt) > stamp) return;
+        bbTelegramCloudQueue.set(safeKind, {
+          value: safeKind === "checkpoint" ? (typeof value === "string" ? value : null) : bbTelegramClone(value, {}),
+          updatedAt: stamp,
+          cleared: !!extra.cleared
+        });
+        bbTelegramSetStatus("syncing");
+        window.clearTimeout(bbTelegramCloudFlushTimer);
+        bbTelegramCloudFlushTimer = window.setTimeout(() => { void bbTelegramFlushCloud(); }, 700);
+      }
+
+      function bbTelegramApplyRemoteState(remoteState) {
+        const cloud = remoteState && typeof remoteState === "object" ? remoteState : {};
+        const remoteUpdated = cloud.updatedAt || {};
+        const localCheckpoint = bbTelegramLocalCheckpoint();
+        const local = {
+          settings: { value: gameSettings, stamp: settingsHadLocalRecord ? Number(gameSettings.updatedAt) || 0 : 0 },
+          customization: { value: bbCustomization, stamp: bbCustomizationHadLocalRecord ? Number(bbCustomization.updatedAt) || 0 : 0 },
+          archive: { value: archive, stamp: Number(archive?.updatedAt) || 0 },
+          checkpoint: { value: localCheckpoint.raw, stamp: localCheckpoint.savedAt }
+        };
+        const remote = {
+          settings: { value: cloud.settings, stamp: Number(remoteUpdated.settings) || 0 },
+          customization: { value: cloud.customization, stamp: Number(remoteUpdated.customization) || 0 },
+          archive: { value: cloud.archive, stamp: Number(remoteUpdated.archive) || 0 },
+          checkpoint: { value: cloud.checkpoint, stamp: Number(remoteUpdated.checkpoint) || 0 }
+        };
+
+        bbTelegramHydrating = true;
+        try {
+          for (const kind of ["settings", "customization", "archive", "checkpoint"]) {
+            const localRow = local[kind];
+            const remoteRow = remote[kind];
+            const remoteMeaningful = kind === "checkpoint"
+              ? typeof remoteRow.value === "string" && remoteRow.value.length > 0
+              : remoteRow.value && typeof remoteRow.value === "object" && Object.keys(remoteRow.value).length > 0;
+            if (remoteMeaningful && remoteRow.stamp > localRow.stamp) {
+              if (kind === "settings") {
+                normalizeSettings(remoteRow.value);
+                applySettings();
+                applyLocale();
+                saveSettings();
+              } else if (kind === "customization") {
+                bbCustomization = bbSanitizeCustomization(remoteRow.value);
+                bbPersistCustomization();
+                bbApplyCustomizationTheme();
+                bbSyncCustomizationToEngine();
+                bbRefreshCustomizationUi?.();
+              } else if (kind === "archive") {
+                archive = { ...defaultArchive, ...bbTelegramClone(remoteRow.value, {}) };
+                refreshArchiveUi();
+                saveArchive();
+              } else if (kind === "checkpoint") {
+                const parsed = runSaveParse(remoteRow.value);
+                if (parsed) {
+                  runSaveWrite(remoteRow.value);
+                  runSaveCached = parsed;
+                  renderRunSaveUi();
+                }
+                }
+            } else if (kind === "checkpoint" && remoteRow.value === null && remoteRow.stamp > localRow.stamp && remoteRow.stamp > 0) {
+              clearRunSave();
+            } else if (localRow.stamp > 0 && localRow.stamp > remoteRow.stamp) {
+              bbTelegramCloudQueue.set(kind, {
+                value: kind === "checkpoint" ? localRow.value : bbTelegramClone(localRow.value, {}),
+                updatedAt: localRow.stamp,
+                cleared: kind === "checkpoint" && !localRow.value
+              });
+            } else if (remoteRow.stamp === 0 && localRow.stamp > 0) {
+              bbTelegramCloudQueue.set(kind, {
+                value: kind === "checkpoint" ? localRow.value : bbTelegramClone(localRow.value, {}),
+                updatedAt: localRow.stamp,
+                cleared: kind === "checkpoint" && !localRow.value
+              });
+            }
+          }
+        } catch (error) {
+          try { console.warn("[BUY BUTTON] Telegram cloud hydration skipped", error); } catch (_) {}
+        } finally {
+          bbTelegramHydrating = false;
+        }
+        bbTelegramHydrated = true;
+        if (bbTelegramCloudQueue.size) {
+          bbTelegramSetStatus("syncing");
+          window.clearTimeout(bbTelegramCloudFlushTimer);
+          bbTelegramCloudFlushTimer = window.setTimeout(() => { void bbTelegramFlushCloud(); }, 120);
+        } else {
+          bbTelegramState.lastSyncAt = Date.now();
+          bbTelegramSetStatus("synced");
+        }
+      }
+
+      async function bbTelegramFlushCloud(options = {}) {
+        if (
+          !bbTelegramState.authenticated
+          || !bbTelegramHydrated
+          || bbTelegramCloudFlushInFlight
+          || !bbTelegramCloudQueue.size
+        ) return false;
+        window.clearTimeout(bbTelegramCloudRetryTimer);
+        bbTelegramCloudFlushInFlight = true;
+        const batch = new Map(bbTelegramCloudQueue);
+        const body = {};
+        for (const [kind, item] of batch) {
+          if (kind === "checkpoint") {
+            body.checkpoint = item.value;
+            body.checkpointUpdatedAt = item.updatedAt;
+          } else {
+            body[kind] = item.value;
+          }
+        }
+        try {
+          bbTelegramSetStatus("syncing");
+          await bbTelegramFetch("/api/state", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            keepalive: !!options.keepalive
+          });
+          for (const [kind, item] of batch) {
+            const current = bbTelegramCloudQueue.get(kind);
+            if (current && Number(current.updatedAt) <= Number(item.updatedAt)) bbTelegramCloudQueue.delete(kind);
+          }
+          bbTelegramCloudRetryCount = 0;
+          bbTelegramState.lastSyncAt = Date.now();
+          bbTelegramSetStatus(bbTelegramCloudQueue.size ? "syncing" : "synced");
+          if (bbTelegramCloudQueue.size) {
+            window.clearTimeout(bbTelegramCloudFlushTimer);
+            bbTelegramCloudFlushTimer = window.setTimeout(() => { void bbTelegramFlushCloud(); }, 180);
+          }
+          return true;
+        } catch (error) {
+          if (Number(error?.status) === 401) {
+            bbTelegramState.authenticated = false;
+            bbTelegramHydrated = false;
+            bbTelegramSetStatus("expired", error?.message);
+          } else {
+            bbTelegramCloudRetryCount = Math.min(6, bbTelegramCloudRetryCount + 1);
+            bbTelegramSetStatus("offline", error?.message);
+            const delay = Math.min(30000, 1200 * (2 ** Math.max(0, bbTelegramCloudRetryCount - 1)));
+            window.clearTimeout(bbTelegramCloudRetryTimer);
+            bbTelegramCloudRetryTimer = window.setTimeout(() => { void bbTelegramFlushCloud(); }, delay);
+          }
+          return false;
+        } finally {
+          bbTelegramCloudFlushInFlight = false;
+        }
+      }
+
+      async function bbAuthenticateTelegram() {
+        if (!bbTelegramWebApp || bbTelegramAuthInFlight) return bbTelegramAuthInFlight;
+        bbTelegramAuthInFlight = (async () => {
+          let initData = "";
+          for (let attempt = 0; attempt < 4; attempt += 1) {
+            initData = String(bbTelegramWebApp.initData || "").trim();
+            if (initData) break;
+            await new Promise((resolve) => window.setTimeout(resolve, 180 * (attempt + 1)));
+          }
+          if (!initData) {
+            bbTelegramSetStatus("guest", "telegram-init-data-empty");
+            bbRenderTelegramProfile();
+            return false;
+          }
+          bbTelegramAuthAttempts += 1;
+          bbTelegramSetStatus("connecting");
+          bbRenderTelegramProfile();
+          try {
+            const payload = await bbTelegramFetch("/api/auth/telegram", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ initData })
+            });
+            if (!payload?.player) throw new Error("telegram-player-missing");
+            bbTelegramState.player = payload.player;
+            bbTelegramState.authenticated = true;
+            bbTelegramState.lastError = "";
+            bbRenderTelegramProfile();
+            bbTelegramApplyShell();
+            bbTelegramApplyRemoteState(payload.state || {});
+            try {
+              window.__BUY_BUTTON_ACCOUNT__ = {
+                provider: "telegram-mini-app",
+                authenticated: true,
+                player: bbTelegramClone(payload.player, null),
+                getState: () => ({
+                  authenticated: bbTelegramState.authenticated,
+                  player: bbTelegramClone(bbTelegramState.player, null),
+                  lastSyncAt: bbTelegramState.lastSyncAt
+                }),
+                sync: () => bbTelegramFlushCloud()
+              };
+              window.dispatchEvent(new CustomEvent("bb:telegram-account", {
+                detail: { player: bbTelegramClone(payload.player, null) }
+              }));
+            } catch (_) {}
+            return true;
+          } catch (error) {
+            bbTelegramState.authenticated = false;
+            bbTelegramHydrated = false;
+            const status = Number(error?.status) === 401
+              ? "expired"
+              : Number(error?.status) === 503
+                ? "unconfigured"
+                : "offline";
+            bbTelegramSetStatus(status, error?.message);
+            bbRenderTelegramProfile();
+            try { console.warn("[BUY BUTTON] Telegram auth unavailable", error?.message || error); } catch (_) {}
+            return false;
+          } finally {
+            bbTelegramAuthInFlight = null;
+          }
+        })();
+        return bbTelegramAuthInFlight;
+      }
+
+      function bbTelegramBindEvents() {
+        if (!bbTelegramWebApp) return;
+        try {
+          bbTelegramWebApp.onEvent?.("themeChanged", bbTelegramApplyShell);
+          bbTelegramWebApp.onEvent?.("viewportChanged", () => {
+            try { resize?.(); } catch (_) {}
+          });
+          bbTelegramWebApp.onEvent?.("activated", () => {
+            last = 0;
+            accumulator = 0;
+          });
+          bbTelegramWebApp.onEvent?.("deactivated", () => {
+            clearInput?.();
+            if (state === "playing") {
+              try { pauseRun?.(); } catch (_) {}
+            }
+            try { void bbTelegramFlushCloud({ keepalive: true }); } catch (_) {}
+          });
+        } catch (_) {}
+        window.addEventListener("bb:cloud-change", (event) => {
+          const detail = event?.detail;
+          if (!detail || detail.version !== 1) return;
+          bbTelegramQueueChange(detail.kind, detail.value, detail.updatedAt, detail);
+        });
+        window.addEventListener("pagehide", () => {
+          try { void bbTelegramFlushCloud({ keepalive: true }); } catch (_) {}
+        }, { capture: true });
+        window.addEventListener("beforeunload", () => {
+          try { void bbTelegramFlushCloud({ keepalive: true }); } catch (_) {}
+        }, { capture: true });
+      }
+
+      if (bbTelegramWebApp) {
+        bbTelegramApplyShell();
+        bbEnsureTelegramProfileCard();
+        bbTelegramBindEvents();
+        bbRenderTelegramProfile();
+        // Let the mature runtime finish its first boot frame before network
+        // work begins. A failed auth request never blocks the game menu.
+        deferMicrotask(() => { void bbAuthenticateTelegram(); });
+      } else {
+        try {
+          window.__BUY_BUTTON_ACCOUNT__ = {
+            provider: "guest",
+            authenticated: false,
+            getState: () => ({ authenticated: false, player: null, lastSyncAt: 0 })
+          };
+        } catch (_) {}
+      }
 
 /* ===== 99-close.js ===== */
       });
