@@ -9100,6 +9100,180 @@ const menuArt = document.querySelector(".menu-art");
       bbRuntimeArmWatchdog();
       bbRuntimeScheduleFrame();
 
+      // FRONTIER PATCH // readable arenas, hard separation and adaptive runs.
+      const BB_UPGRADE_FLOW_KEY = "buy_button_upgrade_flow_v1";
+      let bbUpgradeFlowEnabled = true;
+      try { bbUpgradeFlowEnabled = localStorage.getItem(BB_UPGRADE_FLOW_KEY) !== "off"; } catch (_) {}
+      let bbArenaAnchor = { x: 0, y: 0 };
+      let bbArenaSkill = .5;
+      let bbArenaWaveStartedAt = 0;
+      let bbArenaLastWave = 0;
+
+      function bbArenaRadius(inputWave = wave) {
+        const n = Math.max(1, Number(inputWave) || 1);
+        const bounded = Math.min(10, n);
+        return 540 + Math.pow(bounded - 1, 1.16) * 126;
+      }
+      function bbArenaRefreshButton() {
+        const button = $("shopToggleBtn");
+        if (!button) return;
+        button.classList.toggle("off", !bbUpgradeFlowEnabled);
+        button.setAttribute("aria-pressed", String(bbUpgradeFlowEnabled));
+        button.textContent = bbUpgradeFlowEnabled ? "UPGRADES // AUTO" : "UPGRADES // SKIP";
+        button.title = bbUpgradeFlowEnabled ? "Between-wave upgrade screen is enabled" : "Between-wave upgrade screen is skipped";
+      }
+      function bbArenaSeparateEntities() {
+        const live = enemies.filter((enemy) => enemy && enemy.alive && Number.isFinite(enemy.x) && Number.isFinite(enemy.y));
+        for (let i = 0; i < live.length; i++) {
+          const left = live[i];
+          for (let j = i + 1; j < live.length; j++) {
+            const right = live[j];
+            const dx = right.x - left.x, dy = right.y - left.y;
+            const distance = Math.hypot(dx, dy) || .001;
+            const minimum = (Number(left.r) || 10) + (Number(right.r) || 10) + 3;
+            if (distance >= minimum) continue;
+            const push = (minimum - distance) * .5;
+            const nx = dx / distance, ny = dy / distance;
+            left.x -= nx * push; left.y -= ny * push;
+            right.x += nx * push; right.y += ny * push;
+          }
+        }
+        for (const enemy of live) {
+          const dx = enemy.x - player.x, dy = enemy.y - player.y;
+          const distance = Math.hypot(dx, dy) || .001;
+          const minimum = (Number(enemy.r) || 10) + (Number(player.r) || 16) + 5;
+          if (distance >= minimum) continue;
+          const nx = dx / distance, ny = dy / distance;
+          enemy.x = player.x + nx * minimum;
+          enemy.y = player.y + ny * minimum;
+          enemy.knockX = (enemy.knockX || 0) + nx * 38;
+          enemy.knockY = (enemy.knockY || 0) + ny * 38;
+        }
+      }
+      function bbArenaApplyBounds(dt) {
+        if (state !== "playing" || !player) return;
+        const distance = Math.hypot(player.x - bbArenaAnchor.x, player.y - bbArenaAnchor.y);
+        const radius = bbArenaRadius(wave);
+        if (wave <= 10) {
+          if (distance > radius) {
+            const nx = (player.x - bbArenaAnchor.x) / Math.max(distance, .001);
+            const ny = (player.y - bbArenaAnchor.y) / Math.max(distance, .001);
+            player.x = bbArenaAnchor.x + nx * radius;
+            player.y = bbArenaAnchor.y + ny * radius;
+          }
+          return;
+        }
+        const softRadius = bbArenaRadius(10) + (wave - 10) * 180;
+        const overflow = Math.max(0, distance - softRadius);
+        if (overflow > 0 && typeof hurt === "function") hurt(Math.min(22, 1.8 + overflow * .012) * dt);
+      }
+      function bbArenaUpdateHud() {
+        const threat = $("hardcoreThreatText");
+        if (!threat || state !== "playing") return;
+        if (wave > 10) {
+          const distance = Math.hypot(player.x - bbArenaAnchor.x, player.y - bbArenaAnchor.y);
+          const limit = bbArenaRadius(10) + (wave - 10) * 180;
+          const overflow = Math.max(0, distance - limit);
+          threat.textContent = overflow > 0 ? `BOUNDARY // HP DRAIN ${Math.min(99, Math.ceil(overflow / 10))}%` : `ENDLESS // SKILL ${Math.round(bbArenaSkill * 100)}%`;
+        }
+      }
+
+      // Two extra archetypes are deliberately rare and are selected from the
+      // same pool as the existing expansion/hardcore enemies.
+      Object.assign(enemyTypes, {
+        phase: { name: "PHASE", color: "#8cf7d4", hp: 72, speed: 116, r: 13, touch: 23, value: 26, ranged: true, orbit: true, lore: "It refuses the route you just learned." },
+        surge: { name: "SURGE", color: "#ffcc66", hp: 92, speed: 68, r: 17, touch: 28, value: 31, ranged: true, pulse: true, lore: "Its pattern changes when you aim at it." }
+      });
+
+      const bbFrontierBaseResetRun = resetRun;
+      const bbFrontierBaseStartWave = startWave;
+      const bbFrontierBaseChooseType = chooseType;
+      const bbFrontierBaseSpawnEnemy = spawnEnemy;
+      const bbFrontierBaseUpdate = update;
+      const bbFrontierBaseOpenShop = openShop;
+      const bbFrontierBaseDrawWorld = drawWorld;
+
+      resetRun = function bbFrontierResetRun() {
+        const result = bbFrontierBaseResetRun.apply(this, arguments);
+        bbArenaAnchor = { x: Number(player.x) || 0, y: Number(player.y) || 0 };
+        bbArenaSkill = .5;
+        bbArenaWaveStartedAt = 0;
+        bbArenaLastWave = 0;
+        bbArenaRefreshButton();
+        return result;
+      };
+      startWave = function bbFrontierStartWave(next) {
+        if (bbArenaLastWave > 0 && next > bbArenaLastWave) {
+          const hpRatio = clamp((Number(player.hp) || 0) / Math.max(1, Number(player.maxHp) || 1), 0, 1);
+          const waveSeconds = Math.max(1, (Number(elapsed) || 0) - bbArenaWaveStartedAt);
+          const tempo = clamp(36 / waveSeconds, 0, 1);
+          const performance = hpRatio * .58 + tempo * .22 + clamp((Number(player.kills) || 0) / Math.max(8, next * 2.2), 0, 1) * .2;
+          bbArenaSkill = clamp(bbArenaSkill * .72 + performance * .28, .22, .98);
+        }
+        const result = bbFrontierBaseStartWave.apply(this, arguments);
+        bbArenaLastWave = Math.max(1, Number(next) || 1);
+        bbArenaWaveStartedAt = Number(elapsed) || 0;
+        bbArenaRefreshButton();
+        return result;
+      };
+      chooseType = function bbFrontierChooseType() {
+        const roll = Math.random();
+        if (wave >= 4 && roll < Math.min(.11, .035 + wave * .003)) return "phase";
+        if (wave >= 6 && roll > .93) return "surge";
+        return bbFrontierBaseChooseType.apply(this, arguments);
+      };
+      spawnEnemy = function bbFrontierSpawnEnemy() {
+        const before = enemies.length;
+        const result = bbFrontierBaseSpawnEnemy.apply(this, arguments);
+        const skillScale = clamp(.91 + bbArenaSkill * .27 + Math.max(0, wave - 10) * .008, .88, 1.28);
+        for (let i = before; i < enemies.length; i++) {
+          const enemy = enemies[i];
+          if (!enemy || !enemy.alive) continue;
+          enemy.hp *= skillScale;
+          enemy.maxHp *= skillScale;
+          enemy.speed *= clamp(.96 + (skillScale - .9) * .32, .92, 1.1);
+          enemy.touch *= clamp(.95 + (skillScale - .9) * .35, .9, 1.12);
+        }
+        return result;
+      };
+      update = function bbFrontierUpdate(dt) {
+        bbFrontierBaseUpdate(dt);
+        if (state === "playing") {
+          bbArenaApplyBounds(dt);
+          bbArenaSeparateEntities();
+          bbArenaUpdateHud();
+        }
+      };
+      openShop = function bbFrontierOpenShop() {
+        if (!bbUpgradeFlowEnabled) {
+          continueWave();
+          return;
+        }
+        return bbFrontierBaseOpenShop.apply(this, arguments);
+      };
+      drawWorld = function bbFrontierDrawWorld(time) {
+        bbFrontierBaseDrawWorld.apply(this, arguments);
+        if (state !== "playing" || !ctx || !player) return;
+        const center = worldToScreen(bbArenaAnchor.x, bbArenaAnchor.y);
+        ctx.save();
+        ctx.globalAlpha = wave <= 10 ? .32 : .18;
+        ctx.strokeStyle = wave <= 10 ? "#5ff4ff" : "#ffb35f";
+        ctx.setLineDash([10, 12]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(center.x, center.y, bbArenaRadius(wave) * worldRenderScale(), 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      };
+      $("shopToggleBtn")?.addEventListener("click", () => {
+        bbUpgradeFlowEnabled = !bbUpgradeFlowEnabled;
+        try { localStorage.setItem(BB_UPGRADE_FLOW_KEY, bbUpgradeFlowEnabled ? "on" : "off"); } catch (_) {}
+        bbArenaRefreshButton();
+        toast(bbUpgradeFlowEnabled ? "UPGRADE TERMINAL // ENABLED" : "UPGRADE TERMINAL // AUTO-SKIP", 1300);
+        buttonTone(bbUpgradeFlowEnabled ? 720 : 260, .08, "square");
+      });
+      bbArenaRefreshButton();
+
 /* ===== 90-customization-catalog.js ===== */
       // OPERATOR STUDIO // durable cosmetics and player-selected assist rules.
       // This fragment deliberately lives inside the runtime closure so it can

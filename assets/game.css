@@ -3006,6 +3006,26 @@ body.bb-customized .record-badge {
   box-shadow: 0 0 20px rgba(255, 179, 95, .24);
 }
 
+.upgrade-flow-btn {
+  position: fixed;
+  top: 78px;
+  right: 18px;
+  z-index: 26;
+  min-width: 142px;
+  padding: 8px 10px;
+  border: 1px solid rgba(95,244,255,.46);
+  color: var(--cyan, #5ff4ff);
+  background: rgba(5, 10, 12, .72);
+  font: 800 9px/1 ui-monospace, monospace;
+  letter-spacing: .12em;
+  box-shadow: 0 0 18px rgba(95,244,255,.08);
+}
+.upgrade-flow-btn:hover { background: rgba(95,244,255,.12); }
+.upgrade-flow-btn.off { color: #ffb35f; border-color: rgba(255,179,95,.58); background: rgba(45,20,5,.72); }
+@media (max-width: 720px) {
+  .upgrade-flow-btn { top: 70px; right: 10px; min-width: 124px; font-size: 8px; }
+}
+
 .bb-card-copy span {
   display: -webkit-box;
   overflow: hidden;
